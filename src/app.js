@@ -5,26 +5,25 @@ const morgan = require("morgan");
 
 const app = express();
 
+// Para parsear cuerpos de solicitud JSON
+app.use(express.json());
+
+// Para parsear cuerpos de solicitud URL-encoded (datos de formularios)
+// El 'extended: true' permite objetos y arrays complejos.
+app.use(express.urlencoded({ extended: true }));
+
 // Settings
 app.set("port", process.env.PORT || 3000);
-app.set("views", path.join(__dirname, "views"));
-app.engine(
-  ".hbs",
-  exphbs.create({
-    defaultLayout: "main",
-    extname: ".hbs",
-  }).engine
-);
-app.set("view engine", ".hbs");
+
 
 // middlewares
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.use(require("./routes/index"));
+app.use(require("./routes/users"));
+app.use(require("./routes/groups"));
 
-// Static files
-app.use("/public", express.static(path.join(__dirname, "public")));
+
 
 module.exports = app;

@@ -1,17 +1,17 @@
 // src/firebase.js
 const admin = require("firebase-admin");
-const { getFirestore } = require("firebase-admin/firestore");
+// ¡Importa getFirestore directamente desde el submódulo de firestore!
+const { getFirestore } = require('firebase-admin/firestore');
 
-// Carga las credenciales directamente desde el archivo JSON
-const serviceAccount = require("./start-and-connect-2-firebase-adminsdk-fbsvc-9aa7e9508b.json"); 
+const serviceAccount = require("./startandconnect-c44b2-firebase-adminsdk-fbsvc-e8f8647573.json");
 
-admin.initializeApp({
+// Inicializa la app de Firebase, y guarda la referencia
+const firebaseApp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: serviceAccount.project_id,
+  projectId: "startandconnect-c44b2",
 });
 
-const db = getFirestore();
+// Usa getFirestore, pasándole la app inicializada y el ID de la base de datos
+const db = getFirestore(firebaseApp, "appbase");
 
-module.exports = {
-  db,
-};
+module.exports = { db };
