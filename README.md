@@ -197,3 +197,5 @@ Esta API puede ser desplegada en varios entornos de alojamiento de Node.js, como
     firebase deploy --only functions
     ```
     Tus endpoints API serán accesibles a través de `https://YOUR_REGION-YOUR_PROJECT_ID.cloudfunctions.net/app/api/TU_ENDPOINT`.
+
+    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Circe07/Start-Connect%20)
