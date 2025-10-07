@@ -1,28 +1,72 @@
-# Dependencias de Node
+# ----------------------------------------------------------- #
+# .gitignore para Proyecto Firebase/Node.js/Flutter
+# Generado a partir de tu configuración + buenas prácticas
+# ----------------------------------------------------------- #
+
+# ---- Node.js / Express ----
+# Directorio de dependencias del proyecto
 node_modules/
 
-# Archivos de Firebase Admin SDK (¡CRÍTICO!)
+# Archivos de depuración y bloqueos de paquetes
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# package-lock.json y yarn.lock son normalmente versionados
+# pero si quieres ignorarlos (no recomendado para CI/CD):
+# package-lock.json
+# yarn.lock
+
+# ---- Firebase CLI & Tools ----
+# Archivos y directorios generados por Firebase CLI
+.firebase/
+.firebaserc
+.firebase-tools.json
+
+# CRÍTICO: Archivos de credenciales del Firebase Admin SDK
+# ¡Estos archivos NO DEBEN subirse nunca a un repositorio público o compartido!
 serviceAccountKey.json
 firebase-adminsdk.json
-*.firebase-credentials.json # Si usas otro nombre
+*.firebase-credentials.json
 
-# Variables de entorno
+# Archivos de registro (logs) generados por tu aplicación
+*.log
+logs/ # Directorio común para logs
+
+# ---- Variables de Entorno ----
+# Archivos que contienen variables de entorno sensibles (ej. API keys)
+# ¡NUNCA SUBIR A UN REPOSITORIO!
 .env
 .env.local
 .env.*.local
+.env.*
 
-# Archivos de log
-*.log
-npm-debug.log*
-yarn-debug.log*
-
-# Archivos de build
+# ---- Build y Temporales ----
+# Directorios de salida de compilación
 build/
 dist/
 tmp/
+*.tmp
+*.temp
 
-# Configuración de IDEs y OS
+# ---- Flutter / Dart ----
+# Archivos y directorios generados por el build de Flutter
+/build/ # Ya cubierto arriba, pero lo ponemos específico para Flutter si estuviera en la raíz
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+**/doc/api/ # Documentación generada
+**/ios/Flutter/.last_build_id # Archivos de caché específicos de iOS
+flutter_export_environment.sh # Script generado
+
+# ---- IDEs / Editores ----
+# Configuración específica de IDEs como VS Code, IntelliJ/WebStorm
 .vscode/
 .idea/
+*.iml # Archivos de módulo de IntelliJ
+
+# ---- Archivos del Sistema Operativo ----
+# Archivos de metadatos generados por macOS
 .DS_Store
+# Archivos de caché de miniaturas de Windows
 Thumbs.db
