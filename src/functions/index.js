@@ -1,32 +1,42 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Archivo principal (index.js) de Cloud Functions.
+ * Configura Express.js y exporta la función 'api'.
  */
-
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const { setGlobalOptions } = require("firebase-functions");
+const { onRequest } = require("firebase-functions/v2/https"); // Usamos v2
 const logger = require("firebase-functions/logger");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
+// 1. Importa Express
+const express = require('express');
+
+// Configuración global (límite de instancias)
 setGlobalOptions({ maxInstances: 10 });
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// 2. Inicializa la aplicación Express
+const app = express();
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Middleware (opcional pero recomendado)
+app.use(express.json()); // Permite a Express leer cuerpos JSON
+
+// 3. Define tus rutas (Ejemplo: la ruta /users)
+// NOTA: Gracias a firebase.json, si accedes a /api/users, Express solo ve /users.
+app.get('/users', (req, res) => {
+    logger.info("Petición GET recibida en /users");
+    
+    // Aquí es donde iría la lógica de Firestore
+    
+    // Respuesta JSON de ejemplo
+    res.status(200).json({ 
+        message: "¡API funcionando y ruta /users alcanzada!",
+        data: [{ id: 1, name: "Usuario de Prueba" }]
+    });
+});
+
+// 4. Exporta la función HTTP con el nombre 'api'
+// Este nombre DEBE coincidir con el campo "function": "api" en firebase.json
+exports.api = onRequest(app);
+
+// Si utilizas la API v1 (onRequest de firebase-functions), la exportación sería:
+// const functions = require("firebase-functions");
+// exports.api = functions.https.onRequest(app);
+// Cambio trivial para forzar el redepliegue

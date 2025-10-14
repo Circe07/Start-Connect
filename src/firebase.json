@@ -32,11 +32,11 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**",    // Redirige /api/ lo que sea a la Cloud Function 'api'
-        "function": "api"       // ¡Asegúrate de que tu Cloud Function principal se llama 'api'!
+        "source": "/api/**",    
+        "function": "api"      
       },
       {
-        "source": "**",         // El resto del tráfico va al index.html (para frontend)
+        "source": "**",         
         "destination": "/index.html"
       }
     ]
