@@ -29,6 +29,16 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",    // Redirige /api/ lo que sea a la Cloud Function 'api'
+        "function": "api"       // ¡Asegúrate de que tu Cloud Function principal se llama 'api'!
+      },
+      {
+        "source": "**",         // El resto del tráfico va al index.html (para frontend)
+        "destination": "/index.html"
+      }
     ]
   },
   "storage": {
