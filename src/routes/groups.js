@@ -1,4 +1,4 @@
-const { db } = require("../firebase.js");
+
 const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js"); 
@@ -633,5 +633,6 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
     res.status(statusCode).json({ message: errorMessage });
   }
 });
+
 
 module.exports = router ;

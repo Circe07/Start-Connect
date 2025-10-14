@@ -1,20 +1,18 @@
 // src/firebase.js
+
 const admin = require("firebase-admin");
 const { getFirestore } = require('firebase-admin/firestore');
 
-const serviceAccount = require("./startandconnect-c44b2-firebase-adminsdk-fbsvc-e8f8647573.json");
 
-// Inicializa la app de Firebase
-const firebaseApp = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  projectId: "startandconnect-c44b2",
-});
+let firebaseApp;
 
-// Usa getFirestore, pasándole la app inicializada y el ID de la base de datos
-// (Asumiendo que "appbase" es el ID correcto de tu DB)
+// 🚨 ESTA ES LA ÚNICA INICIALIZACIÓN VÁLIDA PARA CLOUD FUNCTIONS (AUTOMÁTICA):
+if (admin.apps.length === 0) {
+    firebaseApp = admin.initializeApp(); 
+} else {
+    firebaseApp = admin.app();
+}
+
 const db = getFirestore(firebaseApp, "appbase");
 
-// ----------------------------------------------------------------------
-// 🚨 SOLUCIÓN: Exportar tanto 'db' como el objeto 'admin' inicializado.
-module.exports = { db, admin }; 
-// ----------------------------------------------------------------------
+module.exports = { db, admin };
