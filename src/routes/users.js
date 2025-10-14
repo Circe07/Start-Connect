@@ -7,7 +7,7 @@ const authMiddleware = require("../middleware/auth.js");
 console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
 
 // Ruta GET / (posiblemente pública, o protegida si solo usuarios autenticados pueden ver contactos)
-router.get("/", async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const querySnapshot = await db.collection("contacts").get();
     const contacts = querySnapshot.docs.map((doc) => ({
