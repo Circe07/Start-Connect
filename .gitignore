@@ -70,3 +70,5 @@ flutter_export_environment.sh # Script generado
 .DS_Store
 # Archivos de caché de miniaturas de Windows
 Thumbs.db
+*.json
+src/*.json
