@@ -39,4 +39,3 @@ exports.api = onRequest(app);
 // Si utilizas la API v1 (onRequest de firebase-functions), la exportación sería:
 // const functions = require("firebase-functions");
 // exports.api = functions.https.onRequest(app);
-// Cambio trivial para forzar el redepliegue

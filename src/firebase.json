@@ -12,17 +12,6 @@
       ]
     }
   ],
-  "apphosting": {
-    "backendId": "start-and-connect",
-    "rootDir": ".",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
-      "functions"
-    ]
-  },
   "hosting": {
     "public": "public",
     "ignore": [
@@ -32,12 +21,8 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**",    
-        "function": "api"      
-      },
-      {
-        "source": "**",         
-        "destination": "/index.html"
+        "source": "/api/**",
+        "function": "api"
       }
     ]
   },
@@ -45,10 +30,6 @@
     "rules": "storage.rules"
   },
   "emulators": {
-    "apphosting": {
-      "port": 5002,
-      "rootDirectory": "./"
-    },
     "functions": {
       "port": 5001
     },

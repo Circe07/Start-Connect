@@ -20,9 +20,15 @@ app.set("port", process.env.PORT || 3000);
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 
+app.get('/ping', (req, res) => {
+    // Si ves este mensaje, la aplicación Express está viva.
+    res.status(200).send({ message: 'Pong - API is Live!' });
+});
+
 // Routes
-app.use("/api",require("./routes/users"));
-app.use("/api",require("./routes/groups"));
+app.use(require("./routes/users"));
+app.use(require("./routes/groups")); 
+
 
 
 

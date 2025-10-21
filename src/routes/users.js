@@ -1,4 +1,3 @@
-
 const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
@@ -6,23 +5,28 @@ const authMiddleware = require("../middleware/auth.js");
 
 console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
 
-// Ruta GET / (posiblemente pública, o protegida si solo usuarios autenticados pueden ver contactos)
+// RUTA PRINCIPAL (GET /users) - Responde a /api/users
+// Esta ruta estaba en router.get("/"), pero debe ser router.get("/users") 
+// para responder a /api/users después del reescrito de Firebase Hosting.
 router.get("/users", async (req, res) => {
   try {
+    // Nota: Aquí podrías querer aplicar el authMiddleware si los contactos son privados
+    // Ejemplo: router.get("/users", authMiddleware, async (req, res) => { ... })
+    
     const querySnapshot = await db.collection("contacts").get();
     const contacts = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(contacts);
+    // No es necesario console.log(contacts) en producción, pero lo dejamos para depuración
+    console.log("Contactos obtenidos:", contacts.length); 
     res.send(contacts);
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener los contactos:", error);
     res.status(500).send("Error al obtener los contactos.");
   }
 });
 
-// Rutas protegidas - Añade authMiddleware antes de la lógica de la ruta
 // Rutas protegidas - Añade authMiddleware antes de la lógica de la ruta
 router.post("/new-contact", authMiddleware, async (req, res) => {
   console.log(req.body);
@@ -32,13 +36,13 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
 
     // 2. Construir el objeto contactData e incluir el ID del propietario
     const contactData = { 
-        firstname, 
-        lastname, 
-        email, 
-        phone, 
-        // 🚨 CRUCIAL PARA LA SEGURIDAD: Añade el UID del usuario autenticado
-        userId: req.user.uid,
-        createdAt: new Date() // Opcional, pero recomendado
+      firstname, 
+      lastname, 
+      email, 
+      phone, 
+      // 🚨 CRUCIAL PARA LA SEGURIDAD: Añade el UID del usuario autenticado
+      userId: req.user.uid,
+      createdAt: new Date() // Opcional, pero recomendado
     }; 
 
     // 3. Guardar en Firestore
@@ -46,8 +50,8 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
 
     // 4. Respuesta (Mejorado: Retorna JSON en lugar de redireccionar)
     res.status(201).json({
-        message: "Contacto creado exitosamente.",
-        id: newContact.id
+      message: "Contacto creado exitosamente.",
+      id: newContact.id
     });
     
   } catch (error) {
@@ -59,7 +63,7 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
 router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const updateFields = req.body; // ⬅️ SOLUCIÓN: Usamos req.body directamente como datos de actualización.
+    const updateFields = req.body; 
 
     // 1. Validación: Asegurar que hay datos en el cuerpo
     if (Object.keys(updateFields).length === 0) {
@@ -79,7 +83,7 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
     
     // Si el usuario autenticado no es el dueño del contacto, denegar.
     if (contactData.userId !== requestingUserId) {
-        return res.status(403).send("Prohibido: No eres el propietario de este contacto.");
+      return res.status(403).send("Prohibido: No eres el propietario de este contacto.");
     }
     
     // 3. Actualización de Firestore
@@ -103,12 +107,12 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
 
     // 1. Verificar si el documento existe
     if (!contactDoc.exists) {
-        return res.status(404).send("Contacto no encontrado.");
+      return res.status(404).send("Contacto no encontrado.");
     }
     
     // 2. 🚨 VERIFICACIÓN DE PROPIEDAD: Si el usuario no es el dueño, denegar.
     if (contactDoc.data().userId !== requestingUserId) {
-        return res.status(403).send("Prohibido: No tienes permiso para eliminar este contacto.");
+      return res.status(403).send("Prohibido: No tienes permiso para eliminar este contacto.");
     }
 
     // 3. Eliminar el documento
@@ -125,3 +129,4 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
