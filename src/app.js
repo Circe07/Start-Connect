@@ -21,8 +21,8 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.use(require("./routes/users"));
-app.use(require("./routes/groups"));
+app.use("/api",require("./routes/users"));
+app.use("/api",require("./routes/groups"));
 
 
 
