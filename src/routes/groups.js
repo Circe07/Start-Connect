@@ -1,8 +1,8 @@
 
 const { Router } = require("express");
 const router = Router();
-const { db, admin } = require("../firebase.js"); 
-const authMiddleware = require("../middleware/auth.js"); 
+const { db, admin } = require("../firebase.js");
+const authMiddleware = require("../middleware/auth.js");
 
 
 //Serch
@@ -16,13 +16,13 @@ router.get("/publicGroups", async (req, res) => {
 
     // Preparamos la consulta a Firestore
     let query = db.collection("groups")
-                   .where("isPublic", "==", true);
+      .where("isPublic", "==", true);
 
     // La paginación basada en cursor requiere un ordenamiento consistente
     // Ordenamos por 'createdAt' descendente para obtener los más nuevos primero,
     // y luego por ID de documento como un desempate (garantiza un orden único).
     query = query.orderBy("createdAt", "desc")
-                 .orderBy(admin.firestore.FieldPath.documentId()); // Ordena por ID de documento
+      .orderBy(admin.firestore.FieldPath.documentId()); // Ordena por ID de documento
 
     // Si se proporciona startAfterId, lo usamos para comenzar la siguiente página
     if (startAfterId) {
@@ -35,7 +35,7 @@ router.get("/publicGroups", async (req, res) => {
         // Para este ejemplo, lanzaremos un error.
         return res.status(400).json({ message: "El ID de referencia para la paginación (startAfterId) no es válido o el grupo no existe." });
       }
-      
+
       // startAfter requiere los valores de los campos de ordenamiento del último documento
       // En este caso, el valor de 'createdAt' y el ID del documento
       query = query.startAfter(lastDocSnapshot.data().createdAt, lastDocSnapshot.id);
@@ -138,8 +138,8 @@ router.get("/myGroups", authMiddleware, async (req, res) => {
 
     // 1. Consultar la colección 'groups' para encontrar documentos donde el array 'members' contenga el userId
     const groupsSnapshot = await db.collection("groups")
-                                   .where("members", "array-contains", userId)
-                                   .get();
+      .where("members", "array-contains", userId)
+      .get();
 
     // 2. Procesar los resultados de la consulta
     const userGroups = [];
@@ -237,7 +237,7 @@ router.post("/joinGroup", authMiddleware, async (req, res) => {
       const currentMembers = groupDoc.data().members || [];
       console.log(`[joinGroup] Miembros actuales: ${JSON.stringify(currentMembers)}`); // LOG 3
       console.log(`[joinGroup] ¿Usuario ya es miembro? ${currentMembers.includes(userId)}`); // LOG 4
-      
+
       if (currentMembers.includes(userId)) {
         throw new Error("Ya eres miembro de este grupo.");
       }
@@ -257,11 +257,11 @@ router.post("/joinGroup", authMiddleware, async (req, res) => {
     console.error("[joinGroup] Error en el proceso de unión:", error); // LOG DE ERROR
     // ... (tu manejo de errores actual)
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("Ya eres miembro") ? "Ya eres miembro de este grupo." :
-                         "Error interno del servidor al unirse al grupo.";
+      error.message.includes("Ya eres miembro") ? "Ya eres miembro de este grupo." :
+        "Error interno del servidor al unirse al grupo.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("Ya eres miembro") ? 409 :
-                       500;
+      error.message.includes("Ya eres miembro") ? 409 :
+        500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
@@ -341,14 +341,14 @@ router.post("/leaveGroup", authMiddleware, async (req, res) => {
 
     // Manejo de errores adaptado
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("No eres miembro") ? "No eres miembro de este grupo." :
-                         error.message.includes("Como propietario, debes designar") ? "Como propietario, debes designar un nuevo propietario de entre los miembros restantes antes de abandonar el grupo." :
-                         error.message.includes("No puedes designarte a ti mismo") ? "No puedes designarte a ti mismo como nuevo propietario al abandonar. Debes seleccionar otro miembro." :
-                         error.message.includes("El nuevo propietario designado debe ser un miembro actual") ? "El nuevo propietario designado debe ser un miembro actual del grupo." :
-                         "Error interno del servidor al abandonar el grupo.";
+      error.message.includes("No eres miembro") ? "No eres miembro de este grupo." :
+        error.message.includes("Como propietario, debes designar") ? "Como propietario, debes designar un nuevo propietario de entre los miembros restantes antes de abandonar el grupo." :
+          error.message.includes("No puedes designarte a ti mismo") ? "No puedes designarte a ti mismo como nuevo propietario al abandonar. Debes seleccionar otro miembro." :
+            error.message.includes("El nuevo propietario designado debe ser un miembro actual") ? "El nuevo propietario designado debe ser un miembro actual del grupo." :
+              "Error interno del servidor al abandonar el grupo.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("No eres miembro") || errorMessage.includes("Como propietario") || errorMessage.includes("No puedes designarte") || errorMessage.includes("El nuevo propietario designado") ? 403 : // Prohibido o Bad Request en contexto
-                       500;
+      error.message.includes("No eres miembro") || errorMessage.includes("Como propietario") || errorMessage.includes("No puedes designarte") || errorMessage.includes("El nuevo propietario designado") ? 403 : // Prohibido o Bad Request en contexto
+        500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
@@ -412,14 +412,14 @@ router.post("/groups/:groupId/removeMember", authMiddleware, async (req, res) =>
 
     // Manejo de errores adaptado
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
-                         error.message.includes("No puedes eliminarte") ? "No puedes eliminarte a ti mismo de un grupo." :
-                         error.message.includes("no es miembro") ? "El usuario especificado no es miembro de este grupo." :
-                         "Error interno del servidor al eliminar miembro.";
+      error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
+        error.message.includes("No puedes eliminarte") ? "No puedes eliminarte a ti mismo de un grupo." :
+          error.message.includes("no es miembro") ? "El usuario especificado no es miembro de este grupo." :
+            "Error interno del servidor al eliminar miembro.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("No tienes permiso") || error.message.includes("No puedes eliminarte") ? 403 : // Prohibido
-                       error.message.includes("no es miembro") ? 400 : // Bad Request porque el memberId no es válido para esa acción
-                       500;
+      error.message.includes("No tienes permiso") || error.message.includes("No puedes eliminarte") ? 403 : // Prohibido
+        error.message.includes("no es miembro") ? 400 : // Bad Request porque el memberId no es válido para esa acción
+          500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
@@ -482,14 +482,14 @@ router.post("/groups/:groupId/transferOwnership", authMiddleware, async (req, re
 
     // Manejo de errores adaptado
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
-                         error.message.includes("nuevo propietario debe ser miembro") ? "El nuevo propietario debe ser un miembro actual del grupo." :
-                         error.message.includes("ya es el propietario") ? "El usuario especificado ya es el propietario del grupo." :
-                         "Error interno del servidor al transferir la propiedad del grupo.";
+      error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
+        error.message.includes("nuevo propietario debe ser miembro") ? "El nuevo propietario debe ser un miembro actual del grupo." :
+          error.message.includes("ya es el propietario") ? "El usuario especificado ya es el propietario del grupo." :
+            "Error interno del servidor al transferir la propiedad del grupo.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("No tienes permiso") || error.message.includes("ya es el propietario") ? 403 : // Prohibido
-                       error.message.includes("nuevo propietario debe ser miembro") ? 400 : // Bad Request porque el newOwnerId no es válido para esa acción
-                       500;
+      error.message.includes("No tienes permiso") || error.message.includes("ya es el propietario") ? 403 : // Prohibido
+        error.message.includes("nuevo propietario debe ser miembro") ? 400 : // Bad Request porque el newOwnerId no es válido para esa acción
+          500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
@@ -569,14 +569,14 @@ router.patch("/groups/:groupId", authMiddleware, async (req, res) => {
 
     // Manejo de errores adaptado
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
-                         error.message.includes("nombre del grupo no puede estar vacío") ? "El nombre del grupo no puede estar vacío." :
-                         error.message.includes("debe ser un texto") || error.message.includes("debe ser un valor booleano") ? error.message : // Mensaje de validación directo
-                         "Error interno del servidor al actualizar el grupo.";
+      error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
+        error.message.includes("nombre del grupo no puede estar vacío") ? "El nombre del grupo no puede estar vacío." :
+          error.message.includes("debe ser un texto") || error.message.includes("debe ser un valor booleano") ? error.message : // Mensaje de validación directo
+            "Error interno del servidor al actualizar el grupo.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("No tienes permiso") ? 403 :
-                       error.message.includes("nombre del grupo no puede estar vacío") || error.message.includes("debe ser un texto") || error.message.includes("debe ser un valor booleano") ? 400 :
-                       500;
+      error.message.includes("No tienes permiso") ? 403 :
+        error.message.includes("nombre del grupo no puede estar vacío") || error.message.includes("debe ser un texto") || error.message.includes("debe ser un valor booleano") ? 400 :
+          500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
@@ -625,14 +625,14 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
 
     // Manejo de errores adaptado
     const errorMessage = error.message.includes("no existe") ? "El grupo especificado no existe." :
-                         error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
-                         "Error interno del servidor al eliminar el grupo.";
+      error.message.includes("No tienes permiso") ? "No tienes permiso para realizar esta acción." :
+        "Error interno del servidor al eliminar el grupo.";
     const statusCode = error.message.includes("no existe") ? 404 :
-                       error.message.includes("No tienes permiso") ? 403 :
-                       500;
+      error.message.includes("No tienes permiso") ? 403 :
+        500;
     res.status(statusCode).json({ message: errorMessage });
   }
 });
 
 
-module.exports = router ;
+module.exports = router;

@@ -27,7 +27,7 @@ app.get('/ping', (req, res) => {
 
 // Routes
 app.use(require("./routes/users"));
-app.use(require("./routes/groups")); 
+app.use(require("./routes/groups"));
 
 
 

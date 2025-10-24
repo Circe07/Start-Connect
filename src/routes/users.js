@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
-const authMiddleware = require("../middleware/auth.js"); 
+const authMiddleware = require("../middleware/auth.js");
 
 console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
 
@@ -12,14 +12,14 @@ router.get("/users", async (req, res) => {
   try {
     // Nota: Aquí podrías querer aplicar el authMiddleware si los contactos son privados
     // Ejemplo: router.get("/users", authMiddleware, async (req, res) => { ... })
-    
+
     const querySnapshot = await db.collection("contacts").get();
     const contacts = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
     // No es necesario console.log(contacts) en producción, pero lo dejamos para depuración
-    console.log("Contactos obtenidos:", contacts.length); 
+    console.log("Contactos obtenidos:", contacts.length);
     res.send(contacts);
   } catch (error) {
     console.error("Error al obtener los contactos:", error);
@@ -35,15 +35,15 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
     const { firstname, lastname, email, phone } = req.body;
 
     // 2. Construir el objeto contactData e incluir el ID del propietario
-    const contactData = { 
-      firstname, 
-      lastname, 
-      email, 
-      phone, 
+    const contactData = {
+      firstname,
+      lastname,
+      email,
+      phone,
       // 🚨 CRUCIAL PARA LA SEGURIDAD: Añade el UID del usuario autenticado
       userId: req.user.uid,
       createdAt: new Date() // Opcional, pero recomendado
-    }; 
+    };
 
     // 3. Guardar en Firestore
     const newContact = await db.collection("contacts").add(contactData);
@@ -53,7 +53,7 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
       message: "Contacto creado exitosamente.",
       id: newContact.id
     });
-    
+
   } catch (error) {
     console.error("Error al crear el contacto:", error);
     res.status(500).send("Error interno del servidor al crear el contacto.");
@@ -63,7 +63,7 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
 router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const updateFields = req.body; 
+    const updateFields = req.body;
 
     // 1. Validación: Asegurar que hay datos en el cuerpo
     if (Object.keys(updateFields).length === 0) {
@@ -79,18 +79,18 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
     }
 
     const contactData = contactDoc.data();
-    const requestingUserId = req.user.uid; 
-    
+    const requestingUserId = req.user.uid;
+
     // Si el usuario autenticado no es el dueño del contacto, denegar.
     if (contactData.userId !== requestingUserId) {
       return res.status(403).send("Prohibido: No eres el propietario de este contacto.");
     }
-    
+
     // 3. Actualización de Firestore
-    await contactRef.update(updateFields); 
-    
+    await contactRef.update(updateFields);
+
     res.status(200).json({ message: "Contacto actualizado exitosamente." });
-    
+
   } catch (error) {
     console.error("Error al actualizar el contacto:", error);
     res.status(500).send("Error interno del servidor al actualizar el contacto.");
@@ -100,8 +100,8 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
 router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
   try {
     const contactId = req.params.id;
-    const requestingUserId = req.user.uid; 
-    
+    const requestingUserId = req.user.uid;
+
     const contactRef = db.collection("contacts").doc(contactId);
     const contactDoc = await contactRef.get();
 
@@ -109,7 +109,7 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
     if (!contactDoc.exists) {
       return res.status(404).send("Contacto no encontrado.");
     }
-    
+
     // 2. 🚨 VERIFICACIÓN DE PROPIEDAD: Si el usuario no es el dueño, denegar.
     if (contactDoc.data().userId !== requestingUserId) {
       return res.status(403).send("Prohibido: No tienes permiso para eliminar este contacto.");
@@ -117,9 +117,9 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
 
     // 3. Eliminar el documento
     await contactRef.delete();
-    
+
     // 4. Devolver 204 No Content (Éxito sin contenido)
-    res.status(204).send(); 
+    res.status(204).send();
 
   } catch (error) {
     console.error("Error al eliminar el contacto:", error);

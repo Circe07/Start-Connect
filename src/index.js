@@ -1,4 +1,4 @@
- functions = require("firebase-functions");
+functions = require("firebase-functions");
 const app = require("./app"); // Importa tu aplicación Express desde app.js
 
 // La función debe exportarse con el mismo nombre ('api') que se usa
