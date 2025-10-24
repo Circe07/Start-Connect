@@ -26,7 +26,7 @@ jest.mock('firebase-admin', () => mockAdmin);
 // Sobrescribimos el submódulo de Firestore (referencia a DB)
 jest.mock('firebase-admin/firestore', () => mockFirestore);
 
-// ---FINALIZA LA PREPARACION DE MOCKS---
+// =========================================================================
 
 // Cargamos el módulo a probar después de configurar todos los mocks
 // El código de src/firebase.js se ejecuta aquí
