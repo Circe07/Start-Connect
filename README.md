@@ -71,7 +71,7 @@ All protected routes require a valid **Firebase ID Token** in the request header
 
 Ensure you have the following installed:
 
-- ✅ Node.js (LTS >= 18.x)
+- ✅ Node.js (LTS >= 20.x)
 - ✅ npm or yarn
 - ✅ Firebase CLI (optional but needed for deployment)
 
