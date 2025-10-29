@@ -10,8 +10,6 @@ console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projec
 // para responder a /api/users después del reescrito de Firebase Hosting.
 router.get("/users", async (req, res) => {
   try {
-    // Nota: Aquí podrías querer aplicar el authMiddleware si los contactos son privados
-    // Ejemplo: router.get("/users", authMiddleware, async (req, res) => { ... })
     
     const querySnapshot = await db.collection("contacts").get();
     const contacts = querySnapshot.docs.map((doc) => ({

@@ -6,7 +6,7 @@ const { setGlobalOptions } = require("firebase-functions");
 const { onRequest } = require("firebase-functions/v2/https"); // Usamos v2
 const logger = require("firebase-functions/logger");
 
-// 1. Importa Express
+// 1. Importa Expressss
 const express = require('express');
 
 // Configuración global (límite de instancias)
