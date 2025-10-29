@@ -1,12 +1,12 @@
 # StartAndConnect
 ![Logo](LOGO)
-## 📝 Project Description
+## 🔸 Project Description
 
 This project delivers a robust RESTful API for centralized personal contact management and community group administration, built on **Node.js**, **Express**, and **Cloud Firestore**. It provides all the essential functionalities (CRUD) required for user interaction, ensuring security through **Firebase Authentication**.
 
 ---
 
-## 🌐 Base URL for Frontend Consumption
+## 🔸 Base URL for Frontend Consumption
 
 The frontend should target the following base URL, which is the public entry point for the Firebase Cloud Function exposed in the deployment section:
 
@@ -17,16 +17,16 @@ The frontend should target the following base URL, which is the public entry poi
 
 ---
 
-## ✨ Key Features
+## 🔸 Key Features
 
-- ✅ **Secure Contact Management (Users):** Complete CRUD for contacts associated with a specific `userId`.
-- 👥 **Atomic Group Administration (Groups):** Creation, joining, leaving, and ownership transfer logic.
-- 🔐 **Access Control:** Use of middleware to protect routes and verify resource ownership (contacts/groups).
-- 📄 **Pagination:** Support for paginated queries of public groups (`/publicGroups`).
+- **Secure Contact Management (Users):** Complete CRUD for contacts associated with a specific `userId`.
+- **Atomic Group Administration (Groups):** Creation, joining, leaving, and ownership transfer logic.
+- **Access Control:** Use of middleware to protect routes and verify resource ownership (contacts/groups).
+- **Pagination:** Support for paginated queries of public groups (`/publicGroups`).
 
 ---
 
-## 🔐 Authentication Flow (Crucial for Frontend)
+## 🔸 Authentication Flow (Crucial for Frontend)
 
 All protected routes require a valid **Firebase ID Token** in the request headers.
 
@@ -40,7 +40,7 @@ All protected routes require a valid **Firebase ID Token** in the request header
 
 ---
 
-## 🔺 API Endpoints
+## 🔸 API Endpoints
 
 ### 1. Contacts Module (Users Routes)
 
@@ -67,7 +67,7 @@ All protected routes require a valid **Firebase ID Token** in the request header
 
 ---
 
-## 🛠️ Technologies and Requirements
+## 🔸 Technologies and Requirements
 
 Ensure you have the following installed:
 
@@ -81,7 +81,7 @@ Ensure you have the following installed:
 
 ---
 
-## 🔐 Prerequisites and Security
+## 🔸 Prerequisites and Security
 
 ### 1. Firebase Service Account Setup
 
@@ -101,7 +101,7 @@ Create a **composite index** for the `groups` collection:
 
 ---
 
-## ⬇️ Installation & Local Execution
+## 🔸 Installation & Local Execution
 
 ```bash
 git clone git@github.com:Circe07/Start-Connect.git
@@ -114,7 +114,7 @@ API will run at: `http://localhost:3000`
 
 ---
 
-## 🧪 Testing
+## 🔸 Testing
 ### 1. Install Jest
 ```bash
 npm npm i -D jest
@@ -131,7 +131,7 @@ npm test
 
 ---
 
-## ☁️ Firebase Cloud Functions Deployment (Recommended)
+## 🔸 Firebase Cloud Functions Deployment (Recommended)
 
 1. Initialize Firebase:
 ```bash
