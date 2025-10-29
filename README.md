@@ -1,4 +1,4 @@
-# StartAndConnect - Group and Contact Management API (Node.js / Express / Firebase) 🚀
+# StartAndConnect
 ![Logo](LOGO)
 ## 📝 Project Description
 
@@ -26,7 +26,7 @@ The frontend should target the following base URL, which is the public entry poi
 
 ---
 
-## 🔑 Authentication Flow (Crucial for Frontend)
+## 🔐 Authentication Flow (Crucial for Frontend)
 
 All protected routes require a valid **Firebase ID Token** in the request headers.
 
@@ -40,14 +40,14 @@ All protected routes require a valid **Firebase ID Token** in the request header
 
 ---
 
-## 📑 API Endpoints
+## 🔺 API Endpoints
 
 ### 1. Contacts Module (Users Routes)
 
 | Method | Path | Description | Auth Required | Parameters |
 |--------|------|-------------|--------------|------------|
 | GET | `/users` | Retrieves a list of all contacts. | ❌ Public | None |
-| POST | `/new-contact` | Creates a new personal contact. | ✅ Auth | Body: `{ firstname, lastname, email, phone }` |
+| POST | `/new-contact` | Creates a new personal contact. | ✅ Auth | Body: `{ firstname, lastname, email, phone: }` |
 | PATCH | `/update-contact/:id` | Updates a contact (ownership required). | ✅ Auth + Owner | Path: `:id`, Body: `{ field: value }` |
 | DELETE | `/delete-contact/:id` | Deletes a contact (ownership required). | ✅ Auth + Owner | Path: `:id` |
 
@@ -55,7 +55,7 @@ All protected routes require a valid **Firebase ID Token** in the request header
 
 | Method | Path | Description | Auth Required | Parameters |
 |--------|------|-------------|--------------|------------|
-| POST | `/createGroup` | Creates a new group; creator is owner. | ✅ Auth | Body: `{ name, description, isPublic, city }` |
+| POST | `/createGroup` | Creates a new group; creator is owner. | ✅ Auth | Body: `{ name, description, isPublic, city  }` |
 | POST | `/joinGroup` | Adds authenticated user to a group. | ✅ Auth | Body: `{ groupId: string }` |
 | POST | `/leaveGroup` | Removes user, handles owner transfer/deletion. | ✅ Auth | Body: `{ groupId, [newOwnerId] }` |
 | POST | `/groups/:groupId/removeMember` | Removes a member (owner only). | ✅ Auth + Owner | Path: `:groupId`, Body: `{ memberId }` |
@@ -72,7 +72,7 @@ All protected routes require a valid **Firebase ID Token** in the request header
 Ensure you have the following installed:
 
 - ✅ Node.js (LTS >= 20.x)
-- ✅ npm or yarn
+- ✅ npm
 - ✅ Firebase CLI (optional but needed for deployment)
 
 ### Development Dependencies (Testing)
@@ -101,7 +101,7 @@ Create a **composite index** for the `groups` collection:
 
 ---
 
-## 💻 Installation & Local Execution
+## ⬇️ Installation & Local Execution
 
 ```bash
 git clone git@github.com:Circe07/Start-Connect.git
@@ -115,8 +115,11 @@ API will run at: `http://localhost:3000`
 ---
 
 ## 🧪 Testing
-
-### 1. Run All Tests
+### 1. Install Jest
+```bash
+npm npm i -D jest
+```
+### 2. Run All Tests
 ```bash
 npm test
 ```
@@ -146,6 +149,3 @@ exports.api = functions.https.onRequest(app);
 ```bash
 firebase deploy --only functions
 ```
-
-
-

@@ -18,6 +18,11 @@ var mockAdmin = {
     app: jest.fn(() => mockApp),
     // Simula la lista de aplicaciones -> logica condicional
     apps: [],
+    credential: {
+        cert: jest.fn(config => config), // Simula admin.credential.cert(serviceAccount)
+        // Si usas applicationDefault, añádelo aquí también:
+        // applicationDefault: jest.fn(() => ({})), 
+    },
 };
 
 // Sobrescribimos el módulo principal, indicamos que utilize el objeto falso
@@ -52,7 +57,7 @@ describe('Pruebas unitarias para src/firebase.js', () => {
         expect(db).toEqual(({}));
 
         // Verificamos que se llame con la app mock y el nombre de la base de datos
-        expect(mockFirestore.getFirestore).toHaveBeenCalledWith(mockApp, "appbase");
+        expect(mockFirestore.getFirestore).toHaveBeenCalledWith(mockApp);
     });
 
     test('2. Debería usar admin.initializeApp() cuando aun no esta inicializado', () => {

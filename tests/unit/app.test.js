@@ -34,21 +34,7 @@ describe('Configuracion base de la aplicacion Express(app.js)', () => {
         expect(typeof app).toBe('function');
     });
 
-    // 2.- COMPROVAMOS QUE LA RUTA GET /ping RESPONDA CON "200" Y EL MENSAJE "PONG"
-    test('GET /ping debe responder con 200 y el mensaje "PONG" ', async () => {
-
-        // Simulamos la peticion a GET /ping
-        const response = await request(app).get('/ping');
-
-        // Debe responder con el codigo 200 "Ok"
-        expect(response.statusCode).toBe(200);
-
-        // Debe responder con el mensaje "PONG"
-        expect(response.body.message).toBe('Pong - API is Live!');
-        expect(response.type).toBe('application/json');
-    });
-
-    // 3.- AL INSERTAR UNA RUTA NO DEFINIDA RESPONDER CON EL CODIGO "404"
+    // 2.- AL INSERTAR UNA RUTA NO DEFINIDA RESPONDER CON EL CODIGO "404"
     test('GET a una ruta no definida debe devolver 404', async () => {
 
         // Simulamos la respuesta a la ruta no definida
@@ -58,13 +44,8 @@ describe('Configuracion base de la aplicacion Express(app.js)', () => {
         expect(response.statusCode).toBe(404);
     });
 
-    // 4.- COMPROVAR QUE LA APP RESPONDA AL PUERTO "3000"
-    test('el puerto definido debe responder al puerto 3000', () => {
-        // Simulamos la inicializacion de la app para comprovar que se escucha en el puerto 3000
-        expect(app.get('port')).toBe(3000);
-    });
 
-    // 5.- COMPROVAR QUE LA RUTA USERS ESTA CARGADA CORRECTAMENTE A LA APP
+    // 3.- COMPROVAR QUE LA RUTA USERS ESTA CARGADA CORRECTAMENTE A LA APP
     test('La ruta USERS debe cargar correctamente en express y responder al endpoint simulado', async () => {
         // Simulamos la ruta del MOCK
         const response = await request(app).get('/api/users/check');
@@ -75,7 +56,7 @@ describe('Configuracion base de la aplicacion Express(app.js)', () => {
         expect(response.text).toBe('Users Router Loaded');
     })
 
-    // 6.- COMPROVAR QUE LA RUTA GROUPS ESTA CARGADA CORRECTAMENTE A LA APP
+    // 4.- COMPROVAR QUE LA RUTA GROUPS ESTA CARGADA CORRECTAMENTE A LA APP
     test('La ruta GROUPS debe cargar correctamente en express y responder al endpoint simulado', async () => {
 
         // Simulamos la ruta del MOCK

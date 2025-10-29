@@ -39,6 +39,8 @@ logs/ # Directorio común para logs
 .env.local
 .env.*.local
 .env.*
+# Apikey.js contiene informacio delicada de Firebase
+.apikey.js
 
 # ---- Build y Temporales ----
 # Directorios de salida de compilación
