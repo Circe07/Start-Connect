@@ -1,35 +1,31 @@
 const express = require("express");
-const path = require("path");
-const exphbs = require("express-handlebars");
 const morgan = require("morgan");
+const cors = require('cors'); 
 
 const app = express();
 
-// Para parsear cuerpos de solicitud JSON
+// --- Middlewares ---
+
+// Habilita CORS para todas las solicitudes (IMPORTANTE para APIs)
+app.use(cors());
+
+// Logging de peticiones (útil para desarrollo)
+app.use(morgan("dev")); 
+
+// Middleware para parsear cuerpos de solicitud JSON (API)
 app.use(express.json());
 
-// Para parsear cuerpos de solicitud URL-encoded (datos de formularios)
-// El 'extended: true' permite objetos y arrays complejos.
+// Middleware para parsear cuerpos de solicitud URL-encoded (Formularios)
+// Se usa 'extended: true' para permitir objetos y arrays complejos
 app.use(express.urlencoded({ extended: true }));
 
-// Settings
-app.set("port", process.env.PORT || 3000);
 
 
-// middlewares
-app.use(morgan("dev"));
-app.use(express.urlencoded({ extended: false }));
 
-app.get('/ping', (req, res) => {
-    // Si ves este mensaje, la aplicación Express está viva.
-    res.status(200).send({ message: 'Pong - API is Live!' });
-});
-
-// Routes
+// --- Rutas de la Aplicación ---
+// Se montan en la raíz de Express (/)
 app.use(require("./routes/users"));
 app.use(require("./routes/groups"));
-
-
 
 
 module.exports = app;
