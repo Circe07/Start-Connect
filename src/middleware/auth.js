@@ -1,26 +1,40 @@
-// middleware/auth.js (o dentro de tu archivo de rutas)
-const admin = require("firebase-admin"); // Asegúrate de que admin esté disponible aquí
+const { admin } = require("../firebase");
 
+// Middleware de autenticación con Firebase
 const authMiddleware = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).send("No autorizado: Token no proporcionado o formato incorrecto.");
-    }
+  const authHeader = req.headers.authorization;
 
-    const idToken = authHeader.split('Bearer ')[1];
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    
-    // Si el token es válido, adjunta la información del usuario a la solicitud
+  // 1️⃣ Verificar formato del token
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      message: "Token no proporcionado o formato incorrecto (esperado: Bearer <token>)",
+    });
+  }
+
+  // 2️⃣ Extraer el token
+  const token = authHeader.split(" ")[1];
+
+  try {
+    // 3️⃣ Verificar el token con Firebase
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    // 4️⃣ Guardar los datos del usuario autenticado
     req.user = decodedToken;
-    next(); // Continúa con la siguiente función middleware o ruta
+
+    // 5️⃣ Continuar con la siguiente función middleware
+    next();
   } catch (error) {
     console.error("Error al verificar el token de Firebase:", error);
-    if (error.code === 'auth/id-token-expired') {
-      return res.status(401).send("No autorizado: El token ha expirado.");
+
+    let errorMessage = "No autorizado: El token es inválido.";
+    if (error.code === "auth/id-token-expired") {
+      errorMessage = "No autorizado: El token ha expirado.";
+    } else if (error.code === "app/no-app") {
+      errorMessage = "Error de configuración: Firebase Admin no está inicializado correctamente.";
     }
-    return res.status(401).send("No autorizado: Token inválido.");
+
+    return res.status(401).json({ message: errorMessage, code: error.code });
   }
 };
 
-module.exports = authMiddleware; // Exporta si lo pones en un archivo separado
+module.exports = authMiddleware;

@@ -1,5 +1,5 @@
+const app = require("./app"); // Importa tu aplicación Express desde app.js
 const functions = require("firebase-functions");
-const app = require("./app"); // Importa tu aplicación Express
 
 // Determina si estamos en un entorno de desarrollo local
 const isLocal = process.env.NODE_ENV !== 'production' && process.env.FUNCTIONS_EMULATOR !== 'true';
@@ -17,4 +17,4 @@ if (isLocal) {
 exports.api = functions.https.onRequest(app);
 
 // Este console.log es opcional, pero ayuda a confirmar que el script termina si no es local
-console.log("Índice de funciones cargado."); 
+console.log("Índice de funciones cargado.");
