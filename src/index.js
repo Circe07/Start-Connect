@@ -1,8 +1,5 @@
-
-functions = require("firebase-functions");
 const app = require("./app"); // Importa tu aplicación Express desde app.js
 const functions = require("firebase-functions");
-const app = require("./app"); // Importa tu aplicación Express
 
 // Determina si estamos en un entorno de desarrollo local
 const isLocal = process.env.NODE_ENV !== 'production' && process.env.FUNCTIONS_EMULATOR !== 'true';

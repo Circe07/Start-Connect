@@ -1,6 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
-const cors = require('cors'); 
+const cors = require('cors');
 
 const app = express();
 
@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 
 // Logging de peticiones (útil para desarrollo)
-app.use(morgan("dev")); 
+app.use(morgan("dev"));
 
 // Middleware para parsear cuerpos de solicitud JSON (API)
 app.use(express.json());
@@ -21,11 +21,13 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
+// Importacion de routes
+const usersRouter = require("./routes/users");
+const groupsRouter = require("./routes/groups");
 
-// --- Rutas de la Aplicación ---
-// Se montan en la raíz de Express (/)
-app.use(require("./routes/users"));
-app.use(require("./routes/groups"));
+app.use("/api/users", usersRouter);
+app.use("/api/groups", groupsRouter);
+
 
 
 module.exports = app;

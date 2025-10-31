@@ -1,22 +1,26 @@
 // npm install --save-dev jest supertest
-const app = require('/src/app'); // Importamos el modulo app
+const app = require('../../src/app'); // ✅ RUTA CORREGIDA
 const request = require('supertest'); // Importamos el modulo supertest
 
 // ----------------------------------------------------------------------
 // MOCKS DE CONFIGURACION
 // ----------------------------------------------------------------------
-jest.mock('/src/routes/users.js', () => {
+
+// 🎯 CORRECCIÓN CLAVE: La ruta debe ser '../../src/routes/users.js'
+jest.mock('../../src/routes/users.js', () => {
     const express = require('express');
     const router = express.Router();
-    // Ruta de prueba -> solo verifica la carga
-    router.get('/api/users/check', (req, res) => res.status(200).send('Users Router Loaded'));
+    // La ruta es solo '/check', el prefijo /api/users se añade en app.js
+    router.get('/check', (req, res) => res.status(200).send('Users Router Loaded'));
     return router;
 });
-jest.mock('/src/routes/groups.js', () => {
+
+// 🎯 CORRECCIÓN CLAVE: La ruta debe ser '../../src/routes/groups.js'
+jest.mock('../../src/routes/groups.js', () => {
     const express = require('express');
     const router = express.Router();
-    // Ruta de prueba -> solo verifica la carga
-    router.get('/api/groups/check', (req, res) => res.status(200).send('Groups Router Loaded'));
+    // La ruta es solo '/check', el prefijo /api/groups se añade en app.js
+    router.get('/check', (req, res) => res.status(200).send('Groups Router Loaded'));
     return router;
 })
 // =============================================================================================
@@ -47,7 +51,7 @@ describe('Configuracion base de la aplicacion Express(app.js)', () => {
 
     // 3.- COMPROVAR QUE LA RUTA USERS ESTA CARGADA CORRECTAMENTE A LA APP
     test('La ruta USERS debe cargar correctamente en express y responder al endpoint simulado', async () => {
-        // Simulamos la ruta del MOCK
+        // Simulamos la ruta completa
         const response = await request(app).get('/api/users/check');
 
         // Responde con el codigo 200
@@ -59,7 +63,7 @@ describe('Configuracion base de la aplicacion Express(app.js)', () => {
     // 4.- COMPROVAR QUE LA RUTA GROUPS ESTA CARGADA CORRECTAMENTE A LA APP
     test('La ruta GROUPS debe cargar correctamente en express y responder al endpoint simulado', async () => {
 
-        // Simulamos la ruta del MOCK
+        // Simulamos la ruta completa
         const response = await request(app).get('/api/groups/check');
 
         // Responde con el codigo 200

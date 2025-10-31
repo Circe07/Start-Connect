@@ -1,8 +1,12 @@
-
 const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
 const authMiddleware = require("../middleware/auth.js");
+
+// --- Ruta de verificación para los tests ---
+router.get("/check", (req, res) => {
+  res.status(200).send("Groups Router Loaded");
+});
 
 
 //Serch
@@ -587,56 +591,56 @@ router.patch("/groups/:groupId", authMiddleware, async (req, res) => {
 
 // Ruta protegida: Crear una nueva publicación en el grupo
 router.post("/:groupId/post/new", authMiddleware, async (req, res) => {
-   try {
+  try {
     const { groupId } = req.params;
-     const { content, imageUrl } = req.body; // 'imageUrl' es opcional
-     const userId = req.user.uid;
+    const { content, imageUrl } = req.body; // 'imageUrl' es opcional
+    const userId = req.user.uid;
 
-     // Validación básica
-     if (!content) {
-       return res.status(400).send("El contenido de la publicación es obligatorio.");
-   }
+    // Validación básica
+    if (!content) {
+      return res.status(400).send("El contenido de la publicación es obligatorio.");
+    }
 
     // 1. Verificación de Pertenencia (seguridad adicional)
     // Asegura que el usuario sea miembro antes de permitirle publicar
-     const groupRef = db.collection("groups").doc(groupId);
-     const groupDoc = await groupRef.get();
+    const groupRef = db.collection("groups").doc(groupId);
+    const groupDoc = await groupRef.get();
     if (!groupDoc.exists || !groupDoc.data().members.includes(userId)) {
-        return res.status(403).send("No tienes permiso para publicar en este grupo.");
-       }
+      return res.status(403).send("No tienes permiso para publicar en este grupo.");
+    }
 
-       // 2. Referencia a la subcolección 'posts' y nuevo documento
-     const newPostRef = db.collection("groups").doc(groupId).collection("posts").doc();
- 
-     // 3. Datos de la nueva publicación
-     const postData = {
-       content,
-       imageUrl: imageUrl || null, // Guarda null si no se proporciona URL
-       authorId: userId, // ID del autor
-       likes: 0, // Contador inicial de 'Me Gusta'
+    // 2. Referencia a la subcolección 'posts' y nuevo documento
+    const newPostRef = db.collection("groups").doc(groupId).collection("posts").doc();
+
+    // 3. Datos de la nueva publicación
+    const postData = {
+      content,
+      imageUrl: imageUrl || null, // Guarda null si no se proporciona URL
+      authorId: userId, // ID del autor
+      likes: 0, // Contador inicial de 'Me Gusta'
       commentCount: 0, // Contador inicial de comentarios
       createdAt: FieldValue.serverTimestamp() // Marca de tiempo del servidor
-   };
+    };
 
- // 4. Guardar la publicación y actualizar el contador del grupo (Transacción)
+    // 4. Guardar la publicación y actualizar el contador del grupo (Transacción)
     // Usamos una transacción para asegurar que ambas operaciones ocurran o ninguna
     await db.runTransaction(async (transaction) => {
-        transaction.set(newPostRef, postData); // Crear la publicación
-        transaction.update(groupRef, {
-            postCount: FieldValue.increment(1) // Incrementar el contador de posts en el grupo
-        });
+      transaction.set(newPostRef, postData); // Crear la publicación
+      transaction.update(groupRef, {
+        postCount: FieldValue.increment(1) // Incrementar el contador de posts en el grupo
+      });
     });
 
- // 5. Respuesta exitosa
- res.status(201).json({ 
-  message: "Publicación creada exitosamente.", 
-  postId: newPostRef.id // Devuelve el ID de la nueva publicación
- });
+    // 5. Respuesta exitosa
+    res.status(201).json({
+      message: "Publicación creada exitosamente.",
+      postId: newPostRef.id // Devuelve el ID de la nueva publicación
+    });
 
- } catch (error) {
- console.error("Error al crear la publicación:", error);
- res.status(500).send("Error interno del servidor al crear la publicación.");
- }
+  } catch (error) {
+    console.error("Error al crear la publicación:", error);
+    res.status(500).send("Error interno del servidor al crear la publicación.");
+  }
 });
 
 //DELETE

@@ -1,54 +1,40 @@
-const { admin } = require('../firebase');
+const { admin } = require("../firebase");
 
+// Middleware de autenticación con Firebase
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Verificar si el encabezado existe y tiene el formato correcto (Bearer)
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    // Devuelve el codigo 401 si es que el token es de formato incorrecto en formato JSON
+  // 1️⃣ Verificar formato del token
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
-      message: 'Token no proporcionado o formato incorrecto (esperado: Bearer <token>)',
+      message: "Token no proporcionado o formato incorrecto (esperado: Bearer <token>)",
     });
   }
 
-  // Extraemos solamente el token, la parte despues del Bearer
-  const token = authHeader.split(' ')[1];
+  // 2️⃣ Extraer el token
+  const token = authHeader.split(" ")[1];
 
   try {
-
-    // Descodificamos el token y verificamos la firma
+    // 3️⃣ Verificar el token con Firebase
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // Adjuntamos el token decodificado al objeto de solicitud
+    // 4️⃣ Guardar los datos del usuario autenticado
     req.user = decodedToken;
 
-    // Continuar con la siguiente función middleware
+    // 5️⃣ Continuar con la siguiente función middleware
     next();
-
   } catch (error) {
-    // Manejo de errores de verificación de tokens (expirados, inválidos, , , ,)
-    // Lo registramos en consola para depuracion
-    console.error('Error al verificar el token de Firebase:', error);
+    console.error("Error al verificar el token de Firebase:", error);
 
-    // Establecemos unos mensajes de error default
-    let errorMessage = 'No autorizado: El token es inválido.';
-    let errorCode = error.code;
-
-    // Manejo de errores específicos
-    // Si el token ha expirado, lanzamos un mensaje de error
-    if (errorCode === 'auth/id-token-expired') {
-      errorMessage = 'No autorizado: El token ha expirado.';
-    } else if (errorCode === 'app/no-app') {
-      // Este caso es crucial para el debugging en desarrollo/testing (debería ser resuelto por el mock)
-      errorMessage = 'Error de Configuración: La aplicación Firebase Admin no está inicializada correctamente.';
+    let errorMessage = "No autorizado: El token es inválido.";
+    if (error.code === "auth/id-token-expired") {
+      errorMessage = "No autorizado: El token ha expirado.";
+    } else if (error.code === "app/no-app") {
+      errorMessage = "Error de configuración: Firebase Admin no está inicializado correctamente.";
     }
 
-    // Devolvemos el codigo 401 en formato JSON y los errores predeterminados
-    return res.status(401).json({
-      message: errorMessage,
-      code: errorCode
-    });
+    return res.status(401).json({ message: errorMessage, code: error.code });
   }
 };
 
-module.exports = authMiddleware; // Exportamos el Middleware
+module.exports = authMiddleware;

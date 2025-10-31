@@ -22,17 +22,22 @@ signInWithEmailAndPassword(auth, USER_EMAIL, USER_PASSWORD)
   .then((userCredential) => {
     const user = userCredential.user;
 
-    // Solicitar el ID Token
+    // Solicitar el ID Token (true fuerza la renovación si es necesario)
     user.getIdToken(true).then(idToken => {
       console.log("-----------------------------------------");
       console.log("¡TOKEN JWT OBTENIDO CON ÉXITO!");
+      console.log(`UID del Usuario: ${user.uid}`);
+      console.log("\nCOPIA EL SIGUIENTE TOKEN EN POSTMAN:");
       console.log(idToken); // <--- ESTE ES EL TOKEN QUE COPIARÁS A POSTMAN
       console.log("-----------------------------------------");
-      process.exit();
+      process.exit(0);
     }).catch(error => {
       console.error("Error al obtener el ID Token:", error);
+      process.exit(1);
     });
   })
   .catch((error) => {
     console.error("Error de inicio de sesión:", error.message);
+    console.error("Asegúrate de que el usuario exista y las credenciales sean correctas.");
+    process.exit(1);
   });

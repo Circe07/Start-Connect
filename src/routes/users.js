@@ -1,14 +1,22 @@
+
 const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
 const authMiddleware = require("../middleware/auth.js");
 
-console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
+// --- Ruta de verificación para los tests ---
+router.get("/check", (req, res) => {
+  res.status(200).send("Users Router Loaded");
+});
+
+if (process.env.NODE_ENV !== "test") {
+  console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
+}
 
 // RUTA PRINCIPAL (GET /users) - Responde a /api/users
-// Esta ruta estaba en router.get("/"), pero debe ser router.get("/users") 
-// para responder a /api/users después del reescrito de Firebase Hosting.
-router.get("/users", async (req, res) => {
+// Esta ruta debe estar en "/" en app.js definimos que debe buscar /api/users
+// Si agregamos /users lo que esta buscando es /api/users/users
+router.get("/", async (req, res) => {
   try {
     const querySnapshot = await db.collection("contacts").get();
     const contacts = querySnapshot.docs.map((doc) => ({
