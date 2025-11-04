@@ -7,11 +7,9 @@ const authMiddleware = require("../middleware/auth.js");
 // CORRECCIÓN: Esta ruta coincide con la estructura de tu captura de pantalla.
 // Path: appbase (Col) -> User (Doc) -> User (Col) -> {userId} (Doc) -> contacts (Col)
 const getContactsCollectionRef = (userId) => {
-  // Usamos una colección de acceso simple y plano (sin anidación por usuario)
-  const collectionName = 'general_contacts';
-  // Añadimos el userId al documento, no a la ruta
-  return db.collection(collectionName);
+  return db.collection('User').doc(userId).collection('contacts');
 };
+
 
 // --- Ruta de verificación para los tests ---
 router.get("/check", (req, res) => {
