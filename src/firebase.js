@@ -17,21 +17,20 @@ if (process.env.NODE_ENV === 'production' || process.env.FUNCTIONS_EMULATOR === 
     firebaseApp = admin.app();
   }
 } else {
-  // Verifica que el archivo JSON esté en la ruta correcta:
-  const serviceAccount = require("./startandconnect-c44b2-1e2ebf20fbce.json");
-
   if (admin.apps.length === 0) {
+    // Verifica que el archivo JSON esté en la ruta correcta:
+    const serviceAccount = require("./startandconnect-c44b2-1e2ebf20fbce.json");
     firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       projectId: PROJECT_ID,
     });
-    console.log(`🔥 Admin SDK Inicializado (Local/Desarrollo con Clave).`);
+    console.log(`🔥 Admin SDK Inicializado correctamente.`);
   } else {
     firebaseApp = admin.app();
   }
 }
 
-const db = getFirestore(firebaseApp);
+const db = getFirestore(firebaseApp, "appbase");
 
 
 console.log(`🔥 Conectado al proyecto: ${PROJECT_ID} con ID de Base de Datos por defecto`);

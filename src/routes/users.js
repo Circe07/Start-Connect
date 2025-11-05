@@ -4,18 +4,17 @@ const { db, admin } = require("../firebase.js");
 const authMiddleware = require("../middleware/auth.js");
 
 // Función para obtener la referencia a los contactos del usuario
-// Estructura Firestore: User (Col) → {userId} (Doc) → contacts (Col)
 const getContactsCollectionRef = (userId) => {
   return db.collection("User").doc(userId).collection("contacts");
 };
 
-// --- Ruta de verificación para los tests ---
+// --- Ruta de verificación ---
 router.get("/check", (req, res) => {
   res.status(200).send("Users Router Loaded");
 });
 
 if (process.env.NODE_ENV !== "test") {
-  console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
+  console.log("🔥 Conectado al proyecto:", admin.app().options.projectId);
 }
 
 // --- GET /users (obtener contactos del usuario autenticado) ---
@@ -42,27 +41,30 @@ router.get("/", authMiddleware, async (req, res) => {
 
 // --- POST /new-contact (crear nuevo contacto) ---
 router.post("/new-contact", authMiddleware, async (req, res) => {
+  console.log("Usuario autenticado:", req.user);
+
   const userId = req.user.uid;
   const contactData = req.body;
 
   try {
     const userRef = db.collection("User").doc(userId);
 
+
     // 1️⃣ Verifica si el documento del usuario existe
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      console.log(`🧾 Usuario ${userId} no existía. Creando documento...`);
+      console.log(`Usuario ${userId} no existía. Creando documento...`);
       await userRef.set({
         createdAt: new Date(),
         email: req.user.email || null,
       });
     }
 
-    // 2️⃣ Crea el contacto (añadimos userId para validaciones futuras)
+    // 2️⃣ Crea el contacto
     const newContact = await userRef.collection("contacts").add({
       ...contactData,
-      userId,
+      userId: req.user.uid,
       createdAt: new Date(),
     });
 
@@ -102,22 +104,13 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
       return res.status(403).send("Prohibido: No eres el propietario de este contacto.");
     }
 
-    // Sanitizar campos válidos
-    const validUpdateFields = Object.keys(updateFields).reduce((acc, key) => {
-      if (updateFields[key] !== undefined && updateFields[key] !== null) {
-        acc[key] = updateFields[key];
-      }
-      return acc;
-    }, {});
-
-    await contactRef.update(validUpdateFields);
+    await contactRef.update(updateFields);
 
     const updatedContact = await contactRef.get();
     res.status(200).json({
       message: "Contacto actualizado exitosamente.",
       contact: { id: updatedContact.id, ...updatedContact.data() },
     });
-
   } catch (error) {
     console.error("Error al actualizar el contacto:", error);
     res.status(500).send("Error interno del servidor al actualizar el contacto.");
@@ -144,7 +137,6 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
 
     await contactRef.delete();
     res.status(204).send();
-
   } catch (error) {
     console.error("Error al eliminar el contacto:", error);
     res.status(500).send("Error interno del servidor al eliminar el contacto.");
