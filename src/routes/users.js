@@ -2,14 +2,13 @@ const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
 const authMiddleware = require("../middleware/auth.js");
-
+const { createContact } = require("../controllers/contactController");
 // Función utilitaria para construir la ruta completa de la colección del usuario.
 // CORRECCIÓN: Esta ruta coincide con la estructura de tu captura de pantalla.
 // Path: appbase (Col) -> User (Doc) -> User (Col) -> {userId} (Doc) -> contacts (Col)
 const getContactsCollectionRef = (userId) => {
-  return db.collection('User').doc(userId).collection('contacts');
+  return db.collection("User").doc(userId).collection("contacts");
 };
-
 
 // --- Ruta de verificación para los tests ---
 router.get("/check", (req, res) => {
@@ -45,39 +44,38 @@ router.get("/", authMiddleware, async (req, res) => {
 
 // Rutas protegidas - Añade authMiddleware antes de la lógica de la ruta
 router.post("/new-contact", authMiddleware, async (req, res) => {
-  console.log(req.body);
+  const userId = req.user.uid;
+  const contactData = req.body;
+
   try {
-    const requestingUserId = req.user.uid;
+    const userRef = db.collection("users").doc(userId);
 
-    // 2. Construir el objeto contactData e incluir el ID del propietario
-    // Sanitización: Solo incluir campos definidos en el JSON
-    const contactData = Object.keys(req.body).reduce((acc, key) => {
-      if (req.body[key] !== undefined && req.body[key] !== null) {
-        acc[key] = req.body[key];
-      }
-      return acc;
-    }, {});
+    // 🔍 1️⃣ Verifica si el documento del usuario existe
+    const userDoc = await userRef.get();
 
-    // Añadir metadatos
-    contactData.userId = requestingUserId;
-    contactData.createdAt = new Date();
+    if (!userDoc.exists) {
+      console.log(`🧾 Usuario ${userId} no existía. Creando documento...`);
+      await userRef.set({
+        createdAt: new Date(),
+        email: req.user.email || null,
+      });
+    }
 
-    // 3. Guardar en Firestore
-    const contactsRef = getContactsCollectionRef(requestingUserId);
-    const newContact = await contactsRef.add(contactData);
+    // 🧩 2️⃣ Crea el contacto
+    const newContact = await userRef.collection("contacts").add(contactData);
 
-    // 4. Respuesta
     res.status(201).json({
-      message: "Contacto creado exitosamente.",
-      id: newContact.id
+      message: "Contacto creado correctamente",
+      contactId: newContact.id,
     });
-
   } catch (error) {
     console.error("Error al crear el contacto:", error);
-    res.status(500).send("Error interno del servidor al crear el contacto.");
+    res.status(500).json({
+      message: "Error al crear el contacto",
+      error: error.message,
+    });
   }
 });
-
 router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
