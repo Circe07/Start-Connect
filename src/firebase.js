@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production' || process.env.FUNCTIONS_EMULATOR === 
   }
 } else {
   // Verifica que el archivo JSON esté en la ruta correcta:
-  const serviceAccount = require("./startandconnect-c44b2-firebase-adminsdk-fbsvc-84e3a7bf95.json");
+  const serviceAccount = require("./startandconnect-c44b2-1e2ebf20fbce.json");
 
   if (admin.apps.length === 0) {
     firebaseApp = admin.initializeApp({

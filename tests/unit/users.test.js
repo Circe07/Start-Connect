@@ -1,13 +1,16 @@
 const request = require('supertest');
 
 // --- 1. Mocks de Funciones Finales ---
+// (Estos se asignan a las operaciones finales: get, add, update, delete)
 const mockAdd = jest.fn();
 const mockUpdate = jest.fn();
 const mockDelete = jest.fn();
 const mockGetCollection = jest.fn();
 const mockGetDoc = jest.fn();
 
-// --- 2. Mocks de Estructura de Firestore ---
+// --- 2. Mocks de Estructura de Firestore (CORREGIDA) ---
+// Esta es la estructura que TU CÓDIGO (users.js) espera.
+
 // .../contacts/{contactId}
 const mockContactDocRef = {
   get: mockGetDoc,
@@ -15,60 +18,40 @@ const mockContactDocRef = {
   delete: mockDelete,
 };
 
-// .../contacts
+// .../contacts (Colección final)
 const mockContactsCollectionRef = {
   get: mockGetCollection,
   add: mockAdd,
-  doc: jest.fn(() => mockContactDocRef),
+  doc: jest.fn(() => mockContactDocRef), // Devuelve la referencia al documento de contacto
 };
 
-// .../User/{userId}
+// .../User/{userId} (Documento de usuario)
 const mockUserDocRef = {
   collection: jest.fn((collectionName) => {
+    // Cuando se llama a .collection('contacts')...
     if (collectionName === 'contacts') {
-      return mockContactsCollectionRef;
+      return mockContactsCollectionRef; // ...devuelve la referencia a la colección de contactos.
     }
   }),
 };
 
-// .../User (Colección)
-const mockUserCollectionRef = {
-  doc: jest.fn(() => mockUserDocRef),
-};
-
-// .../User (Documento)
-const mockAppbaseDocRef = {
-  collection: jest.fn((collectionName) => {
-    if (collectionName === 'User') {
-      return mockUserCollectionRef;
-    }
-  }),
-};
-
-// --- 3. Mock Principal de 'firebase' ---
-// 🚨 CORRECCIÓN CLAVE: El mock principal debe tener una estructura que permita acceder a la función db.collection.
+// --- 3. Mock Principal de 'firebase' (CORREGIDO) ---
+// Simula el objeto 'db'
 const mockDb = {
   collection: jest.fn((collectionName) => {
-    if (collectionName === 'appbase') {
+    // Cuando se llama a .collection('User')...
+    if (collectionName === 'User') {
+      // ...devuelve un objeto que tiene la función .doc()
       return {
-        doc: jest.fn((docName) => {
-          if (docName === 'User') {
-            return mockAppbaseDocRef;
-          }
-        }),
-        // 🚨 SIMPLIFICACIÓN: Para el test GET, la función db.collection('general_contacts') es la que se usa.
+        doc: jest.fn(() => mockUserDocRef), // .doc(userId) devuelve la referencia al documento de usuario
       };
-    }
-    // Ruta simplificada para la solución del 5 NOT_FOUND:
-    if (collectionName === 'general_contacts') {
-      return mockContactsCollectionRef;
     }
   }),
 };
 
-
+// Mockeo de firebase.js
 jest.mock('../../src/firebase', () => ({
-  db: mockDb,
+  db: mockDb, // Usa el mockDb corregido
   admin: {
     app: () => ({
       options: {
@@ -111,7 +94,7 @@ beforeEach(() => {
 
   // --- Configuración de Mocks por Defecto ---
 
-  // 🚨 CORRECCIÓN GET COLLECTION: Devuelve el objeto que tiene la propiedad 'docs'
+  // GET /users (get de colección)
   mockGetCollection.mockResolvedValue({
     docs: [
       {
@@ -121,19 +104,22 @@ beforeEach(() => {
     ],
   });
 
-  // 🚨 CORRECCIÓN GET DOC: El doc de contacto devuleve los datos para la verificación de propiedad
+  // GET /update, /delete (get de documento)
   mockGetDoc.mockResolvedValue({
     exists: true,
-    data: () => ({ userId: 'mock-user-id' }),
+    data: () => ({ userId: 'mock-user-id' }), // El propietario por defecto es el mock-user-id
   });
 
+  // POST /new-contact
   mockAdd.mockResolvedValue({ id: 'new-mock-id' });
+  // PATCH /update-contact
   mockUpdate.mockResolvedValue();
+  // DELETE /delete-contact
   mockDelete.mockResolvedValue();
 });
 
 
-// --- 8. Suite de Pruebas ---
+// --- 8. Suite de Pruebas (Sin cambios) ---
 describe('Pruebas para /api/users (Rutas de Contactos)', () => {
 
   // 1. GET /users
@@ -175,6 +161,7 @@ describe('Pruebas para /api/users (Rutas de Contactos)', () => {
   // 4. PATCH /update-contact/:id (no propietario)
   test('4. PATCH /update-contact/:id debería retornar 403 si NO es el propietario', async () => {
 
+    // Sobrescribe el mock por defecto SOLO para este test
     mockGetDoc.mockResolvedValueOnce({
       exists: true,
       data: () => ({ ...MOCK_CONTACT_DATA, userId: 'otro-user-id' }),
@@ -190,6 +177,7 @@ describe('Pruebas para /api/users (Rutas de Contactos)', () => {
   // 5. PATCH /update-contact/:id (no existe)
   test('5. PATCH /update-contact/:id debería retornar 404 si el contacto no existe', async () => {
 
+    // Sobrescribe el mock por defecto SOLO para este test
     mockGetDoc.mockResolvedValueOnce({ exists: false });
 
     const response = await request(app)
@@ -221,6 +209,7 @@ describe('Pruebas para /api/users (Rutas de Contactos)', () => {
   // 8. DELETE /delete-contact/:id (no propietario)
   test('8. DELETE /delete-contact/:id debería retornar 403 si NO es el propietario', async () => {
 
+    // Sobrescribe el mock por defecto SOLO para este test
     mockGetDoc.mockResolvedValueOnce({
       exists: true,
       data: () => ({ ...MOCK_CONTACT_DATA, userId: 'otro-user-id' }),
@@ -235,6 +224,7 @@ describe('Pruebas para /api/users (Rutas de Contactos)', () => {
   // 9. DELETE /delete-contact/:id (no existe)
   test('9. DELETE /delete-contact/:id debería retornar 404 si el contacto no existe', async () => {
 
+    // Sobrescribe el mock por defecto SOLO para este test
     mockGetDoc.mockResolvedValueOnce({ exists: false });
 
     const response = await request(app)
