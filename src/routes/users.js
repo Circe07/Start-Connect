@@ -2,10 +2,9 @@ const { Router } = require("express");
 const router = Router();
 const { db, admin } = require("../firebase.js");
 const authMiddleware = require("../middleware/auth.js");
-const { createContact } = require("../controllers/contactController");
-// Función utilitaria para construir la ruta completa de la colección del usuario.
-// CORRECCIÓN: Esta ruta coincide con la estructura de tu captura de pantalla.
-// Path: appbase (Col) -> User (Doc) -> User (Col) -> {userId} (Doc) -> contacts (Col)
+
+// Función para obtener la referencia a los contactos del usuario
+// Estructura Firestore: User (Col) → {userId} (Doc) → contacts (Col)
 const getContactsCollectionRef = (userId) => {
   return db.collection("User").doc(userId).collection("contacts");
 };
@@ -19,10 +18,9 @@ if (process.env.NODE_ENV !== "test") {
   console.log("🔥 Conectado al proyecto:", admin.app().options.credential.projectId);
 }
 
-// RUTA PRINCIPAL (GET /users) - Responde a /api/users
+// --- GET /users (obtener contactos del usuario autenticado) ---
 router.get("/", authMiddleware, async (req, res) => {
-
-  console.log(`[GET /] UID de usuario recibido: ${req.user?.uid}`); // Verificamos el uid que obtiene
+  console.log(`[GET /] UID de usuario recibido: ${req.user?.uid}`);
 
   try {
     const requestingUserId = req.user.uid;
@@ -42,15 +40,15 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Rutas protegidas - Añade authMiddleware antes de la lógica de la ruta
+// --- POST /new-contact (crear nuevo contacto) ---
 router.post("/new-contact", authMiddleware, async (req, res) => {
   const userId = req.user.uid;
   const contactData = req.body;
 
   try {
-    const userRef = db.collection("users").doc(userId);
+    const userRef = db.collection("User").doc(userId);
 
-    // 🔍 1️⃣ Verifica si el documento del usuario existe
+    // 1️⃣ Verifica si el documento del usuario existe
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
@@ -61,8 +59,12 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
       });
     }
 
-    // 🧩 2️⃣ Crea el contacto
-    const newContact = await userRef.collection("contacts").add(contactData);
+    // 2️⃣ Crea el contacto (añadimos userId para validaciones futuras)
+    const newContact = await userRef.collection("contacts").add({
+      ...contactData,
+      userId,
+      createdAt: new Date(),
+    });
 
     res.status(201).json({
       message: "Contacto creado correctamente",
@@ -76,6 +78,8 @@ router.post("/new-contact", authMiddleware, async (req, res) => {
     });
   }
 });
+
+// --- PATCH /update-contact/:id (actualizar contacto) ---
 router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -98,7 +102,7 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
       return res.status(403).send("Prohibido: No eres el propietario de este contacto.");
     }
 
-    // Sanitizar campos de actualización
+    // Sanitizar campos válidos
     const validUpdateFields = Object.keys(updateFields).reduce((acc, key) => {
       if (updateFields[key] !== undefined && updateFields[key] !== null) {
         acc[key] = updateFields[key];
@@ -108,7 +112,11 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
 
     await contactRef.update(validUpdateFields);
 
-    res.status(200).json({ message: "Contacto actualizado exitosamente." });
+    const updatedContact = await contactRef.get();
+    res.status(200).json({
+      message: "Contacto actualizado exitosamente.",
+      contact: { id: updatedContact.id, ...updatedContact.data() },
+    });
 
   } catch (error) {
     console.error("Error al actualizar el contacto:", error);
@@ -116,6 +124,7 @@ router.patch("/update-contact/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// --- DELETE /delete-contact/:id (eliminar contacto) ---
 router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
   try {
     const contactId = req.params.id;
@@ -143,4 +152,3 @@ router.delete("/delete-contact/:id", authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-

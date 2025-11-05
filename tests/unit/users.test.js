@@ -27,10 +27,13 @@ const mockContactsCollectionRef = {
 
 // .../User/{userId} (Documento de usuario)
 const mockUserDocRef = {
+  get: jest.fn(async () => ({
+    exists: true,
+    data: () => ({ userId: 'mock-user-id' }),
+  })),
   collection: jest.fn((collectionName) => {
-    // Cuando se llama a .collection('contacts')...
     if (collectionName === 'contacts') {
-      return mockContactsCollectionRef; // ...devuelve la referencia a la colección de contactos.
+      return mockContactsCollectionRef;
     }
   }),
 };
@@ -119,7 +122,7 @@ beforeEach(() => {
 });
 
 
-// --- 8. Suite de Pruebas (Sin cambios) ---
+// --- 8. Suite de Pruebas ---
 describe('Pruebas para /api/users (Rutas de Contactos)', () => {
 
   // 1. GET /users
@@ -144,7 +147,8 @@ describe('Pruebas para /api/users (Rutas de Contactos)', () => {
 
     expect(response.statusCode).toBe(201);
     expect(mockAdd).toHaveBeenCalled();
-    expect(response.body).toHaveProperty('id', 'new-mock-id');
+    expect(response.body).toHaveProperty('contactId', 'new-mock-id');
+
   });
 
   // 3. PATCH /update-contact/:id (propietario)
