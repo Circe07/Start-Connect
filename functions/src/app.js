@@ -25,8 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 const usersRouter = require("./routes/users");
 const groupsRouter = require("./routes/groups");
 
-app.use("/api/users", usersRouter);
-app.use("/api/groups", groupsRouter);
+app.use("/users", usersRouter);
+app.use("/groups", groupsRouter);
 
 
 

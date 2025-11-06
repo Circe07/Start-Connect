@@ -1,32 +1,38 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+// Archivo principal de Cloud Functions (API Express).
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const { setGlobalOptions } = require("firebase-functions/v2/options");
+const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+const express = require("express");
+const cors = require("cors");
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// Configuración global (seguridad y rendimiento)
+setGlobalOptions({
+    region: "europe-west1",
+    maxInstances: 10,
+});
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Inicializa la app Express
+const app = express();
+
+// Middlewares globales
+app.use(cors({ origin: true }));
+app.use(express.json());
+
+const usersRoutes = require("./src/routes/users");
+
+// Monta las rutas en /api/users
+app.use("/users", usersRoutes);
+
+// Ruta de prueba raíz
+app.get("/", (req, res) => {
+    logger.info("API Start&Connect en ejecución");
+    res.status(200).json({
+        status: "ok",
+        message: "Start&Connect API (Firebase Functions v2) funcionando correctamente",
+    });
+});
+
+// Exporta la función HTTP principal
+exports.api = onRequest(app);
