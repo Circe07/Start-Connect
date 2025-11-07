@@ -53,7 +53,7 @@ const mockDb = {
 };
 
 // Mockeo de firebase.js
-jest.mock('../../src/firebase', () => ({
+jest.mock('../../functions/src/config/firebase`', () => ({
   db: mockDb, // Usa el mockDb corregido
   admin: {
     app: () => ({

@@ -35,7 +35,7 @@ jest.mock('firebase-admin/firestore', () => mockFirestore);
 
 // Cargamos el módulo a probar después de configurar todos los mocks
 // El código de src/firebase.js se ejecuta aquí
-const { db, admin } = require('../../src/firebase');
+const { db, admin } = require('../../functions/src/config/firebase');
 
 
 describe('Pruebas unitarias para src/firebase.js', () => {

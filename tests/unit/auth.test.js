@@ -11,7 +11,7 @@ const mockVerifyIdToken = jest.fn();
 // 1.2. Mockeamos el módulo de Firebase (la ruta corregida '../../src/firebase')
 // Configuramos el mock para que admin.auth() devuelva un objeto con nuestra función mockeada.
 // Esto debe hacerse ANTES de importar el middleware que depende de él.
-jest.mock('../../src/firebase', () => {
+jest.mock('../../functions/src/config/firebase.js', () => {
   // Implementación del mock más robusta para evitar el error 'app/no-app'
   const mockAuthService = {
     verifyIdToken: mockVerifyIdToken,
@@ -43,7 +43,7 @@ jest.mock('../../src/firebase', () => {
 });
 
 // Importamos el middleware DESPUÉS de haber mockeado sus dependencias
-const authMiddleware = require('../../src/middleware/auth');
+const authMiddleware = require('../../functions/src/config/firebase');
 
 // Datos de prueba que simulan un token decodificado
 const mockDecodedToken = { uid: 'test-user-uid', email: 'test@example.com', name: 'Test User' };

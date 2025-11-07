@@ -1,5 +1,5 @@
 // npm install --save-dev jest supertest
-const app = require('../../src/app'); // ✅ RUTA CORREGIDA
+const app = require('../../functions/src/app');
 const request = require('supertest'); // Importamos el modulo supertest
 
 // ----------------------------------------------------------------------
@@ -7,7 +7,7 @@ const request = require('supertest'); // Importamos el modulo supertest
 // ----------------------------------------------------------------------
 
 // 🎯 CORRECCIÓN CLAVE: La ruta debe ser '../../src/routes/users.js'
-jest.mock('../../src/routes/users.js', () => {
+jest.mock('../../functions/src/routes/users', () => {
     const express = require('express');
     const router = express.Router();
     // La ruta es solo '/check', el prefijo /api/users se añade en app.js
@@ -16,7 +16,7 @@ jest.mock('../../src/routes/users.js', () => {
 });
 
 // 🎯 CORRECCIÓN CLAVE: La ruta debe ser '../../src/routes/groups.js'
-jest.mock('../../src/routes/groups.js', () => {
+jest.mock('../../functions/src/routes/groups', () => {
     const express = require('express');
     const router = express.Router();
     // La ruta es solo '/check', el prefijo /api/groups se añade en app.js
