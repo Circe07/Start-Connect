@@ -347,6 +347,78 @@ router.patch("/:groupId", authMiddleware, async (req, res) => {
   }
 });
 
+// PATCH /groups/:groupId/transfer-owner
+router.patch("/:groupId/transfer-owner", authMiddleware, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { newOwnerId } = req.body;
+    const userId = req.user.uid;
+
+    if (!newOwnerId)
+      return res.status(400).json({ message: "Se requiere el ID del nuevo propietario." });
+
+    const groupRef = groupsRef().doc(groupId);
+    const groupDoc = await groupRef.get();
+
+    if (!groupDoc.exists)
+      return res.status(404).json({ message: "El grupo no existe." });
+
+    const data = groupDoc.data();
+
+    if (data.ownerId !== userId)
+      return res.status(403).json({ message: "Solo el propietario actual puede transferir el grupo." });
+
+    if (!data.members.includes(newOwnerId))
+      return res.status(400).json({ message: "El nuevo propietario debe ser miembro del grupo." });
+
+    if (newOwnerId === userId)
+      return res.status(400).json({ message: "Ya eres el propietario del grupo." });
+
+    await groupRef.update({ ownerId: newOwnerId });
+
+    res.status(200).json({ message: `Propiedad del grupo transferida a ${newOwnerId}.` });
+  } catch (error) {
+    console.error("Error al transferir la propiedad del grupo:", error);
+    res.status(500).json({ message: "Error interno al transferir la propiedad." });
+  }
+});
+
+// DELETE /groups/:groupId/remove-member/:memberId
+router.delete("/:groupId/remove-member/:memberId", authMiddleware, async (req, res) => {
+  try {
+    const { groupId, memberId } = req.params;
+    const userId = req.user.uid;
+
+    const groupRef = groupsRef().doc(groupId);
+    const groupDoc = await groupRef.get();
+
+    if (!groupDoc.exists)
+      return res.status(404).json({ message: "El grupo no existe." });
+
+    const data = groupDoc.data();
+
+    if (data.ownerId !== userId)
+      return res.status(403).json({ message: "Solo el propietario puede eliminar miembros." });
+
+    if (!data.members.includes(memberId))
+      return res.status(400).json({ message: "El usuario no es miembro del grupo." });
+
+    if (memberId === userId)
+      return res.status(400).json({ message: "No puedes eliminarte a ti mismo. Usa el endpoint /leave." });
+
+    await groupRef.update({
+      members: FieldValue.arrayRemove(memberId),
+      memberCount: FieldValue.increment(-1),
+    });
+
+    res.status(200).json({ message: `Miembro ${memberId} eliminado correctamente.` });
+  } catch (error) {
+    console.error("Error al eliminar miembro:", error);
+    res.status(500).json({ message: "Error interno al eliminar miembro del grupo." });
+  }
+});
+
+
 /* ===========================
    DELETE /:groupId
    Eliminar grupo

@@ -1,15 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Permitir lectura y escritura SOLO a usuarios autenticados
-    match /User/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Subcolección contacts
-      match /contacts/{contactId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+    // --- Colección principal: groups ---
+    match /groups/{groupId} {
+      
+      // Permitir leer si el grupo es público o si el usuario pertenece
+      allow read: if resource.data.isPublic == true
+        || (request.auth != null && request.auth.uid in resource.data.members);
+
+      // Bloquear escritura directa (solo backend con Admin SDK puede modificar)
+      allow write: if false;
+
+      // --- Subcolección: posts ---
+      match /posts/{postId} {
+        // Permitir leer posts si el grupo es público o el usuario pertenece
+        allow read: if get(/databases/$(database)/documents/groups/$(groupId)).data.isPublic == true
+          || (request.auth != null && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members);
+
+        // Bloquear escrituras directas en posts (solo backend)
+        allow write: if false;
       }
+    }
+
+    // Bloqueo global — nada más puede leerse ni escribirse
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
