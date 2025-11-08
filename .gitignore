@@ -1,76 +1,80 @@
-# ----------------------------------------------------------- #
-# .gitignore para Proyecto Firebase/Node.js/Flutter
-# Generado a partir de tu configuración + buenas prácticas
-# ----------------------------------------------------------- #
 
 # ---- Node.js / Express ----
-# Directorio de dependencias del proyecto
+# Dependencias del proyecto
 node_modules/
 
-# Archivos de depuración y bloqueos de paquetes
+# Logs de errores y depuración
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-# package-lock.json y yarn.lock son normalmente versionados
-# pero si quieres ignorarlos (no recomendado para CI/CD):
+
+# Archivos de bloqueo (pueden incluirse si se desea CI/CD)
 # package-lock.json
 # yarn.lock
 
+
 # ---- Firebase CLI & Tools ----
-# Archivos y directorios generados por Firebase CLI
+# Archivos internos del CLI de Firebase
 .firebase/
-.firebaserc
 .firebase-tools.json
 
-# CRÍTICO: Archivos de credenciales del Firebase Admin SDK
-# ¡Estos archivos NO DEBEN subirse nunca a un repositorio público o compartido!
+# Archivos sensibles (NO subir nunca)
 serviceAccountKey.json
 firebase-adminsdk.json
 *.firebase-credentials.json
 
-# Archivos de registro (logs) generados por tu aplicación
-*.log
-logs/ # Directorio común para logs
+# Estos archivos DEBEN estar versionados, no los ignores:
+#! firebase.json
+#! .firebaserc
+#! firestore.rules
+#! firestore.indexes.json
+
 
 # ---- Variables de Entorno ----
-# Archivos que contienen variables de entorno sensibles (ej. API keys)
-# ¡NUNCA SUBIR A UN REPOSITORIO!
+# No subas nunca tus .env (tokens, claves, etc.)
 .env
 .env.local
 .env.*.local
 .env.*
-# Apikey.js contiene informacio delicada de Firebase
+
+# Apikeys o configuraciones sensibles
+apikey.js
 .apikey.js
 
+
 # ---- Build y Temporales ----
-# Directorios de salida de compilación
+# Carpetas de salida o compilación
 build/
 dist/
 tmp/
 *.tmp
 *.temp
 
-# ---- Flutter / Dart ----
-# Archivos y directorios generados por el build de Flutter
-/build/ # Ya cubierto arriba, pero lo ponemos específico para Flutter si estuviera en la raíz
+# ---- Archivos de registro (logs) ----
+*.log
+logs/
+
+
+# ---- IDEs / Editores ----
+# Configuración de VSCode, IntelliJ, WebStorm, etc.
+.vscode/
+.idea/
+*.iml
+
+
+# ---- Sistema Operativo ----
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+
+# ---- Flutter / Dart (si lo usas como frontend móvil) ----
+/build/
 .dart_tool/
 .packages
 .pub-cache/
 .pub/
-**/doc/api/ # Documentación generada
-**/ios/Flutter/.last_build_id # Archivos de caché específicos de iOS
-flutter_export_environment.sh # Script generado
-
-# ---- IDEs / Editores ----
-# Configuración específica de IDEs como VS Code, IntelliJ/WebStorm
-.vscode/
-.idea/
-*.iml # Archivos de módulo de IntelliJ
-
-# ---- Archivos del Sistema Operativo ----
-# Archivos de metadatos generados por macOS
-.DS_Store
-# Archivos de caché de miniaturas de Windows
-Thumbs.db
-*.json
-src/*.json
+**/doc/api/
+**/ios/Flutter/.last_build_id
+flutter_export_environment.sh

@@ -191,7 +191,7 @@ router.post("/:groupId/join", authMiddleware, async (req, res) => {
       });
     });
 
-    res.status(200).json({ message: "Te has unido al grupo." });
+    res.status(200).json({ message: `Te has unido al grupo ${groupId} con el usuario ${userId}.` });
   } catch (error) {
     const map = {
       not_found: [404, "El grupo no existe."],
@@ -239,7 +239,7 @@ router.post("/:groupId/leave", authMiddleware, async (req, res) => {
       }
     });
 
-    res.status(200).json({ message: "Has abandonado el grupo exitosamente." });
+    res.status(200).json({ message: `Has abandonado el grupo ${groupId} exitosamente.` });
   } catch (error) {
     const map = {
       not_found: [404, "El grupo no existe."],
@@ -263,17 +263,17 @@ router.post("/:groupId/new-post", authMiddleware, async (req, res) => {
     const userId = req.user.uid;
 
     if (!content?.trim())
-      return res.status(400).json({ message: "El contenido es obligatorio." });
+      return res.status(400).json({ message: `El contenido es obligatorio.` });
 
     const groupRef = groupsRef().doc(groupId);
     const groupDoc = await groupRef.get();
 
     if (!groupDoc.exists)
-      return res.status(404).json({ message: "El grupo no existe." });
+      return res.status(404).json({ message: `El grupo ${groupId} no existe.` });
 
     const groupData = groupDoc.data();
     if (!groupData.members.includes(userId))
-      return res.status(403).json({ message: "No tienes permiso para publicar en este grupo." });
+      return res.status(403).json({ message: `No tienes permiso para publicar en el grupo ${groupId}.` });
 
     const newPostRef = groupRef.collection("posts").doc();
     const postData = {
@@ -348,10 +348,9 @@ router.patch("/:groupId", authMiddleware, async (req, res) => {
 });
 
 // PATCH /groups/:groupId/transfer-owner
-router.patch("/:groupId/transfer-owner", authMiddleware, async (req, res) => {
+router.patch("/:groupId/transfer-owner/:newOwnerId", authMiddleware, async (req, res) => {
   try {
-    const { groupId } = req.params;
-    const { newOwnerId } = req.body;
+    const { groupId, newOwnerId } = req.params;
     const userId = req.user.uid;
 
     if (!newOwnerId)
