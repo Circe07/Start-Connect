@@ -22,11 +22,14 @@ app.use(express.json());
 
 const contactsRoutes = require("./src/routes/contacts");
 const groupsRoutes = require("./src/routes/groups");
+const groupsRequestsRoutes = require("./src/routes/groupsRequests");
 
 // Monta las rutas en /api/contacts
 app.use("/contacts", contactsRoutes);
 // Monta las rutas en /api/groups
 app.use("/groups", groupsRoutes);
+// Monta las rutas en /api/groupsRequests
+app.use("/groupsRequests", groupsRequestsRoutes);
 
 // Ruta de prueba raíz
 app.get("/", (req, res) => {
