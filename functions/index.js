@@ -20,11 +20,12 @@ const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 
-const usersRoutes = require("./src/routes/users");
+const contactsRoutes = require("./src/routes/contacts");
 const groupsRoutes = require("./src/routes/groups");
 
-// Monta las rutas en /api/users
-app.use("/users", usersRoutes);
+// Monta las rutas en /api/contacts
+app.use("/contacts", contactsRoutes);
+// Monta las rutas en /api/groups
 app.use("/groups", groupsRoutes);
 
 // Ruta de prueba raíz
