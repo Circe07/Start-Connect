@@ -362,7 +362,7 @@ exports.deleteGroup = async (req, res) => {
             return res.status(403).json({ message: "Solo el propietario puede eliminar el grupo." });
 
         await groupsRef().doc(groupId).delete();
-        res.status(200).json({ message: `Grupo ${groupId} eliminado exitosamente.` });
+        res.status(204).json({ message: `Grupo ${groupId} eliminado exitosamente.` });
     } catch (error) {
         console.error("Error al eliminar grupo:", error);
         res.status(500).json({ message: "Error interno al eliminar grupo." });
@@ -399,7 +399,7 @@ exports.deletePost = async (req, res) => {
             });
         });
 
-        return res.status(200).json({ message: "Publicación eliminada exitosamente." });
+        return res.status(204).json({ message: "Publicación eliminada exitosamente." });
 
     } catch (error) {
         console.error("Error al eliminar publicación:", error);
