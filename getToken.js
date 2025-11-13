@@ -5,9 +5,8 @@
 
 const { initializeApp } = require("firebase/app");
 const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
-const { getIdToken } = require("firebase/auth");
 
-// --- CONFIGURACIÓN DEL PROYECTO ---
+// --- CONFIGURACIÓN DE TU PROYECTO FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyASqdBdLa1OIRZaj9F3xgSuAgjf6qrfVb8",
   authDomain: "startandconnect-c44b2.firebaseapp.com",
@@ -15,36 +14,43 @@ const firebaseConfig = {
 };
 
 // --- CREDENCIALES DE USUARIO DE PRUEBA ---
-const USER_EMAIL = "test@gmail.com"; // Usuario existente en Firebase Authentication
-const USER_PASSWORD = "A53838081a*"; // Contraseña correcta
+const USERS = [
+  { email: "admin@gmail.com", password: "123455" },
+  { email: "test@gmail.com", password: "A53838081a*" },
+  { email: "test2@gmail.com", password: "123456" },
+];
 
-// --- AUTENTICACIÓN Y TOKEN ---
+// --- FUNCIÓN PRINCIPAL ---
 (async () => {
-  try {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const { getIdToken } = await import("firebase/auth");
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    console.log("Iniciando sesión...");
+  for (const user of USERS) {
+    try {
+      console.log(`\n🔐 Iniciando sesión como ${user.email}...`);
 
-    const userCredential = await signInWithEmailAndPassword(auth, USER_EMAIL, USER_PASSWORD);
-    const user = userCredential.user;
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        user.email,
+        user.password
+      );
 
-    // Forzamos actualización del token
-    const idToken = await user.getIdToken(true);
+      const idToken = await userCredential.user.getIdToken(true);
 
-    console.log("-----------------------------------------");
-    console.log("¡TOKEN JWT OBTENIDO CON ÉXITO!");
-    console.log(`UID del Usuario: ${user.uid}`);
-    console.log("\nCOPIA ESTE TOKEN EN POSTMAN (Authorization: Bearer ...):");
-    console.log(idToken);
-    console.log("-----------------------------------------");
-
-    process.exit(0);
-  } catch (error) {
-    console.error("Error al obtener el token:", error.message);
-    if (error.code === "auth/invalid-login-credentials") {
-      console.error("Verifica email y contraseña en Firebase Authentication.");
+      console.log("-----------------------------------------");
+      console.log(`✅ TOKEN OBTENIDO PARA: ${user.email}`);
+      console.log(`UID: ${userCredential.user.uid}`);
+      console.log("\nCopia este token en Postman:");
+      console.log(idToken);
+      console.log("-----------------------------------------\n");
+    } catch (error) {
+      console.error(`❌ Error con ${user.email}:`, error.message);
+      if (error.code === "auth/invalid-login-credentials") {
+        console.error("⚠️ Verifica email y contraseña en Firebase Authentication.");
+      }
     }
-    process.exit(1);
   }
+
+  process.exit(0);
 })();
