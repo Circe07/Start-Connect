@@ -9,6 +9,14 @@ const {
   deleteContact,
 } = require("../controllers/contacts.controller");
 
+// GET /check
+router.get("/check", (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "Rutas de contactos cargadas"
+  });
+});
+
 router.get("/", authMiddleware, getAllContacts);
 router.post("/", authMiddleware, createContact);
 router.patch("/:id", authMiddleware, updateContact);

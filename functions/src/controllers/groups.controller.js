@@ -1,6 +1,5 @@
 const Group = require("../models/group.model.js");
-const { db, admin } = require("../config/firebase.js");
-const { FieldValue, Timestamp } = require("firebase-admin/firestore");
+const { db, FieldValue } = require("../config/firebase.js");
 
 
 
@@ -123,7 +122,7 @@ exports.createGroup = async (req, res) => {
         res.status(201).json({
             message: "Grupo creado correctamente",
             groupId: ref.id,
-            group: { id: ref.id, ...newGroup }
+            group: newGroup.toFirestore(),
         });
 
     } catch (error) {
@@ -233,6 +232,8 @@ exports.newPost = async (req, res) => {
 
         if (!content?.trim())
             return res.status(400).json({ message: "El contenido es obligatorio" });
+        if (!imageUrl)
+            return res.status(400).json({ message: "La imagen es obligatoria" });
 
         const groupRef = groupsRef().doc(id);
         const groupDoc = await groupRef.get();
@@ -275,7 +276,7 @@ exports.newPost = async (req, res) => {
 
 
 /* ==========================================================
-PATCH /groups/:groupId/transfer-owner/:newOwnerId
+PATCH /groups/:id/transfer-owner/:newOwnerId
 ========================================================== */
 exports.transferOwner = async (req, res) => {
     try {
@@ -347,7 +348,7 @@ exports.updateGroup = async (req, res) => {
 
 
 /* ==========================================================
-DELETE /groups/:groupId/remove-member/:memberId
+DELETE /groups/:id/remove-member/:memberId
 ========================================================== */
 exports.removeMember = async (req, res) => {
     try {
@@ -409,7 +410,7 @@ exports.deleteGroup = async (req, res) => {
 
 
 /* ==========================================================
-DELETE /groups/:groupId/post/:postId
+DELETE /groups/:id/post/:postId
 ========================================================== */
 exports.deletePost = async (req, res) => {
     try {

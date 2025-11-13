@@ -17,6 +17,13 @@ const {
   deletePost,
 } = require("../controllers/groups.controller");
 
+// GET /check
+router.get("/check", (req, res) => {
+  return res.status(200).json({
+    succes: true,
+    message: "Rutas de grupos cargadas"
+  });
+});
 // GET routes
 router.get("/public", authMiddleware, getPublicGroups);
 router.get("/my-groups", authMiddleware, getMyGroups);

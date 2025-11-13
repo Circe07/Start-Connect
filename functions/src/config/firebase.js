@@ -1,25 +1,23 @@
-// functions/src/config/firebase.js
 const admin = require("firebase-admin");
-const { getFirestore } = require("firebase-admin/firestore");
+const {
+  getFirestore,
+  FieldValue
+} = require("firebase-admin/firestore");
 
 const PROJECT_ID = "startandconnect-c44b2";
-const DATABASE_ID = "startandconnect-eur3";  // Tu única database
+const DATABASE_ID = "startandconnect-eur3";
 
-let app;
-
-// Inicializar Admin SDK
+// Inicializar Admin SOLO una vez
 if (!admin.apps.length) {
-  app = admin.initializeApp({
+  admin.initializeApp({
     projectId: PROJECT_ID,
   });
-  console.log("🔥 Admin SDK Inicializado (Producción)");
-} else {
-  app = admin.app();
+  console.log("🔥 Admin SDK Inicializado (Producción/Local)");
 }
 
-// Conectar a tu database real (MultiDB)
-const db = getFirestore(app, DATABASE_ID);
+const db = getFirestore(admin.app(), DATABASE_ID);
 
 console.log(`🔥 Conectado a Firestore database: ${DATABASE_ID}`);
+console.log("🔥 FieldValue en firebase.js:", FieldValue);
 
-module.exports = { admin, db };
+module.exports = { admin, db, FieldValue };

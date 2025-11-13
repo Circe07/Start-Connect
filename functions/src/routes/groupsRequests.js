@@ -9,9 +9,17 @@ const {
   rejectedRequest,
 } = require("../controllers/groupRequests.controller");
 
+// GET /check
+router.get("/check", (req, res) => {
+  return res.status(200).json({
+    succes: true,
+    message: "Rutas de peticiones cargadas"
+  });
+});
+
 router.post("/:groupId", authMiddleware, sendRequest);
 router.get("/:groupId", authMiddleware, getGroupRequests);
-router.patch("/:id/approve", authMiddleware, approveRequest);
-router.patch("/:id/reject", authMiddleware, rejectedRequest);
+router.patch("/:requestId/approve", authMiddleware, approveRequest);
+router.patch("/:requestId/reject", authMiddleware, rejectedRequest);
 
 module.exports = router;

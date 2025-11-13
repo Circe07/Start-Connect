@@ -4,7 +4,7 @@ const Contact = require("../models/contact.model");
 
 // Referencia a la subcolección de contactos de un usuario
 const getContactsCollectionRef = (userId) =>
-    db.collection("User").doc(userId).collection("contacts");
+    db.collection("users").doc(userId).collection("contacts");
 
 // Log de conexión del proyecto (solo en local)
 if (process.env.NODE_ENV !== "production") {
@@ -38,7 +38,7 @@ exports.createContact = async (req, res) => {
             return res.status(400).json({ success: false, message: "Datos vacíos o inválidos" });
         }
 
-        const userRef = db.collection("User").doc(userId);
+        const userRef = db.collection("users").doc(userId);
         const userDoc = await userRef.get();
 
         if (!userDoc.exists) {
@@ -81,6 +81,7 @@ exports.updateContact = async (req, res) => {
             return res.status(403).json({ success: false, message: "No autorizado" });
         }
 
+        updates.updatedAt = new Date();
         await contactRef.update(updates);
 
         const updatedContact = await contactRef.get();
