@@ -11,6 +11,8 @@ const contactsRoutes = require("./routes/contacts");
 const groupsRoutes = require("./routes/groups");
 const groupsRequestsRoutes = require("./routes/groupsRequests");
 const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
+const hobbiesRoutes = require("./routes/hobbies");
 
 const app = express();
 
@@ -20,14 +22,14 @@ app.use(express.json());
 
 // Rutas públicas (no requieren token)
 app.use("/auth", authRoutes);
-
-// Middleware de autenticación (a partir de aquí TODO requiere token)
-app.use(authMiddleware);
+app.use("/admin", adminRoutes);
 
 // Rutas privadas
+app.use("/hobbies", hobbiesRoutes);
 app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
 app.use("/groupsRequests", groupsRequestsRoutes);
+
 
 
 // Ruta raíz

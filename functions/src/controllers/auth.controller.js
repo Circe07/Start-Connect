@@ -29,7 +29,6 @@ exports.register = async (req, res) => {
 };
 
 // POST -> INICIAR SESIÓN
-// TODO: ARREGLAR INICIO DE SESION(NO FUNCIONA API KEY)
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -103,3 +102,17 @@ exports.me = async (req, res) => {
   }
 };
 
+// POST -> ENVIAR CORREO DE RESTABLECIMIENTO DE CONTRASEÑA
+exports.changePassword = async (req, res) => {
+
+  try {
+    const { email } = req.body;
+
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
+
+    res.status(200).json({ message: 'Enlace generado correctamente', resetLink });
+  } catch (error) {
+    console.error('Error al enviar el correo de restablecimiento de contraseña:', error);
+    res.status(500).json({ message: 'Error al enviar el correo de restablecimiento de contraseña', error: error.message });
+  }
+};
