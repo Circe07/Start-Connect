@@ -1,3 +1,5 @@
+// ! NO EJECTUAR A MENOS QUE SE AGREGEN MAS HOBBIES
+
 const router = require("express").Router();
 const hobbiesSeed = require("../../scripts/hobbiesSeed");
 const { db } = require("../config/firebase");

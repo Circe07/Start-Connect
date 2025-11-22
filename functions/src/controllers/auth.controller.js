@@ -8,10 +8,16 @@ const fetch = require('node-fetch');
 exports.register = async (req, res) => {
   try {
 
+    // ! OBLIGADO A PASAR EMAIL Y CONTRASEÑA
+    // ? OPCIONAL displayName QUE SERIA EL NOMBRE DEL USUARIO
     const { email, password, displayName } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email y contraseña son requeridos' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
     }
 
     // Si la contraseña es menor a 6 caracteres, devolver un error

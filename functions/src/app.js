@@ -20,7 +20,7 @@ const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 
-// Rutas públicas (no requieren token)
+// Rutas públicas
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 
