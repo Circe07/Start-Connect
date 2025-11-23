@@ -15,6 +15,8 @@ const {
   removeMember,
   deleteGroup,
   deletePost,
+  sendMessage,
+  getMessages,
 } = require("../controllers/groups.controller");
 
 // GET /check
@@ -28,11 +30,13 @@ router.get("/check", (req, res) => {
 router.get("/public", authMiddleware, getPublicGroups);
 router.get("/my-groups", authMiddleware, getMyGroups);
 router.get("/:id", authMiddleware, getGroupById);
+router.get("/:id/messages", authMiddleware, getMessages);
 // POST routes
 router.post("/", authMiddleware, createGroup);
 router.post("/:id/join", authMiddleware, joinGroup);
 router.post("/:id/leave", authMiddleware, leaveGroup);
 router.post("/:id/post", authMiddleware, newPost);
+router.post("/:id/messages", authMiddleware, sendMessage);
 // PATCH routes
 router.patch("/:id", authMiddleware, updateGroup);
 router.patch("/:id/transfer-owner/:newOwnerId", authMiddleware, transferOwner);

@@ -1,5 +1,6 @@
 const Group = require("../models/group.model.js");
 const { db, FieldValue } = require("../config/firebase.js");
+const Message = require("../models/message.model.js");
 
 
 
@@ -443,5 +444,105 @@ exports.deletePost = async (req, res) => {
     } catch (error) {
         console.error("Error deletePost:", error);
         res.status(500).json({ message: "Error interno", error: error.message });
+    }
+};
+
+/* ==========================================================
+POST /groups/:id/messages
+========================================================== */
+exports.sendMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.uid;
+        const { content } = req.body;
+
+        if (!content?.trim()) {
+            return res.status(400).json({ message: "El contenido del mensaje es obligatorio." });
+        }
+
+        const groupRef = groupsRef().doc(id);
+        const groupDoc = await groupRef.get();
+
+        if (!groupDoc.exists) {
+            return res.status(404).json({ message: "El grupo no existe." });
+        }
+
+        const group = Group.fromFirestore(groupDoc);
+
+        // Verificar si el usuario es miembro del grupo
+        const isMember = group.members.some(m => m.userId === userId);
+        if (!isMember) {
+            return res.status(403).json({ message: "No eres miembro de este grupo." });
+        }
+
+        const newMessage = new Message(null, {
+            groupId: id,
+            userId: userId,
+            content: content.trim(),
+            createdAt: FieldValue.serverTimestamp(),
+        });
+
+        const messageRef = await groupRef.collection("messages").add(newMessage.toFirestore());
+
+        res.status(201).json({
+            message: "Mensaje enviado.",
+            messageId: messageRef.id,
+            data: newMessage
+        });
+
+    } catch (error) {
+        console.error("Error sendMessage:", error);
+        res.status(500).json({ message: "Error interno." });
+    }
+};
+
+/* ==========================================================
+GET /groups/:id/messages
+========================================================== */
+exports.getMessages = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.uid;
+        const limit = parseInt(req.query.limit) || 20;
+        const startAfterId = req.query.startAfterId;
+
+        const groupRef = groupsRef().doc(id);
+        const groupDoc = await groupRef.get();
+
+        if (!groupDoc.exists) {
+            return res.status(404).json({ message: "El grupo no existe." });
+        }
+
+        const group = Group.fromFirestore(groupDoc);
+
+        // Verificar si el usuario es miembro del grupo
+        const isMember = group.members.some(m => m.userId === userId);
+        if (!isMember) {
+            return res.status(403).json({ message: "No eres miembro de este grupo." });
+        }
+
+        let query = groupRef.collection("messages")
+            .orderBy("createdAt", "desc")
+            .limit(limit);
+
+        if (startAfterId) {
+            const lastDoc = await groupRef.collection("messages").doc(startAfterId).get();
+            if (lastDoc.exists) {
+                query = query.startAfter(lastDoc);
+            }
+        }
+
+        const snapshot = await query.get();
+        const messages = snapshot.docs.map(doc => Message.fromFirestore(doc));
+
+        res.status(200).json({
+            messages,
+            hasMore: snapshot.size === limit,
+            nextStartAfterId: snapshot.size === limit ? snapshot.docs.at(-1).id : null
+        });
+
+    } catch (error) {
+        console.error("Error getMessages:", error);
+        res.status(500).json({ message: "Error interno." });
     }
 };

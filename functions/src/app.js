@@ -3,8 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const logger = require("firebase-functions/logger");
 
-// Middlewares
-const authMiddleware = require("./middleware/auth");
+
 
 // Rutas
 const contactsRoutes = require("./routes/contacts");
