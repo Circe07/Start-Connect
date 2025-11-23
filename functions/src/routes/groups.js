@@ -17,6 +17,7 @@ const {
   deletePost,
   sendMessage,
   getMessages,
+  deleteMessage,
 } = require("../controllers/groups.controller");
 
 // GET /check
@@ -44,6 +45,7 @@ router.patch("/:id/transfer-owner/:newOwnerId", authMiddleware, transferOwner);
 router.delete("/:id/remove-member/:memberId", authMiddleware, removeMember);
 router.delete("/:id", authMiddleware, deleteGroup);
 router.delete("/:id/post/:postId", authMiddleware, deletePost);
+router.delete("/:id/messages/:messageId", authMiddleware, deleteMessage);
 
 // Export the router
 module.exports = router;
