@@ -24,8 +24,9 @@ class Group {
         this.maxMembers = data.maxMembers || 10; // Número máximo de miembros permitidos
 
         // Metadatos
-        this.createdAt = data.createdAt || new Date(); // Fecha de creación
+        this.createdAt = data.createdAt ?? new Date(); // Fecha de creación
         this.updatedAt = data.updatedAt || null; // Fecha de última actualización
+        this.postCount = data.postCount || 0; // Número de posts en el grupo
     }
 
     static fromFirestore(doc) {
@@ -47,6 +48,7 @@ class Group {
             maxMembers: this.maxMembers,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
+            postCount: this.postCount,
         };
     }
 }
