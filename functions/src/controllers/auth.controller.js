@@ -10,22 +10,32 @@ exports.register = async (req, res) => {
 
     // ! OBLIGADO A PASAR EMAIL Y CONTRASEÑA
     // ? OPCIONAL displayName QUE SERIA EL NOMBRE DEL USUARIO
-    const { email, password, displayName } = req.body;
+    const { email, password, displayName, location } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !displayName || !location) {
       return res.status(400).json({ message: 'Email y contraseña son requeridos' });
     }
 
+    // Si la contraseña es menor a 6 caracteres, devolver un error
     if (password.length < 6) {
       return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
     }
 
-    // Si la contraseña es menor a 6 caracteres, devolver un error
     const user = await admin.auth().createUser({
       email,
       password,
-      displayName
+      displayName,
+      location
     });
+
+    const userRef = admin.firestore().collection("users").doc(user.uid);
+    await userRef.set({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      location: user.location
+    });
+
 
     res.status(201).json({ message: 'Usuario creado correctamente', user });
   } catch (error) {

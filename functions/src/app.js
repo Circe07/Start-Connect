@@ -13,6 +13,7 @@ const groupsRequestsRoutes = require("./routes/groupsRequests");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const hobbiesRoutes = require("./routes/hobbies");
+const usersRoutes = require("./routes/users");
 
 const app = express();
 
@@ -23,12 +24,14 @@ app.use(express.json());
 // Rutas públicas
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
+app.use("/users", usersRoutes);
 
 // Rutas privadas
 app.use("/hobbies", hobbiesRoutes);
 app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
 app.use("/groupsRequests", groupsRequestsRoutes);
+
 
 
 
