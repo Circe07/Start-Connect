@@ -8,7 +8,5 @@ module.exports = [
     { id: "senderismo", name: "Senderismo", icon: "🥾", category: "Aire libre" },
     { id: "ciclismo", name: "Ciclismo", icon: "🚴", category: "Aire libre" },
     { id: "yoga", name: "Yoga", icon: "🧘", category: "Salud" },
-    { id: "cine", name: "Cine", icon: "🎬", category: "Ocio" },
-    { id: "viajar", name: "Viajar", icon: "✈️", category: "Ocio" },
     { id: "natacion", name: "Natacion", icon: "🏊", category: "Deporte" },
 ];

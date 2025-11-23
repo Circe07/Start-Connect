@@ -7,40 +7,72 @@ const fetch = require('node-fetch');
 // POST -> CREAR USUARIO
 exports.register = async (req, res) => {
   try {
+    const {
+      email,
+      password,
+      name,
+      username,
+      bio,
+      photo,
+      sports,
+      phoneNumber,
+      location
+    } = req.body;
 
-    // ! OBLIGADO A PASAR EMAIL Y CONTRASEÑA
-    // ? OPCIONAL displayName QUE SERIA EL NOMBRE DEL USUARIO
-    const { email, password, displayName, location } = req.body;
-
-    if (!email || !password || !displayName || !location) {
-      return res.status(400).json({ message: 'Email y contraseña son requeridos' });
+    // Validación de obligatorios
+    if (!email || !password || !name || !username) {
+      return res.status(400).json({
+        message: "email, password, name y username son requeridos"
+      });
     }
 
-    // Si la contraseña es menor a 6 caracteres, devolver un error
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    // Longitud mínima
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "La contraseña debe tener al menos 8 caracteres"
+      });
     }
 
+    // Validación fuerte
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regex.test(password)) {
+      return res.status(400).json({
+        message: "La contraseña debe contener al menos una letra, un número y un carácter especial"
+      });
+    }
+
+    // Crear usuario en Firebase Auth
     const user = await admin.auth().createUser({
       email,
       password,
-      displayName,
-      location
+      displayName: name
     });
 
-    const userRef = admin.firestore().collection("users").doc(user.uid);
-    await userRef.set({
+    // Guardar documento en Firestore
+    await admin.firestore().collection("users").doc(user.uid).set({
       uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      location: user.location
+      email,
+      name,
+      username,
+      bio: bio || "",
+      photo: photo || "",
+      sports: sports || [],
+      phoneNumber: phoneNumber || "",
+      location: location || "",
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
+    res.status(201).json({
+      message: "Usuario creado correctamente",
+      user
+    });
 
-    res.status(201).json({ message: 'Usuario creado correctamente', user });
   } catch (error) {
-    console.error('Error al crear el usuario:', error);
-    res.status(500).json({ message: 'Error al crear el usuario', error: error.message });
+    console.error("Error al crear el usuario:", error);
+    res.status(500).json({
+      message: "Error al crear el usuario",
+      error: error.message
+    });
   }
 };
 
