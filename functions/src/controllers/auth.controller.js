@@ -1,6 +1,6 @@
 // ! PARA LAS RUTAS ES NECESARIO LA API KEY EN FRONTEND
 
-const { admin } = require("../config/firebase");
+const { admin, db } = require("../config/firebase");
 const functions = require("firebase-functions");
 const fetch = require('node-fetch');
 
@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
     });
 
     // Guardar documento en Firestore
-    await admin.firestore().collection("users").doc(user.uid).set({
+    await db.collection("users").doc(user.uid).set({
       uid: user.uid,
       email,
       name,
