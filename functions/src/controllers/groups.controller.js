@@ -546,3 +546,48 @@ exports.getMessages = async (req, res) => {
         res.status(500).json({ message: "Error interno." });
     }
 };
+
+/* ==========================================================
+DELETE /groups/:id/messages/:messageId
+========================================================== */
+exports.deleteMessage = async (req, res) => {
+    try {
+        const { id, messageId } = req.params;
+        const userId = req.user.uid;
+
+        const groupRef = groupsRef().doc(id);
+        const messageRef = groupRef.collection("messages").doc(messageId);
+
+        const [groupDoc, messageDoc] = await Promise.all([
+            groupRef.get(),
+            messageRef.get()
+        ]);
+
+        if (!groupDoc.exists) {
+            return res.status(404).json({ message: "El grupo no existe." });
+        }
+
+        if (!messageDoc.exists) {
+            return res.status(404).json({ message: "El mensaje no existe." });
+        }
+
+        const group = Group.fromFirestore(groupDoc);
+        const message = Message.fromFirestore(messageDoc);
+
+        // Permitir borrar si es el autor del mensaje O el dueño del grupo
+        const isAuthor = message.userId === userId;
+        const isGroupOwner = group.userId === userId;
+
+        if (!isAuthor && !isGroupOwner) {
+            return res.status(403).json({ message: "No tienes permiso para eliminar este mensaje." });
+        }
+
+        await messageRef.delete();
+
+        res.status(200).json({ message: "Mensaje eliminado correctamente." });
+
+    } catch (error) {
+        console.error("Error deleteMessage:", error);
+        res.status(500).json({ message: "Error interno." });
+    }
+};
