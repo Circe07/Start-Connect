@@ -13,6 +13,7 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const hobbiesRoutes = require("./routes/hobbies");
 const usersRoutes = require("./routes/users");
+const mapsRoutes = require("./routes/maps");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/hobbies", hobbiesRoutes);
 app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
 app.use("/groupsRequests", groupsRequestsRoutes);
+app.use("/maps", mapsRoutes);
 
 
 
