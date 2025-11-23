@@ -2,10 +2,9 @@ const { db } = require("../config/firebase");
 
 // GET -> Obtiene todos los hobbies
 exports.getAllHobbies = async (req, res) => {
-
     try {
         const snap = await db.collection("globalHobbies").get();
-        const hobbies = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const hobbies = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         res.json(hobbies);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -16,8 +15,12 @@ exports.getAllHobbies = async (req, res) => {
 exports.getMyHobbies = async (req, res) => {
     try {
         const uid = req.user.uid;
-        const snap = await db.collection("users").doc(uid).collection("hobbies").get();
-        const hobbies = snap.docs.map(doc => doc.id);
+        const snap = await db
+            .collection("users")
+            .doc(uid)
+            .collection("hobbies")
+            .get();
+        const hobbies = snap.docs.map((doc) => doc.id);
 
         res.json(hobbies);
     } catch (err) {
@@ -29,15 +32,21 @@ exports.getMyHobbies = async (req, res) => {
 exports.addHobbiesToUser = async (req, res) => {
     try {
         const uid = req.user.uid;
-        const { hobbies } = req.body
+        const { hobbies } = req.body;
 
         if (!hobbies || !Array.isArray(hobbies)) {
-            return res.status(400).json({ message: "Debe proporcionar un array de hobbies" });
-        };
+            return res
+                .status(400)
+                .json({ message: "Debe proporcionar un array de hobbies" });
+        }
 
         const batch = db.batch();
-        hobbies.forEach(hobbyId => {
-            const ref = db.collection("users").doc(uid).collection("hobbies").doc(hobbyId);
+        hobbies.forEach((hobbyId) => {
+            const ref = db
+                .collection("users")
+                .doc(uid)
+                .collection("hobbies")
+                .doc(hobbyId);
             batch.set(ref, { active: true });
         });
 
@@ -57,17 +66,15 @@ exports.getUsersByHobby = async (req, res) => {
         console.log("=== getUsersByHobby ===");
         console.log("hobbyId recibido:", hobbyId);
 
-        const snap = await db.collectionGroup("hobbies")
-            .get();
+        const snap = await db.collectionGroup("hobbies").get();
 
         console.log("Total docs encontrados en collectionGroup:", snap.size);
 
         const users = snap.docs
-            .filter(doc => doc.id === hobbyId)
-            .map(doc => doc.ref.parent.parent.id);
+            .filter((doc) => doc.id === hobbyId)
+            .map((doc) => doc.ref.parent.parent.id);
 
         res.json(users);
-
     } catch (err) {
         console.error("🔥 ERROR en getUsersByHobby:", err);
         res.status(500).json({ error: err.message });
@@ -81,15 +88,17 @@ exports.removeHobbiesFromUser = async (req, res) => {
         const { hobbies } = req.body;
 
         if (!hobbies || !Array.isArray(hobbies)) {
-            return res.status(400).json({ message: "Debe proporcionar un array de hobbies" });
-        };
+            return res
+                .status(400)
+                .json({ message: "Debe proporcionar un array de hobbies" });
+        }
 
         const batch = db.batch();
-        const rootRef = db.collection("users").doc(uid).collection("hobbies")
+        const rootRef = db.collection("users").doc(uid).collection("hobbies");
 
         // hobbyId hace referencia al id de cada hobby
         // ! no utilizar fuera de este scope por el hecho que hobbyId no esta definido
-        hobbies.forEach(hobbyId => {
+        hobbies.forEach((hobbyId) => {
             const ref = rootRef.doc(hobbyId);
             batch.delete(ref);
         });
