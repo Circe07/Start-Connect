@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./logo.png" alt="StartAndConnect Logo" width="200"/>
+</p>
+
 # 🔸 StartAndConnect
 
 ## 🔸 Overview
