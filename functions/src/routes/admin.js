@@ -2,6 +2,7 @@
 
 const router = require("express").Router();
 const hobbiesSeed = require("../../scripts/hobbiesSeed");
+const venuesSeed = require("../../scripts/venuesSeed");
 const { db } = require("../config/firebase");
 
 router.post("/seed-hobbies", async (req, res) => {
@@ -21,4 +22,24 @@ router.post("/seed-hobbies", async (req, res) => {
     }
 });
 
+router.post("/seed-venues", async (req, res) => {
+    try {
+        for (const venue of venuesSeed) {
+            const venueRef = db.collection("globalVenues").doc(venue.id);
+
+            const venueData = { ...venue };
+            delete venueData.facilities;
+            await venueRef.set(venueData);
+
+            for (const facility of venue.facilities) {
+                const facilityRef = venueRef.collection("facilities").doc(facility.id);
+                await facilityRef.set(facility);
+            }
+        }
+
+        res.json({ success: true, message: "Venues y facilities cargados" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 module.exports = router;
