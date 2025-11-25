@@ -14,6 +14,7 @@ const adminRoutes = require("./routes/admin");
 const hobbiesRoutes = require("./routes/hobbies");
 const usersRoutes = require("./routes/users");
 const mapsRoutes = require("./routes/maps");
+const bookingsRoutes = require("./routes/bookings");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
 app.use("/groupsRequests", groupsRequestsRoutes);
 app.use("/maps", mapsRoutes);
+app.use("/bookings", bookingsRoutes);
 
 
 
