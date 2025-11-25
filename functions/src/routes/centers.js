@@ -9,6 +9,7 @@ router.get("/search", centersController.searchCenters);
 
 // Rutas Protegidas (Solo Admin)
 router.post("/", adminMiddleware, centersController.createCenter);
+router.patch("/:id", adminMiddleware, centersController.updateCenter);
 router.delete("/:id", adminMiddleware, centersController.deleteCenter);
 
 module.exports = router;

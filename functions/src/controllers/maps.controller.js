@@ -20,6 +20,7 @@ exports.getNearbyPlaces = async (req, res) => {
 
         // 1. Obtener todos los centros
         const snapshot = await db.collection("centers").get();
+        console.log(`[DEBUG] Centros encontrados en DB: ${snapshot.size}`);
 
         if (snapshot.empty) {
             return res.status(200).json({
@@ -33,11 +34,20 @@ exports.getNearbyPlaces = async (req, res) => {
 
         // 2. Filtrar por distancia (Fórmula de Haversine)
         snapshot.forEach(doc => {
+            const data = doc.data();
+            console.log(`[DEBUG] Procesando centro ID: ${doc.id}`, JSON.stringify(data));
+
             const center = Center.fromFirestore(doc);
 
-            // Verificar que el centro tenga ubicación válida
-            if (center.location && typeof center.location.lat === 'number' && typeof center.location.lng === 'number') {
-                const distance = getDistanceFromLatLonInKm(userLat, userLng, center.location.lat, center.location.lng) * 1000; // Convertir a metros
+            // Verificar que el centro tenga ubicación válida (permitir strings numéricos)
+            const centerLat = parseFloat(center.location?.lat);
+            const centerLng = parseFloat(center.location?.lng);
+
+            console.log(`[DEBUG] Coordenadas parseadas: lat=${centerLat}, lng=${centerLng}`);
+
+            if (!isNaN(centerLat) && !isNaN(centerLng)) {
+                const distance = getDistanceFromLatLonInKm(userLat, userLng, centerLat, centerLng) * 1000; // Convertir a metros
+                console.log(`[DEBUG] Distancia calculada: ${distance} metros (Radio: ${searchRadius})`);
 
                 if (distance <= searchRadius) {
                     places.push({
@@ -51,7 +61,11 @@ exports.getNearbyPlaces = async (req, res) => {
                         prices: center.prices,
                         socialMedia: center.socialMedia
                     });
+                } else {
+                    console.log(`[DEBUG] Centro fuera de rango.`);
                 }
+            } else {
+                console.log(`[DEBUG] Coordenadas inválidas.`);
             }
         });
 

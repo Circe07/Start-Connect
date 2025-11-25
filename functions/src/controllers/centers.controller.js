@@ -55,6 +55,35 @@ exports.deleteCenter = async (req, res) => {
     }
 };
 
+// PATCH /centers/:id (Admin Only)
+exports.updateCenter = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Evitar que se actualice el ID o fechas de creación manualmente
+        delete updates.id;
+        delete updates.createdAt;
+
+        updates.updatedAt = FieldValue.serverTimestamp();
+
+        const centerRef = db.collection("centers").doc(id);
+        const doc = await centerRef.get();
+
+        if (!doc.exists) {
+            return res.status(404).json({ message: "El centro no existe." });
+        }
+
+        await centerRef.update(updates);
+
+        res.status(200).json({ message: "Centro actualizado correctamente." });
+
+    } catch (error) {
+        console.error("Error updateCenter:", error);
+        res.status(500).json({ message: "Error interno al actualizar el centro." });
+    }
+};
+
 // GET /centers (Public)
 exports.getCenters = async (req, res) => {
     try {
