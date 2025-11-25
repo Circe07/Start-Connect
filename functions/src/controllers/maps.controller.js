@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const { db } = require("../config/firebase");
-const Group = require("../models/group.model");
+const Center = require("../models/center.model");
 
 /* ==========================================================
    GET /maps/nearby
@@ -18,8 +18,8 @@ exports.getNearbyPlaces = async (req, res) => {
         const userLng = parseFloat(lng);
         const searchRadius = parseFloat(radius) || 5000; // Default 5km
 
-        // 1. Obtener todos los grupos (Optimización: filtrar por ciudad si estuviera disponible)
-        const snapshot = await db.collection("groups").get();
+        // 1. Obtener todos los centros
+        const snapshot = await db.collection("centers").get();
 
         if (snapshot.empty) {
             return res.status(200).json({
@@ -33,22 +33,23 @@ exports.getNearbyPlaces = async (req, res) => {
 
         // 2. Filtrar por distancia (Fórmula de Haversine)
         snapshot.forEach(doc => {
-            const group = Group.fromFirestore(doc);
+            const center = Center.fromFirestore(doc);
 
-            // Verificar que el grupo tenga ubicación válida
-            if (group.location && typeof group.location.lat === 'number' && typeof group.location.lng === 'number') {
-                const distance = getDistanceFromLatLonInKm(userLat, userLng, group.location.lat, group.location.lng) * 1000; // Convertir a metros
+            // Verificar que el centro tenga ubicación válida
+            if (center.location && typeof center.location.lat === 'number' && typeof center.location.lng === 'number') {
+                const distance = getDistanceFromLatLonInKm(userLat, userLng, center.location.lat, center.location.lng) * 1000; // Convertir a metros
 
                 if (distance <= searchRadius) {
                     places.push({
-                        id: group.id,
-                        name: group.name,
-                        description: group.description,
-                        sport: group.sport,
-                        location: group.location,
+                        id: center.id,
+                        name: center.name,
+                        description: center.description,
+                        address: center.address,
+                        location: center.location,
                         distance: Math.round(distance), // Metros
-                        membersCount: group.members.length,
-                        isPublic: group.isPublic
+                        services: center.services,
+                        prices: center.prices,
+                        socialMedia: center.socialMedia
                     });
                 }
             }
