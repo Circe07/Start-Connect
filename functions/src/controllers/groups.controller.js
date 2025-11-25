@@ -591,3 +591,122 @@ exports.deleteMessage = async (req, res) => {
         res.status(500).json({ message: "Error interno." });
     }
 };
+/* ==========================================================
+POST /groups/:id/posts/:postId/like
+========================================================== */
+exports.toggleLike = async (req, res) => {
+    try {
+        const { id, postId } = req.params;
+        const userId = req.user.uid;
+
+        const groupRef = groupsRef().doc(id);
+        const postRef = groupRef.collection("posts").doc(postId);
+        const likeRef = postRef.collection("likes").doc(userId);
+
+        await db.runTransaction(async (t) => {
+            const postDoc = await t.get(postRef);
+            if (!postDoc.exists) throw new Error("post_not_found");
+
+            const likeDoc = await t.get(likeRef);
+
+            if (likeDoc.exists) {
+                // Ya dio like -> Quitar like (Unlike)
+                t.delete(likeRef);
+                t.update(postRef, { likeCount: FieldValue.increment(-1) });
+            } else {
+                // No dio like -> Dar like
+                t.set(likeRef, {
+                    userId,
+                    postId,
+                    createdAt: FieldValue.serverTimestamp()
+                });
+                t.update(postRef, { likeCount: FieldValue.increment(1) });
+            }
+        });
+
+        res.status(200).json({ message: "Like actualizado correctamente." });
+
+    } catch (error) {
+        console.error("Error toggleLike:", error);
+        if (error.message === "post_not_found") {
+            return res.status(404).json({ message: "La publicación no existe." });
+        }
+        res.status(500).json({ message: "Error interno." });
+    }
+};
+
+/* ==========================================================
+POST /groups/:id/posts/:postId/comments
+========================================================== */
+exports.addComment = async (req, res) => {
+    try {
+        const { id, postId } = req.params;
+        const userId = req.user.uid;
+        const { content } = req.body;
+
+        if (!content?.trim()) {
+            return res.status(400).json({ message: "El comentario no puede estar vacío." });
+        }
+
+        const groupRef = groupsRef().doc(id);
+        const postRef = groupRef.collection("posts").doc(postId);
+        const commentRef = postRef.collection("comments").doc();
+
+        await db.runTransaction(async (t) => {
+            const postDoc = await t.get(postRef);
+            if (!postDoc.exists) throw new Error("post_not_found");
+
+            t.set(commentRef, {
+                userId,
+                content: content.trim(),
+                createdAt: FieldValue.serverTimestamp()
+            });
+
+            t.update(postRef, { commentCount: FieldValue.increment(1) });
+        });
+
+        res.status(201).json({ message: "Comentario añadido.", commentId: commentRef.id });
+
+    } catch (error) {
+        console.error("Error addComment:", error);
+        if (error.message === "post_not_found") {
+            return res.status(404).json({ message: "La publicación no existe." });
+        }
+        res.status(500).json({ message: "Error interno." });
+    }
+};
+
+/* ==========================================================
+GET /groups/:id/posts/:postId/comments
+========================================================== */
+exports.getComments = async (req, res) => {
+    try {
+        const { id, postId } = req.params;
+        const limit = parseInt(req.query.limit) || 20;
+
+        const groupRef = groupsRef().doc(id);
+        const postRef = groupRef.collection("posts").doc(postId);
+
+        // Verificar existencia del post (opcional, pero recomendado)
+        const postDoc = await postRef.get();
+        if (!postDoc.exists) {
+            return res.status(404).json({ message: "La publicación no existe." });
+        }
+
+        const snapshot = await postRef.collection("comments")
+            .orderBy("createdAt", "asc") // Comentarios en orden cronológico
+            .limit(limit)
+            .get();
+
+        const comments = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        res.status(200).json({ comments });
+
+    } catch (error) {
+        console.error("Error getComments:", error);
+        res.status(500).json({ message: "Error interno." });
+    }
+};

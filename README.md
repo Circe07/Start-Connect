@@ -204,4 +204,86 @@ Content-Type: application/json
 PATCH Transfer Owner
 
 ```http
-PATCH /
+PATCH /groups/abc123/transfer-owner/user456 HTTP/1.1
+Host: api.example.com
+Authorization: Bearer <FIREBASE_ID_TOKEN>
+```
+
+#### 🔸 Centers Module (Admin)
+
+| Method | Endpoint          | Auth        | Description                                      |
+| ------ | ----------------- | ----------- | ------------------------------------------------ |
+| GET    | `/centers`        | Public      | List all centers                                 |
+| GET    | `/centers/search` | Public      | Search centers by name or location               |
+| POST   | `/centers`        | ✅ (Admin)  | Create a new center                              |
+| PATCH  | `/centers/:id`    | ✅ (Admin)  | Update an existing center                        |
+| DELETE | `/centers/:id`    | ✅ (Admin)  | Delete a center                                  |
+
+#### 🔸 Maps Module
+
+| Method | Endpoint       | Auth | Description                                      |
+| ------ | -------------- | ---- | ------------------------------------------------ |
+| GET    | `/maps/nearby` | ✅   | Find centers near a location (lat, lng, radius)  |
+
+#### 🔸 Social Module (Groups)
+
+| Method | Endpoint                                    | Auth | Description                                      |
+| ------ | ------------------------------------------- | ---- | ------------------------------------------------ |
+| POST   | `/groups/:id/messages`                      | ✅   | Send a message to the group chat                 |
+| GET    | `/groups/:id/messages`                      | ✅   | Get messages from the group chat                 |
+| DELETE | `/groups/:id/messages/:messageId`           | ✅   | Delete a message (Author/Owner only)             |
+| POST   | `/groups/:id/posts/:postId/like`            | ✅   | Toggle Like on a post                            |
+| POST   | `/groups/:id/posts/:postId/comments`        | ✅   | Add a comment to a post                          |
+| GET    | `/groups/:id/posts/:postId/comments`        | ✅   | Get comments of a post                           |
+| DELETE | `/groups/:id/posts/:postId/comments/:commentId` | ✅ | Delete a comment (Author/Post Author/Group Owner)|
+
+#### 🔸 Admin Module
+
+| Method | Endpoint            | Auth | Description                                      |
+| ------ | ------------------- | ---- | ------------------------------------------------ |
+| POST   | `/admin/make-admin` |      | Assign admin role to a user (Dev/Setup only)     |
+
+### 🔸 Usage Examples
+
+#### Search Nearby Centers
+```http
+GET /maps/nearby?lat=40.416&lng=-3.703&radius=5000
+Authorization: Bearer <token>
+```
+
+#### Create Center (Admin)
+```http
+POST /centers
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+    "name": "Mega Gym",
+    "address": "Main St 123",
+    "location": { "lat": 40.4, "lng": -3.7 },
+    "services": ["Gym", "Pool"],
+    "prices": { "monthly": 50 }
+}
+```
+
+#### Social Interactions
+**Like a Post:**
+```http
+POST /groups/group123/posts/post456/like
+Authorization: Bearer <token>
+```
+
+**Comment on a Post:**
+```http
+POST /groups/group123/posts/post456/comments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "content": "Great post!" }
+```
+
+**Delete a Comment:**
+```http
+DELETE /groups/group123/posts/post456/comments/comment789
+Authorization: Bearer <token>
+```
