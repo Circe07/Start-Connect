@@ -402,6 +402,8 @@ exports.deleteGroup = async (req, res) => {
 
         res.status(200).json({ message: "Grupo eliminado" });
 
+        await groupsRef().doc(groupId).delete();
+        res.status(204).json({ message: `Grupo ${groupId} eliminado exitosamente.` });
     } catch (error) {
         console.error("Error deleteGroup:", error);
         res.status(500).json({ message: "Error interno" });
@@ -439,7 +441,7 @@ exports.deletePost = async (req, res) => {
             });
         });
 
-        res.status(200).json({ message: "Publicación eliminada." });
+        return res.status(204).json({ message: "Publicación eliminada exitosamente." });
 
     } catch (error) {
         console.error("Error deletePost:", error);
