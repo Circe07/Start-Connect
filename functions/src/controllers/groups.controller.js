@@ -710,3 +710,56 @@ exports.getComments = async (req, res) => {
         res.status(500).json({ message: "Error interno." });
     }
 };
+
+/* ==========================================================
+DELETE /groups/:id/posts/:postId/comments/:commentId
+========================================================== */
+exports.deleteComment = async (req, res) => {
+    try {
+        const { id, postId, commentId } = req.params;
+        const userId = req.user.uid;
+
+        const groupRef = groupsRef().doc(id);
+        const postRef = groupRef.collection("posts").doc(postId);
+        const commentRef = postRef.collection("comments").doc(commentId);
+
+        await db.runTransaction(async (t) => {
+            const groupDoc = await t.get(groupRef);
+            const postDoc = await t.get(postRef);
+            const commentDoc = await t.get(commentRef);
+
+            if (!groupDoc.exists) throw new Error("group_not_found");
+            if (!postDoc.exists) throw new Error("post_not_found");
+            if (!commentDoc.exists) throw new Error("comment_not_found");
+
+            const group = Group.fromFirestore(groupDoc);
+            const postData = postDoc.data();
+            const commentData = commentDoc.data();
+
+            // Permisos: Autor del comentario OR Dueño del grupo OR Autor del post
+            const isCommentAuthor = commentData.userId === userId;
+            const isGroupOwner = group.userId === userId;
+            const isPostAuthor = postData.authorId === userId;
+
+            if (!isCommentAuthor && !isGroupOwner && !isPostAuthor) {
+                throw new Error("permission_denied");
+            }
+
+            t.delete(commentRef);
+            t.update(postRef, { commentCount: FieldValue.increment(-1) });
+        });
+
+        res.status(200).json({ message: "Comentario eliminado." });
+
+    } catch (error) {
+        console.error("Error deleteComment:", error);
+        const map = {
+            group_not_found: [404, "El grupo no existe."],
+            post_not_found: [404, "La publicación no existe."],
+            comment_not_found: [404, "El comentario no existe."],
+            permission_denied: [403, "No tienes permiso para eliminar este comentario."]
+        };
+        const [code, msg] = map[error.message] || [500, "Error interno."];
+        res.status(code).json({ message: msg });
+    }
+};
