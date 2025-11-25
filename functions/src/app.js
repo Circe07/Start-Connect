@@ -14,6 +14,7 @@ const adminRoutes = require("./routes/admin");
 const hobbiesRoutes = require("./routes/hobbies");
 const usersRoutes = require("./routes/users");
 const mapsRoutes = require("./routes/maps");
+const centersRoutes = require("./routes/centers");
 
 const app = express();
 
@@ -32,17 +33,18 @@ app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
 app.use("/groupsRequests", groupsRequestsRoutes);
 app.use("/maps", mapsRoutes);
+app.use("/centers", centersRoutes);
 
 
 
 
 // Ruta raíz
 app.get("/", (req, res) => {
-    logger.info("API Start&Connect en ejecución");
-    res.status(200).json({
-        status: "ok",
-        message: "Start&Connect API (Firebase Functions v2) funcionando correctamente",
-    });
+  logger.info("API Start&Connect en ejecución");
+  res.status(200).json({
+    status: "ok",
+    message: "Start&Connect API (Firebase Functions v2) funcionando correctamente",
+  });
 });
 
 module.exports = app;

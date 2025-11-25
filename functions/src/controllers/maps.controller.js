@@ -1,68 +1,66 @@
 const functions = require("firebase-functions");
+const { db } = require("../config/firebase");
+const Group = require("../models/group.model");
 
 /* ==========================================================
    GET /maps/nearby
-   Query Params: lat, lng, radius (meters), type (gym, park, etc.)
+   Query Params: lat, lng, radius (meters)
 ========================================================== */
 exports.getNearbyPlaces = async (req, res) => {
     try {
-        const { lat, lng, radius, type, keyword } = req.query;
-        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
-        if (!apiKey) {
-            console.error("Falta la API Key de Google Maps (GOOGLE_MAPS_API_KEY)");
-            return res.status(500).json({ message: "Error de configuración del servidor." });
-        }
+        const { lat, lng, radius } = req.query;
 
         if (!lat || !lng) {
             return res.status(400).json({ message: "Latitud (lat) y Longitud (lng) son obligatorias." });
         }
 
-        const searchRadius = radius || 1500; // Default 1.5km
-        const placeType = type || "gym"; // Default gym
+        const userLat = parseFloat(lat);
+        const userLng = parseFloat(lng);
+        const searchRadius = parseFloat(radius) || 5000; // Default 5km
 
-        // Construir URL de Google Places API (Nearby Search)
-        let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${searchRadius}&type=${placeType}&key=${apiKey}`;
+        // 1. Obtener todos los grupos (Optimización: filtrar por ciudad si estuviera disponible)
+        const snapshot = await db.collection("groups").get();
 
-        if (keyword) {
-            url += `&keyword=${encodeURIComponent(keyword)}`;
-        }
-
-        // Usar fetch nativo (Node 18+)
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-            console.error("Error Google Places API:", data);
-            return res.status(502).json({
-                message: "Error al consultar Google Maps API",
-                details: data.status,
-                errorMessage: data.error_message
+        if (snapshot.empty) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                places: []
             });
         }
 
-        // Mapear resultados para devolver solo lo necesario
-        const places = data.results.map(place => ({
-            id: place.place_id,
-            name: place.name,
-            location: place.geometry.location,
-            vicinity: place.vicinity,
-            rating: place.rating,
-            user_ratings_total: place.user_ratings_total,
-            icon: place.icon,
-            photos: place.photos ? place.photos.map(p => ({
-                photo_reference: p.photo_reference,
-                height: p.height,
-                width: p.width
-            })) : [],
-            isOpen: place.opening_hours ? place.opening_hours.open_now : null
-        }));
+        const places = [];
+
+        // 2. Filtrar por distancia (Fórmula de Haversine)
+        snapshot.forEach(doc => {
+            const group = Group.fromFirestore(doc);
+
+            // Verificar que el grupo tenga ubicación válida
+            if (group.location && typeof group.location.lat === 'number' && typeof group.location.lng === 'number') {
+                const distance = getDistanceFromLatLonInKm(userLat, userLng, group.location.lat, group.location.lng) * 1000; // Convertir a metros
+
+                if (distance <= searchRadius) {
+                    places.push({
+                        id: group.id,
+                        name: group.name,
+                        description: group.description,
+                        sport: group.sport,
+                        location: group.location,
+                        distance: Math.round(distance), // Metros
+                        membersCount: group.members.length,
+                        isPublic: group.isPublic
+                    });
+                }
+            }
+        });
+
+        // Ordenar por distancia
+        places.sort((a, b) => a.distance - b.distance);
 
         res.status(200).json({
             success: true,
             count: places.length,
-            places: places,
-            next_page_token: data.next_page_token || null
+            places: places
         });
 
     } catch (error) {
@@ -70,3 +68,21 @@ exports.getNearbyPlaces = async (req, res) => {
         res.status(500).json({ message: "Error interno del servidor", error: error.message });
     }
 };
+
+// Función auxiliar: Fórmula de Haversine
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio de la tierra en km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distancia en km
+    return d;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}

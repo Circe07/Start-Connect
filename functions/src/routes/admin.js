@@ -42,4 +42,19 @@ router.post("/seed-venues", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+const { admin } = require("../config/firebase");
+
+router.post("/make-admin", async (req, res) => {
+    try {
+        const { uid } = req.body;
+        if (!uid) return res.status(400).json({ message: "UID es requerido" });
+
+        await admin.auth().setCustomUserClaims(uid, { role: 'admin' });
+
+        res.json({ success: true, message: `Usuario ${uid} es ahora Administrador.` });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
