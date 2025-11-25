@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./logo.png" alt="StartAndConnect Logo" width="200"/>
+</p>
+
 # 🔸 StartAndConnect
 
 ## 🔸 Overview
@@ -200,125 +204,86 @@ Content-Type: application/json
 PATCH Transfer Owner
 
 ```http
-PATCH /groups/abc123/transfer-owner/newOwnerUid456 HTTP/1.1
+PATCH /groups/abc123/transfer-owner/user456 HTTP/1.1
 Host: api.example.com
 Authorization: Bearer <FIREBASE_ID_TOKEN>
 ```
 
-DELETE Remove Member
+#### 🔸 Centers Module (Admin)
 
+| Method | Endpoint          | Auth        | Description                                      |
+| ------ | ----------------- | ----------- | ------------------------------------------------ |
+| GET    | `/centers`        | Public      | List all centers                                 |
+| GET    | `/centers/search` | Public      | Search centers by name or location               |
+| POST   | `/centers`        | ✅ (Admin)  | Create a new center                              |
+| PATCH  | `/centers/:id`    | ✅ (Admin)  | Update an existing center                        |
+| DELETE | `/centers/:id`    | ✅ (Admin)  | Delete a center                                  |
+
+#### 🔸 Maps Module
+
+| Method | Endpoint       | Auth | Description                                      |
+| ------ | -------------- | ---- | ------------------------------------------------ |
+| GET    | `/maps/nearby` | ✅   | Find centers near a location (lat, lng, radius)  |
+
+#### 🔸 Social Module (Groups)
+
+| Method | Endpoint                                    | Auth | Description                                      |
+| ------ | ------------------------------------------- | ---- | ------------------------------------------------ |
+| POST   | `/groups/:id/messages`                      | ✅   | Send a message to the group chat                 |
+| GET    | `/groups/:id/messages`                      | ✅   | Get messages from the group chat                 |
+| DELETE | `/groups/:id/messages/:messageId`           | ✅   | Delete a message (Author/Owner only)             |
+| POST   | `/groups/:id/posts/:postId/like`            | ✅   | Toggle Like on a post                            |
+| POST   | `/groups/:id/posts/:postId/comments`        | ✅   | Add a comment to a post                          |
+| GET    | `/groups/:id/posts/:postId/comments`        | ✅   | Get comments of a post                           |
+| DELETE | `/groups/:id/posts/:postId/comments/:commentId` | ✅ | Delete a comment (Author/Post Author/Group Owner)|
+
+#### 🔸 Admin Module
+
+| Method | Endpoint            | Auth | Description                                      |
+| ------ | ------------------- | ---- | ------------------------------------------------ |
+| POST   | `/admin/make-admin` |      | Assign admin role to a user (Dev/Setup only)     |
+
+### 🔸 Usage Examples
+
+#### Search Nearby Centers
 ```http
-DELETE /groups/abc123/remove-member/memberUid789 HTTP/1.1
-Host: api.example.com
-Authorization: Bearer <FIREBASE_ID_TOKEN>
-```
-
-DELETE Delete Group
-
-```http
-DELETE /groups/abc123 HTTP/1.1
-Host: api.example.com
-Authorization: Bearer <FIREBASE_ID_TOKEN>
-```
-
-DELETE Delete Post
-
-```http
-DELETE /groups/abc123/post/postId456 HTTP/1.1
-Host: api.example.com
-Authorization: Bearer <FIREBASE_ID_TOKEN>
-```
-
-## 🔸 Base URLs
-
-| Environment | Base URL                              |
-| ----------- | ------------------------------------- |
-| Local       | `http://localhost:3000`               |
-| Firebase    | `https://api-ma5t57vzsq-ew.a.run.app` |
-
-## 🔸 Features
-
-- Firebase Authentication with Bearer tokens
-- Group Management (create, join, leave, update, delete)
-- Post System within groups
-- Pagination for public groups
-- Real-time Firestore NoSQL database
-
-## 🔸 Authentication
-
-Protected routes require Firebase ID Token:
-
-```http
-Authorization: Bearer <FIREBASE_ID_TOKEN>
-```
-
-## 🔸 Groups API
-
-### Create Group
-
-```http
-POST /groups/create-group
+GET /maps/nearby?lat=40.416&lng=-3.703&radius=5000
 Authorization: Bearer <token>
+```
+
+#### Create Center (Admin)
+```http
+POST /centers
+Authorization: Bearer <admin_token>
+Content-Type: application/json
 
 {
-   "name": "Developers Hub",
-   "description": "Community for engineers.",
-   "city": "Barcelona",
-   "isPublic": true
+    "name": "Mega Gym",
+    "address": "Main St 123",
+    "location": { "lat": 40.4, "lng": -3.7 },
+    "services": ["Gym", "Pool"],
+    "prices": { "monthly": 50 }
 }
 ```
 
-### Join Group
-
+#### Social Interactions
+**Like a Post:**
 ```http
-POST /groups/:groupId/join
+POST /groups/group123/posts/post456/like
 Authorization: Bearer <token>
 ```
 
-### List My Groups
-
+**Comment on a Post:**
 ```http
-GET /groups/myGroups
+POST /groups/group123/posts/post456/comments
 Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "content": "Great post!" }
 ```
 
-### Public Groups
-
+**Delete a Comment:**
 ```http
-GET /groups/public?limit=5&startAfterId=abc123
-```
-
-## 🔸 Posts API
-
-### Create Post
-
-```http
-POST /groups/:groupId/new-post
+DELETE /groups/group123/posts/post456/comments/comment789
 Authorization: Bearer <token>
-
-{
-   "content": "Hello everyone!",
-   "imageUrl": "https://example.com/image.jpg"
-}
-```
-
-### Delete Post
-
-```http
-DELETE /groups/:groupId/post/:postId
-Authorization: Bearer <token>
-```
-
-## 🔸 Development
-
-```bash
-# Install dependencies
-npm install
-
-# Deploy to Firebase
-firebase deploy --only functions
-
-# Run tests
-npm install jest
-npm test
 ```
