@@ -16,6 +16,7 @@ const firebaseConfig = {
 // --- CREDENCIALES DE USUARIO DE PRUEBA ---
 const USERS = [
   { email: "startandconnect@gmail.com", password: "A53838081a*" },
+  { email: "unaidevcoding@gmail.com", password: "993000" },
   { email: "admin@gmail.com", password: "123455" },
   { email: "test@gmail.com", password: "A53838081a*" },
   { email: "test2@gmail.com", password: "123456" },
