@@ -18,6 +18,10 @@ const {
   sendMessage,
   getMessages,
   deleteMessage,
+  toggleLike,
+  addComment,
+  getComments,
+  deleteComment,
 } = require("../controllers/groups.controller");
 
 // GET /check
@@ -32,12 +36,15 @@ router.get("/public", authMiddleware, getPublicGroups);
 router.get("/my-groups", authMiddleware, getMyGroups);
 router.get("/:id", authMiddleware, getGroupById);
 router.get("/:id/messages", authMiddleware, getMessages);
+router.get("/:id/posts/:postId/comments", authMiddleware, getComments);
 // POST routes
 router.post("/", authMiddleware, createGroup);
 router.post("/:id/join", authMiddleware, joinGroup);
 router.post("/:id/leave", authMiddleware, leaveGroup);
 router.post("/:id/post", authMiddleware, newPost);
 router.post("/:id/messages", authMiddleware, sendMessage);
+router.post("/:id/posts/:postId/like", authMiddleware, toggleLike);
+router.post("/:id/posts/:postId/comments", authMiddleware, addComment);
 // PATCH routes
 router.patch("/:id", authMiddleware, updateGroup);
 router.patch("/:id/transfer-owner/:newOwnerId", authMiddleware, transferOwner);
@@ -46,6 +53,7 @@ router.delete("/:id/remove-member/:memberId", authMiddleware, removeMember);
 router.delete("/:id", authMiddleware, deleteGroup);
 router.delete("/:id/post/:postId", authMiddleware, deletePost);
 router.delete("/:id/messages/:messageId", authMiddleware, deleteMessage);
+router.delete("/:id/posts/:postId/comments/:commentId", authMiddleware, deleteComment);
 
 // Export the router
 module.exports = router;
