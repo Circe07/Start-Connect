@@ -3,6 +3,10 @@ const router = express.Router();
 const adminMiddleware = require("../middleware/admin");
 const centersController = require("../controllers/centers.controller");
 
+// Ruta de prueba
+router.get("/check", async (req, res) => {
+  res.status(200).json({ messsage: 'Rutas de centros funcionando correctamente' })
+})
 // Rutas Públicas
 router.get("/", centersController.getCenters);
 router.get("/search", centersController.searchCenters);

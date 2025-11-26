@@ -5,6 +5,10 @@ const hobbiesSeed = require("../../scripts/hobbiesSeed");
 const venuesSeed = require("../../scripts/venuesSeed");
 const { db } = require("../config/firebase");
 
+router.get('/check', (req, res) => {
+    res.status(200).json({ message: 'Rutas de admin funcionando correctamente' })
+})
+
 router.post("/seed-hobbies", async (req, res) => {
     try {
         const batch = db.batch();
