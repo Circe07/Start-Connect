@@ -1,10 +1,20 @@
-// ! PARA LAS RUTAS ES NECESARIO LA API KEY EN FRONTEND
+/**
+ * Controller Authentication
+ * This controller is responsible for handling user login and registration.
+ * It uses Firebase Authentication and Firestore to store user data.
+ * Author: Unai Villar
+ */
 
 const { admin, db } = require("../config/firebase");
 const functions = require("firebase-functions");
 const fetch = require('node-fetch');
 
-// POST -> CREAR USUARIO
+/**
+ * POST --> REGISTER USER
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.register = async (req, res) => {
   try {
     const {
@@ -19,21 +29,23 @@ exports.register = async (req, res) => {
       location
     } = req.body;
 
-    // Validación de obligatorios
+    /**
+     * Email, password, name and usermame are required
+     * Password must be at least 8 characters
+     * Password must contain at least one letter, one number and one special character
+     */
     if (!email || !password || !name || !username) {
       return res.status(400).json({
         message: "email, password, name y username son requeridos"
       });
     }
 
-    // Longitud mínima
     if (password.length < 8) {
       return res.status(400).json({
         message: "La contraseña debe tener al menos 8 caracteres"
       });
     }
 
-    // Validación fuerte
     const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!regex.test(password)) {
       return res.status(400).json({
@@ -41,14 +53,21 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Crear usuario en Firebase Auth
+    /**
+     * Create user in Firebase Authentication
+     */
     const user = await admin.auth().createUser({
       email,
       password,
       displayName: name
     });
 
-    // Guardar documento en Firestore
+    /**
+     * Save user data in Firestore
+     * Collection --> users
+     * Document --> uid
+     * Fields --> uid, email, name, username, bio, photo, sports, phoneNumber, location
+     */
     await db.collection("users").doc(user.uid).set({
       uid: user.uid,
       email,
@@ -76,17 +95,35 @@ exports.register = async (req, res) => {
   }
 };
 
-// POST -> INICIAR SESIÓN
+/**
+ * POST --> LOGIN USER
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    /**
+     * Email and password are required
+     */
     if (!email || !password) {
       return res.status(400).json({ message: "Email y contraseña requeridos" });
     }
 
+    /**
+     * Get API key from environment variable
+     * API key is used to authenticate requests
+     * API key is generated in Firebase Console > Authentication > API keys
+     */
     const apiKey = process.env.AUTH_API_KEY;
 
+    /**
+     * Call Firebase Authentication API to login user
+     * API key is used to authenticate requests
+     * This is used for authentication and authorization
+     */
     const response = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
       {
@@ -120,11 +157,16 @@ exports.login = async (req, res) => {
 
 
 
-// POST -> CERRAR SESIÓN
+/**
+ * Post --> LOGOUT
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.logut = async (req, res) => {
   try {
     const uid = req.user.uid;
 
+    // Revoke refresh token to invalidate session
     await admin.auth().revokeRefreshTokens(uid);
 
     res.status(200).json({ message: 'Sesión cerrada correctamente' });
@@ -134,7 +176,11 @@ exports.logut = async (req, res) => {
   }
 };
 
-// GET -> OBTENER INFORMACIÓN DEL USUARIO
+/**
+ * Get -->  GET MY INFORMATION
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.me = async (req, res) => {
   try {
     const user = await admin.auth().getUser(req.user.uid);
@@ -150,12 +196,19 @@ exports.me = async (req, res) => {
   }
 };
 
-// POST -> ENVIAR CORREO DE RESTABLECIMIENTO DE CONTRASEÑA
+/**
+ * POST --> CHANGE PASSWORD VIA LINK
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.changePassword = async (req, res) => {
 
   try {
     const { email } = req.body;
-
+    /**
+     * Generate password reset link for user
+     * Password reset link is sent to user's email
+     */
     const resetLink = await admin.auth().generatePasswordResetLink(email);
 
     res.status(200).json({ message: 'Enlace generado correctamente', resetLink });

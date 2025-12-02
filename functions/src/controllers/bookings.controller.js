@@ -1,11 +1,23 @@
+/**
+ * Controller Bookings
+ * This controller is responsible for createing and managing bookings.
+ * Author: Unai Villar
+ */
+
 const { db, admin, FieldValue } = require("../config/firebase");
 const Booking = require("../models/booking.model");
 
-// POST --> CREAR RESERVA
+/**
+ * POST --> CREATE BOOKING
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.createBooking = async (req, res) => {
   try {
     const userId = req.user.uid;
 
+    // Data of booking
     const data = {
       userId,
       venueId: req.body.venueId,
@@ -15,13 +27,19 @@ exports.createBooking = async (req, res) => {
       endTime: req.body.endTime
     };
 
-    // Validación del modelo
+    /**
+     * Validate data
+     * If data is not valid, return error
+     */
     const validationError = Booking.validate(data);
     if (validationError) {
       return res.status(400).json({ message: validationError });
     }
 
-    // Validación de solapamientos
+    /**
+     * Check if there is an overlap with other bookings
+     * If there is an overlap, return error
+     */
     const overlap = await db
       .collection("bookings")
       .where("venueId", "==", data.venueId)
@@ -35,10 +53,14 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "Horario no disponible" });
     }
 
-    // Crear reserva
+    /**
+     * Create bokking in Firestore
+     * Collection "bookings"
+     */
     const booking = new Booking(data);
     const ref = db.collection("bookings").doc();
 
+    // Set id
     booking.id = ref.id;
 
     await ref.set(booking.toFirestore(FieldValue));
@@ -55,7 +77,12 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-// GET --> OBTENER MIS RESERVAS
+/**
+ * GET --> GET MY BOOKINGS
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.getMyBookings = async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -79,7 +106,11 @@ exports.getMyBookings = async (req, res) => {
   }
 };
 
-// GET --> OBTENER DISPONIBILIDAD
+/**
+ * GET --> GET AVAILABILITY
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.getAvailability = async (req, res) => {
   try {
     const { venueId, facilityId, date } = req.params;
