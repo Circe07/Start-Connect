@@ -1,7 +1,18 @@
+/**
+ * Controller Users
+ * This controller is responsible for creating and managing users and their profiles.
+ * Author: Unai Villar
+ */
+
 const { db } = require("../config/firebase");
 
 
-// GET -> Obtiene el perfil de un usuario
+/**
+ * GET -> Get my profile
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.getMyProfile = async (req, res) => {
     try {
         const uid = req.user.uid;
@@ -19,12 +30,29 @@ exports.getMyProfile = async (req, res) => {
     }
 }
 
-// PATCH -> Actualiza el perfil de un usuario
+/**
+ *  PATCH -> Update my profile
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.updateMyProfile = async (req, res) => {
     try {
         const uid = req.user.uid;
         const body = req.body;
 
+        /**
+         * Allowed fields to update
+         * This fields will be updated
+         * name -> string
+         * username -> string
+         * bio -> string
+         * photo -> string
+         * sports -> array
+         * phoneNumber -> string
+         * location -> string
+         * TODO: Recommend to add more fields and validate data type with ../model
+         */
         const allowedFields = [
             "name",
             "username",
@@ -56,7 +84,12 @@ exports.updateMyProfile = async (req, res) => {
 };
 
 
-// GET -> Obtiene un usuario por su ID
+/**
+ * GET -> Get user profile with uid(id)
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.getUserProfile = async (req, res) => {
     try {
         const { uid } = req.params;

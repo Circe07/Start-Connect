@@ -1,11 +1,20 @@
-// src/app.js
+/**
+ * This file is used to configure the express server
+ * Author: Unai Villar
+ */
+
+
 const express = require("express");
 const cors = require("cors");
 const logger = require("firebase-functions/logger");
+const app = express();
 
 
 
-// Rutas
+/**
+ * Import all routes here
+ * TODO: Add more routes in the future
+ */
 const contactsRoutes = require("./routes/contacts");
 const groupsRoutes = require("./routes/groups");
 const groupsRequestsRoutes = require("./routes/groupsRequests");
@@ -17,18 +26,25 @@ const mapsRoutes = require("./routes/maps");
 const centersRoutes = require("./routes/centers");
 const bookingsRoutes = require("./routes/bookings");
 
-const app = express();
 
-// Middlewares globales
+/**
+ * Global middleware here
+ */
 app.use(cors({ origin: true }));
 app.use(express.json());
 
-// Rutas públicas
+/**
+ * Public routes
+ * This routes don't need authentication
+ */
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/users", usersRoutes);
 
-// Rutas privadas
+/**
+ * Private routes
+ * This routes need authentication
+ */
 app.use("/hobbies", hobbiesRoutes);
 app.use("/contacts", contactsRoutes);
 app.use("/groups", groupsRoutes);
@@ -40,12 +56,14 @@ app.use("/bookings", bookingsRoutes);
 
 
 
-// Ruta raíz
-app.get("/", (req, res) => {
-  logger.info("API Start&Connect en ejecución");
+/**
+ * Default route to check if API is working
+ */
+app.get("/", (_, res) => {
+  logger.info("API Start&Connect in execution");
   res.status(200).json({
     status: "ok",
-    message: "Start&Connect API (Firebase Functions v2) funcionando correctamente",
+    message: "Start&Connect API (Firebase Functions v2) in execution",
   });
 });
 

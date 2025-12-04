@@ -1,18 +1,31 @@
+/**
+ * Firebase configuration
+ * This file is used to configure Firebase...
+ * Is use with MultiDB (don't use data base default)
+ * @author Unai Villar 
+ *  
+ */
+
 const admin = require("firebase-admin");
 const {
   getFirestore,
   FieldValue
 } = require("firebase-admin/firestore");
 
+/**
+ * Credentials from Firebase
+ * PROJECT_ID: Project ID from Firebase
+ * DATABASE_ID: Database ID from Firebase
+ */
 const PROJECT_ID = "startandconnect-c44b2";
 const DATABASE_ID = "startandconnect-eur3";
 
-// Inicializar Admin SOLO una vez
+// Initialize Firebase in production
 if (!admin.apps.length) {
   admin.initializeApp({
     projectId: PROJECT_ID,
   });
-  console.log("🔥 Admin SDK Inicializado (Producción/Local)");
+  console.log("🔥 Admin SDK Inicializado (Producción)");
 }
 
 const db = getFirestore(admin.app(), DATABASE_ID);

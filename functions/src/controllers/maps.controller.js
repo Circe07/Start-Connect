@@ -1,25 +1,47 @@
+/**
+ * Controller Maps
+ * This controller is responsible for handling map-related operations.
+ * Author: Unai Villar
+ */
+
 const functions = require("firebase-functions");
 const { db } = require("../config/firebase");
 const Center = require("../models/center.model");
 
-/* ==========================================================
-   GET /maps/nearby
-   Query Params: lat, lng, radius (meters)
-========================================================== */
+/**
+ * GET -> Get nearby places
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+
 exports.getNearbyPlaces = async (req, res) => {
     try {
+        /**
+         * Query Params
+         * lat -> User latitude
+         * lng -> User longitude
+         * radius -> Search radius
+         */
         const { lat, lng, radius } = req.query;
 
         if (!lat || !lng) {
             return res.status(400).json({ message: "Latitud (lat) y Longitud (lng) son obligatorias." });
         }
 
+        /**
+         * userLat references -> User latitude
+         * userLng references -> User longitude
+         * searchRadius references -> Search radius(default value = 5000m)
+         */
         const userLat = parseFloat(lat);
         const userLng = parseFloat(lng);
-        const searchRadius = parseFloat(radius) || 5000; // Default 5km
+        const searchRadius = parseFloat(radius) || 5000;
 
-        // 1. Obtener todos los centros
         const snapshot = await db.collection("centers").get();
+        /**
+         * LOG for depuration and get centers
+         */
         console.log(`[DEBUG] Centros encontrados en DB: ${snapshot.size}`);
 
         if (snapshot.empty) {
@@ -30,6 +52,9 @@ exports.getNearbyPlaces = async (req, res) => {
             });
         }
 
+        /**
+         * TODO: Finish documentation
+         */
         const places = [];
 
         // 2. Filtrar por distancia (Fórmula de Haversine)

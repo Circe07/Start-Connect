@@ -1,4 +1,12 @@
+/**
+ * Module to seed hobbies in the database
+ * Author: Unai Villar
+ */
+
 module.exports = [
+    /**
+     * TODO: Add more hobbies
+     */
     { id: "padel", name: "Pádel", icon: "🎾", category: "Deporte" },
     { id: "futbol", name: "Fútbol", icon: "⚽", category: "Deporte" },
     { id: "baloncesto", name: "Baloncesto", icon: "🏀", category: "Deporte" },
