@@ -78,3 +78,6 @@ Thumbs.db
 **/doc/api/
 **/ios/Flutter/.last_build_id
 flutter_export_environment.sh
+
+# Scripts de utilidad
+.getToken.js

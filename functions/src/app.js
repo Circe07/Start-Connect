@@ -1,33 +1,70 @@
-const express = require("express");
-const morgan = require("morgan");
-const cors = require('cors');
+/**
+ * This file is used to configure the express server
+ * Author: Unai Villar
+ */
 
+
+const express = require("express");
+const cors = require("cors");
+const logger = require("firebase-functions/logger");
 const app = express();
 
-// --- Middlewares ---
 
-// Habilita CORS para todas las solicitudes (IMPORTANTE para APIs)
-app.use(cors());
 
-// Logging de peticiones (útil para desarrollo)
-app.use(morgan("dev"));
+/**
+ * Import all routes here
+ * TODO: Add more routes in the future
+ */
+const contactsRoutes = require("./routes/contacts");
+const groupsRoutes = require("./routes/groups");
+const groupsRequestsRoutes = require("./routes/groupsRequests");
+const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
+const hobbiesRoutes = require("./routes/hobbies");
+const usersRoutes = require("./routes/users");
+const mapsRoutes = require("./routes/maps");
+const centersRoutes = require("./routes/centers");
+const bookingsRoutes = require("./routes/bookings");
 
-// Middleware para parsear cuerpos de solicitud JSON (API)
+
+/**
+ * Global middleware here
+ */
+app.use(cors({ origin: true }));
 app.use(express.json());
 
-// Middleware para parsear cuerpos de solicitud URL-encoded (Formularios)
-// Se usa 'extended: true' para permitir objetos y arrays complejos
-app.use(express.urlencoded({ extended: true }));
+/**
+ * Public routes
+ * This routes don't need authentication
+ */
+app.use("/auth", authRoutes);
+app.use("/admin", adminRoutes);
+app.use("/users", usersRoutes);
+
+/**
+ * Private routes
+ * This routes need authentication
+ */
+app.use("/hobbies", hobbiesRoutes);
+app.use("/contacts", contactsRoutes);
+app.use("/groups", groupsRoutes);
+app.use("/groupsRequests", groupsRequestsRoutes);
+app.use("/maps", mapsRoutes);
+app.use("/centers", centersRoutes);
+app.use("/bookings", bookingsRoutes);
 
 
 
-// Importacion de routes
-const usersRouter = require("./routes/users");
-const groupsRouter = require("./routes/groups");
 
-app.use("/users", usersRouter);
-app.use("/groups", groupsRouter);
-
-
+/**
+ * Default route to check if API is working
+ */
+app.get("/", (_, res) => {
+  logger.info("API Start&Connect in execution");
+  res.status(200).json({
+    status: "ok",
+    message: "Start&Connect API (Firebase Functions v2) in execution",
+  });
+});
 
 module.exports = app;

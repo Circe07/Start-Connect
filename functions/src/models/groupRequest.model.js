@@ -1,18 +1,26 @@
-// /functions/src/controllers/groupRequest.controller.js
+// functions/src/models/groupRequest.model.js
 
 class GroupRequest {
   constructor(id, data = {}) {
-    if (typeof data !== "object" || data === null) data = {}; // Asegura que data es un objeto
+    if (typeof data !== "object" || data === null) data = {};
 
     // Identificadores
     this.id = id || null;
-    this.groupId = data.groupId || null;
-    this.userId = data.userId || null;
+
+    // Validación fuerte (evita errores de Firestore)
+    this.groupId = typeof data.groupId === "string" && data.groupId.trim() !== ""
+      ? data.groupId
+      : null;
+
+    this.userId = typeof data.userId === "string" && data.userId.trim() !== ""
+      ? data.userId
+      : null;
 
     // Información básica
-    this.status = data.status || 'pending' // pendiente | aceptada | rechazada
+    this.status = data.status || "pending"; // pending | accepted | rejected
+
     this.createdAt = data.createdAt || new Date();
-    this.updateAt = data.updateAt || null;
+    this.updatedAt = data.updatedAt || null;
   }
 
   static fromFirestore(doc) {
@@ -26,7 +34,7 @@ class GroupRequest {
       userId: this.userId,
       status: this.status,
       createdAt: this.createdAt,
-      updateAt: this.updateAt,
+      updatedAt: this.updatedAt,
     };
   }
 }
