@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OSX
 #
 .DS_Store
@@ -73,3 +74,88 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+=======
+
+# ---- Node.js / Express ----
+# Dependencias del proyecto
+node_modules/
+
+# Logs de errores y depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de bloqueo (pueden incluirse si se desea CI/CD)
+# package-lock.json
+# yarn.lock
+
+
+# ---- Firebase CLI & Tools ----
+# Archivos internos del CLI de Firebase
+.firebase/
+.firebase-tools.json
+
+# Archivos sensibles (NO subir nunca)
+serviceAccountKey.json
+firebase-adminsdk.json
+*.firebase-credentials.json
+
+# Estos archivos DEBEN estar versionados, no los ignores:
+#! firebase.json
+#! .firebaserc
+#! firestore.rules
+#! firestore.indexes.json
+
+
+# ---- Variables de Entorno ----
+# No subas nunca tus .env (tokens, claves, etc.)
+.env
+.env.local
+.env.*.local
+.env.*
+
+# Apikeys o configuraciones sensibles
+apikey.js
+.apikey.js
+
+
+# ---- Build y Temporales ----
+# Carpetas de salida o compilación
+build/
+dist/
+tmp/
+*.tmp
+*.temp
+
+# ---- Archivos de registro (logs) ----
+*.log
+logs/
+
+
+# ---- IDEs / Editores ----
+# Configuración de VSCode, IntelliJ, WebStorm, etc.
+.vscode/
+.idea/
+*.iml
+
+
+# ---- Sistema Operativo ----
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+
+# ---- Flutter / Dart (si lo usas como frontend móvil) ----
+/build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+flutter_export_environment.sh
+
+# Scripts de utilidad
+.getToken.js
+>>>>>>> 386072677ec8a797db972b009ddda3c39467ea30
