@@ -10,12 +10,25 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://api.mapbox.com/downloads/v2/releases/maven' }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.1.0") // specify version
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+
+        // ✅ Add this line for Firebase
+        classpath 'com.google.gms:google-services:4.4.4'
     }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://api.mapbox.com/downloads/v2/releases/maven' }
+    }
+}
+
+// Keep the React Native root project plugin
 apply plugin: "com.facebook.react.rootproject"
