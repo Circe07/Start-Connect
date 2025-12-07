@@ -1,4 +1,3 @@
-
 # ---- Node.js / Express ----
 # Dependencias del proyecto
 node_modules/
@@ -15,7 +14,7 @@ yarn-error.log*
 
 # ---- Firebase CLI & Tools ----
 # Archivos internos del CLI de Firebase
-.firebase/
+.firebase/     
 .firebase-tools.json
 
 # Archivos sensibles (NO subir nunca)
