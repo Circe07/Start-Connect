@@ -1,75 +1,83 @@
-# OSX
-#
-.DS_Store
 
-# Xcode
-#
-build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-**/.xcode.env.local
-
-# Android/IntelliJ
-#
-build/
-.idea
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
-.kotlin/
-
-# node.js
-#
+# ---- Node.js / Express ----
+# Dependencias del proyecto
 node_modules/
-npm-debug.log
-yarn-error.log
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
+# Logs de errores y depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
+# Archivos de bloqueo (pueden incluirse si se desea CI/CD)
+# package-lock.json
+# yarn.lock
 
-# Bundle artifact
-*.jsbundle
 
-# Ruby / CocoaPods
-**/Pods/
-/vendor/bundle/
+# ---- Firebase CLI & Tools ----
+# Archivos internos del CLI de Firebase
+.firebase/
+.firebase-tools.json
 
-# Temporary files created by Metro to check the health of the file watcher
-.metro-health-check*
+# Archivos sensibles (NO subir nunca)
+serviceAccountKey.json
+firebase-adminsdk.json
+*.firebase-credentials.json
 
-# testing
-/coverage
+# Estos archivos DEBEN estar versionados, no los ignores:
+#! firebase.json
+#! .firebaserc
+#! firestore.rules
+#! firestore.indexes.json
 
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+
+# ---- Variables de Entorno ----
+# No subas nunca tus .env (tokens, claves, etc.)
+.env
+.env.local
+.env.*.local
+.env.*
+
+# Apikeys o configuraciones sensibles
+apikey.js
+.apikey.js
+
+
+# ---- Build y Temporales ----
+# Carpetas de salida o compilación
+build/
+dist/
+tmp/
+*.tmp
+*.temp
+
+# ---- Archivos de registro (logs) ----
+*.log
+logs/
+
+
+# ---- IDEs / Editores ----
+# Configuración de VSCode, IntelliJ, WebStorm, etc.
+.vscode/
+.idea/
+*.iml
+
+
+# ---- Sistema Operativo ----
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+
+# ---- Flutter / Dart (si lo usas como frontend móvil) ----
+/build/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+flutter_export_environment.sh
+
+# Scripts de utilidad
+.getToken.js
