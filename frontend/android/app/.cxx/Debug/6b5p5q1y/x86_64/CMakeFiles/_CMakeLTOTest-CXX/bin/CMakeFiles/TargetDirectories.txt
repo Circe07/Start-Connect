@@ -1,0 +1,4 @@
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir
