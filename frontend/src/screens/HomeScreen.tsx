@@ -11,9 +11,7 @@ import {
   Animated,
   FlatList,
 } from 'react-native';
-import {
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import HobbiesScreen from './HobbiesScreen';
 import BottomNavigation from '../components/BottomNavigation';
 
@@ -100,18 +98,25 @@ export default function HomeScreen({ navigation }: any) {
       case 'perfil':
         return <PerfilScreen navigation={navigation} />;
       default:
-        return <ExperiencesContent 
-          filter={searchQuery} 
-          onToggleSearch={toggleSearch}
-          isSearchExpanded={isSearchExpanded}
-          searchAnimation={searchAnimation}
-          addButtonAnimation={addButtonAnimation}
-        />;
+        return (
+          <ExperiencesContent
+            filter={searchQuery}
+            onToggleSearch={toggleSearch}
+            isSearchExpanded={isSearchExpanded}
+            searchAnimation={searchAnimation}
+            addButtonAnimation={addButtonAnimation}
+          />
+        );
     }
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      ]}
+    >
       <View style={styles.container}>
         {/* Fixed Header */}
         {activeTab !== 'tienda' ? (
@@ -120,13 +125,25 @@ export default function HomeScreen({ navigation }: any) {
               <View style={styles.headerLeft}>
                 <Pressable onPress={() => setActiveTab('experiences')}>
                   <View style={styles.headerTitleContainer}>
-                    <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>START&</Text>
-                    <Text style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}>CONNECT</Text>
+                    <Text
+                      style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}
+                    >
+                      START&
+                    </Text>
+                    <Text
+                      style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}
+                    >
+                      CONNECT
+                    </Text>
                   </View>
                 </Pressable>
               </View>
               <View style={styles.headerRight}>
-                <Image source={require('../assets/images/logo.png')} style={styles.logoImage as any} resizeMode="contain" />
+                <Image
+                  source={require('../assets/images/logo.png')}
+                  style={styles.logoImage as any}
+                  resizeMode="contain"
+                />
               </View>
             </View>
 
@@ -136,17 +153,22 @@ export default function HomeScreen({ navigation }: any) {
                 <FlatList
                   data={[...Array(8)].map((_, i) => i)}
                   horizontal
-                  keyExtractor={(item) => String(item)}
+                  keyExtractor={item => String(item)}
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.communityBarContent}
                   renderItem={({ item }) => (
                     <View style={styles.communityItem}>
-                      <View style={[styles.communityCircle, { borderColor: BRAND_ORANGE }] }>
-                         <Image
-                           source={require('../assets/images/pr1.jpg')}
-                           style={styles.communityImage as any}
-                           resizeMode="cover"
-                         />
+                      <View
+                        style={[
+                          styles.communityCircle,
+                          { borderColor: BRAND_ORANGE },
+                        ]}
+                      >
+                        <Image
+                          source={require('../assets/images/pr1.jpg')}
+                          style={styles.communityImage as any}
+                          resizeMode="cover"
+                        />
                       </View>
                     </View>
                   )}
@@ -156,16 +178,24 @@ export default function HomeScreen({ navigation }: any) {
           </>
         ) : (
           <View style={[styles.tiendaTopBar, { marginTop: 18 }]}>
-            <Pressable hitSlop={10}><Text style={[styles.tiendaTopText, { color: BRAND_GRAY }]}>Menu</Text></Pressable>
+            <Pressable hitSlop={10}>
+              <Text style={[styles.tiendaTopText, { color: BRAND_GRAY }]}>
+                Menu
+              </Text>
+            </Pressable>
             <Text style={styles.tiendaTopTitle}>Producto</Text>
-            <Pressable hitSlop={10}><Text style={[styles.tiendaTopText, { color: BRAND_GRAY }]}>Carrete</Text></Pressable>
+            <Pressable hitSlop={10}>
+              <Text style={[styles.tiendaTopText, { color: BRAND_GRAY }]}>
+                Carrete
+              </Text>
+            </Pressable>
           </View>
         )}
 
         {/* Scrollable Main Content */}
         {activeTab === 'experiences' ? (
-          <ExperiencesContent 
-            filter={searchQuery} 
+          <ExperiencesContent
+            filter={searchQuery}
             onToggleSearch={toggleSearch}
             isSearchExpanded={isSearchExpanded}
             searchAnimation={searchAnimation}
@@ -176,7 +206,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Bottom Navigation */}
-        <BottomNavigation 
+        <BottomNavigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
           navigation={navigation}
@@ -191,7 +221,7 @@ const ExperiencesContent = ({
   onToggleSearch,
   isSearchExpanded,
   searchAnimation,
-  addButtonAnimation
+  addButtonAnimation,
 }: {
   filter?: any;
   onToggleSearch: () => void;
@@ -237,48 +267,66 @@ const ExperiencesContent = ({
           ? {
               ...post,
               isLiked: !post.isLiked,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1
+              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
             }
-          : post
-      )
+          : post,
+      ),
     );
   };
-  
+
   // Create header component for FlatList
   const renderHeader = () => (
     <View style={styles.experiencesContainer}>
-      <Text style={[styles.experiencesTitle, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+      <Text
+        style={[
+          styles.experiencesTitle,
+          { color: isDarkMode ? '#f2f2f2' : '#333' },
+        ]}
+      >
         EXPERIENCIAS
       </Text>
-      
+
       {/* Search and Add Button */}
       <View style={styles.searchAddContainer}>
         <Pressable style={styles.searchIconButton} onPress={onToggleSearch}>
-          <Text style={[styles.searchIcon, { color: isDarkMode ? '#666' : '#999' }]}>🔍</Text>
+          <Text
+            style={[styles.searchIcon, { color: isDarkMode ? '#666' : '#999' }]}
+          >
+            🔍
+          </Text>
         </Pressable>
-        
+
         {isSearchExpanded && (
-          <Animated.View style={[
-            styles.searchContainer,
-            {
-              flex: searchAnimation,
-              opacity: searchAnimation,
-            }
-          ]}>
+          <Animated.View
+            style={[
+              styles.searchContainer,
+              {
+                flex: searchAnimation,
+                opacity: searchAnimation,
+              },
+            ]}
+          >
             <TextInput
-              style={[styles.searchInput, { 
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-              }]}
+              style={[
+                styles.searchInput,
+                {
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                },
+              ]}
               placeholder="Search experiences..."
               placeholderTextColor={isDarkMode ? '#666' : '#999'}
               value={filter as string}
-              onChangeText={(text) => {/* Handle search */}}
+              onChangeText={text => {
+                /* Handle search */
+              }}
             />
           </Animated.View>
         )}
-        
-        <Pressable style={[styles.addButton, { backgroundColor: BRAND_ORANGE }]}>
+
+        <Pressable
+          style={[styles.addButton, { backgroundColor: BRAND_ORANGE }]}
+        >
           <Text style={styles.addButtonText}>+</Text>
         </Pressable>
       </View>
@@ -288,34 +336,51 @@ const ExperiencesContent = ({
   return (
     <FlatList
       data={posts}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={item => item.id.toString()}
       ListHeaderComponent={renderHeader}
       renderItem={({ item: post }) => (
-        <View style={[styles.postContainer, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}>
+        <View
+          style={[
+            styles.postContainer,
+            { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
+          ]}
+        >
           {/* Post Header */}
           <View style={styles.postHeader}>
             <View style={styles.postUserInfo}>
-              <View style={[styles.postAvatar, { backgroundColor: BRAND_ORANGE }]} />
-              <Text style={[styles.postUsername, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+              <View
+                style={[styles.postAvatar, { backgroundColor: BRAND_ORANGE }]}
+              />
+              <Text
+                style={[
+                  styles.postUsername,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
                 {post.user}
               </Text>
             </View>
           </View>
-          
+
           {/* Post Image */}
-            <Image
-              source={post.image}
-              style={styles.postImage as any}
-              resizeMode="cover"
-            />
-          
+          <Image
+            source={post.image}
+            style={styles.postImage as any}
+            resizeMode="cover"
+          />
+
           {/* Post Actions */}
           <View style={styles.postActions}>
-            <Pressable 
+            <Pressable
               style={styles.postAction}
               onPress={() => handleLike(post.id)}
             >
-              <Text style={[styles.postActionIcon, { color: post.isLiked ? '#ff3040' : '#000' }]}>
+              <Text
+                style={[
+                  styles.postActionIcon,
+                  { color: post.isLiked ? '#ff3040' : '#000' },
+                ]}
+              >
                 {post.isLiked ? '❤️' : '🤍'}
               </Text>
             </Pressable>
@@ -326,21 +391,36 @@ const ExperiencesContent = ({
               <Text style={styles.postActionIcon}>📤</Text>
             </Pressable>
           </View>
-          
+
           {/* Post Stats */}
           <View style={styles.postStats}>
-            <Text style={[styles.postLikes, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.postLikes,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
               {post.likes} likes
             </Text>
           </View>
-          
+
           {/* Post Caption */}
           <View style={styles.postCaption}>
-            <Text style={[styles.postCaptionText, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
-              <Text style={[styles.postCaptionUser, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.postCaptionText,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.postCaptionUser,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
                 {post.user}
-              </Text>
-              {' '}{post.caption}
+              </Text>{' '}
+              {post.caption}
             </Text>
           </View>
         </View>

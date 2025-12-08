@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, useColorScheme } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
@@ -10,7 +11,11 @@ interface BottomNavigationProps {
   navigation?: any;
 }
 
-export default function BottomNavigation({ activeTab, onTabChange, navigation }: BottomNavigationProps) {
+export default function BottomNavigation({
+  activeTab,
+  onTabChange,
+  navigation,
+}: BottomNavigationProps) {
   const isDarkMode = useColorScheme() === 'dark';
 
   const handleTabPress = (tab: string) => {
@@ -23,49 +28,84 @@ export default function BottomNavigation({ activeTab, onTabChange, navigation }:
   };
 
   return (
-    <View style={[styles.bottomNav, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}>
-      <Pressable 
+    <View
+      style={[
+        styles.bottomNav,
+        { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
+      ]}
+    >
+      <Pressable style={styles.navItem} onPress={() => handleTabPress('home')}>
+        <Icon
+          name="home"
+          size={26}
+          color={activeTab === 'home' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+        <Text
+          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
+        >
+          INICIO
+        </Text>
+      </Pressable>
+      <Pressable
         style={styles.navItem}
         onPress={() => handleTabPress('tienda')}
       >
-        <View style={[styles.navIcon, { backgroundColor: activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY }]} />
-        <Text style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>TIENDA</Text>
+        <Icon
+          name="store"
+          size={26}
+          color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+        <Text
+          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
+        >
+          TIENDA
+        </Text>
       </Pressable>
-      
-      <Pressable 
+
+      <Pressable
         style={styles.navItem}
         onPress={() => handleTabPress('hobbie')}
       >
-        <View style={[styles.navIcon, { backgroundColor: activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY }]} />
-        <Text style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>HOBBIE</Text>
+        <Icon
+          name="star"
+          size={26}
+          color={activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+        <Text
+          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
+        >
+          HOBBIE
+        </Text>
       </Pressable>
-      
-      <Pressable 
-        style={styles.navItem}
-        onPress={() => handleTabPress('chat')}
-      >
-        <View style={[styles.navIcon, { backgroundColor: activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY }]} />
-        <Text style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>CHAT</Text>
+
+      <Pressable style={styles.navItem} onPress={() => handleTabPress('chat')}>
+        <Icon
+          name="chat"
+          size={26}
+          color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+        <Text
+          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
+        >
+          CHAT
+        </Text>
       </Pressable>
-      
-      <Pressable 
+
+      <Pressable
         style={styles.navItem}
         onPress={() => handleTabPress('perfil')}
       >
-        <View style={[
-          styles.perfilIcon, 
-          { 
-            backgroundColor: activeTab === 'perfil' ? BRAND_ORANGE : '#E0E0E0',
-            borderColor: activeTab === 'perfil' ? BRAND_ORANGE : '#E0E0E0'
-          }
-        ]}>
-          <View style={styles.dotsContainer}>
-            <View style={[styles.dot, { backgroundColor: activeTab === 'perfil' ? '#fff' : '#9E9E9E' }]} />
-            <View style={[styles.dot, { backgroundColor: activeTab === 'perfil' ? '#fff' : '#9E9E9E' }]} />
-            <View style={[styles.dot, { backgroundColor: activeTab === 'perfil' ? '#fff' : '#9E9E9E' }]} />
-          </View>
-        </View>
-        <Text style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>PERFIL</Text>
+        <Icon
+          name="person"
+          size={26}
+          color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+
+        <Text
+          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
+        >
+          PERFIL
+        </Text>
       </Pressable>
     </View>
   );
