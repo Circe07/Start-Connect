@@ -297,15 +297,12 @@ Authorization: Bearer <token>
 
 # 🔸 How to initialize Frontend
 
-<<<<<<< HEAD
 ## Download dev tools
 
 ```
 npm install
 ```
 
-=======
->>>>>>> 37787db830dc5256a2ef21cc7ad64e633f60e3e7
 ## First Step
 
 1. Configuration android path sdk -> "frontend/android/local.properties"
