@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNMapsSpecs_autolinked_build",
+		"source" : "C:/Users/dam1/Documents/Start-Connect/frontend/node_modules/react-native-maps/android/src/main/jni"
+	}
+}

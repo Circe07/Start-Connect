@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="./logo.png" alt="StartAndConnect Logo" width="200"/>
-</p>
-
-# 🔸 StartAndConnect
+<img src="./banner.png" alt="StartAndConnect Logo" />
 
 ## 🔸 Overview
 
@@ -298,3 +294,35 @@ Content-Type: application/json
 DELETE /groups/group123/posts/post456/comments/comment789
 Authorization: Bearer <token>
 ```
+
+# 🔸 How to initialize Frontend
+
+## First Step
+
+1. Configuration android path sdk -> "frontend/android/local.properties"
+
+2. Example -> sdk.dir=C:\\Users\\your_user\\AppData\\Local\\Android\\Sdk
+
+## Second Step
+
+```cmd
+npm start // start metro
+npm run android // start app and download in android emulator
+npm run ios // start app and download in ios emulator
+```
+
+## Errors
+
+If you have this -> java.lang.String cannot be cast to java.lang.Boolean
+
+### 1. Check your JDK version -> >= 21
+
+### 2. Check your NodeJS version -> v.20
+
+If you have this -> white screen
+
+### 1. Close App -> Emulator
+
+### 2. Restart metro server -> terminal(recommend: install warp)
+
+### 3. When Metro is run -> open app
