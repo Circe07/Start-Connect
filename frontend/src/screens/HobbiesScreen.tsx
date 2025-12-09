@@ -10,10 +10,6 @@ import {
   useColorScheme,
 } from 'react-native';
 import { Dimensions } from 'react-native';
-import {
-  SafeAreaView,
-} from 'react-native-safe-area-context';
-
 // React Native Maps import
 import MapView, { Marker, Callout } from 'react-native-maps';
 
@@ -24,9 +20,15 @@ const DATA = {
   football: [require('../assets/images/hobbies/football/5.jpg')],
   basketball: [require('../assets/images/hobbies/basketball/2.jpg')],
   cycling: [require('../assets/images/hobbies/cycling/4.jpg')],
-  martialArt: [require('../assets/images/hobbies/martialArt/3.jpg'), require('../assets/images/hobbies/martialArt/6.jpg')],
+  martialArt: [
+    require('../assets/images/hobbies/martialArt/3.jpg'),
+    require('../assets/images/hobbies/martialArt/6.jpg'),
+  ],
   mClimbing: [require('../assets/images/hobbies/mClimbing/9.jpg')],
-  ski: [require('../assets/images/hobbies/ski/1.jpg'), require('../assets/images/hobbies/ski/7.jpg')],
+  ski: [
+    require('../assets/images/hobbies/ski/1.jpg'),
+    require('../assets/images/hobbies/ski/7.jpg'),
+  ],
   surf: [require('../assets/images/hobbies/surf/8.jpg')],
 };
 
@@ -40,7 +42,7 @@ export default function HobbiesScreen({ query = '' as any }) {
   const screenWidth = Dimensions.get('window').width;
   const gap = 2; // 2px gap between images
 
-  const itemSize = Math.floor((screenWidth - (2 * gap)) / 3); // two inner gaps per row
+  const itemSize = Math.floor((screenWidth - 2 * gap) / 3); // two inner gaps per row
 
   const normalized = (query as string)?.toLowerCase?.().trim() ?? '';
   const filteredImages = useMemo(() => {
@@ -48,7 +50,9 @@ export default function HobbiesScreen({ query = '' as any }) {
     const target = normalized;
 
     // collect datasets where the key starts with the query
-    const matchedKeys = Object.keys(DATA).filter((key) => key.toLowerCase().startsWith(target));
+    const matchedKeys = Object.keys(DATA).filter(key =>
+      key.toLowerCase().startsWith(target),
+    );
 
     // also support common stems
     if (matchedKeys.length === 0) {
@@ -66,148 +70,164 @@ export default function HobbiesScreen({ query = '' as any }) {
         .filter(([stem]) => target.startsWith(stem))
         .map(([, key]) => key);
       if (stemHit.length === 0) return [];
-      return stemHit.flatMap((k) => DATA[k]);
+      return stemHit.flatMap(k => DATA[k]);
     }
 
-    return matchedKeys.flatMap((k) => DATA[k as keyof typeof DATA]);
+    return matchedKeys.flatMap(k => DATA[k as keyof typeof DATA]);
   }, [normalized]);
 
   return (
     <ScrollView style={styles.mainContent} showsVerticalScrollIndicator={false}>
-          {/* Hobbies Title */}
-          <Text style={[styles.hobbiesTitle, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
-            HOBBIES
-          </Text>
+      {/* Hobbies Title */}
+      <Text
+        style={[
+          styles.hobbiesTitle,
+          { color: isDarkMode ? '#f2f2f2' : '#333' },
+        ]}
+      >
+        HOBBIES
+      </Text>
 
-          {/* Label Tabs */}
-          <View style={styles.labelTabsContainer}>
-            {labels.map((label, index) => (
-              <Pressable
-                key={index}
-                style={[
-                  styles.labelTab,
-                  {
-                    backgroundColor: activeLabel === label 
-                      ? (isDarkMode ? '#333' : '#f0f0f0')
-                      : 'transparent'
-                  }
-                ]}
-                onPress={() => setActiveLabel(label)}
-              >
-                <Text style={[
-                  styles.labelTabText,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' }
-                ]}>
-                  {label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+      {/* Label Tabs */}
+      <View style={styles.labelTabsContainer}>
+        {labels.map((label, index) => (
+          <Pressable
+            key={index}
+            style={[
+              styles.labelTab,
+              {
+                backgroundColor:
+                  activeLabel === label
+                    ? isDarkMode
+                      ? '#333'
+                      : '#f0f0f0'
+                    : 'transparent',
+              },
+            ]}
+            onPress={() => setActiveLabel(label)}
+          >
+            <Text
+              style={[
+                styles.labelTabText,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              {label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
 
-          {/* Content based on active label */}
-          {activeLabel === 'Label 2' ? (
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                initialRegion={{
-                  latitude: 41.3851,
-                  longitude: 2.1734,
-                  latitudeDelta: 0.05,
-                  longitudeDelta: 0.05,
-                }}
-                showsUserLocation={false}
-                showsMyLocationButton={false}
-                showsCompass={true}
-                showsScale={true}
-                zoomEnabled={true}
-                scrollEnabled={true}
-                pitchEnabled={true}
-                rotateEnabled={true}
-              >
-                {/* Barcelona City Center */}
-                <Marker
-                  coordinate={{
-                    latitude: 41.3851,
-                    longitude: 2.1734,
-                  }}
-                  title="Barcelona City Center"
-                  description="Historic city center of Barcelona"
-                >
-                  <View style={styles.customMarker}>
-                    <Text style={styles.markerText}>🏛️</Text>
-                  </View>
-                  <Callout>
-                    <View style={styles.calloutContainer}>
-                      <Text style={styles.calloutTitle}>Barcelona City Center</Text>
-                      <Text style={styles.calloutDescription}>Historic city center of Barcelona</Text>
-                    </View>
-                  </Callout>
-                </Marker>
+      {/* Content based on active label */}
+      {activeLabel === 'Label 2' ? (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: 41.3851,
+              longitude: 2.1734,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }}
+            showsUserLocation={false}
+            showsMyLocationButton={false}
+            showsCompass={true}
+            showsScale={true}
+            zoomEnabled={true}
+            scrollEnabled={true}
+            pitchEnabled={true}
+            rotateEnabled={true}
+          >
+            {/* Barcelona City Center */}
+            <Marker
+              coordinate={{
+                latitude: 41.3851,
+                longitude: 2.1734,
+              }}
+              title="Barcelona City Center"
+              description="Historic city center of Barcelona"
+            >
+              <View style={styles.customMarker}>
+                <Text style={styles.markerText}>🏛️</Text>
+              </View>
+              <Callout>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>Barcelona City Center</Text>
+                  <Text style={styles.calloutDescription}>
+                    Historic city center of Barcelona
+                  </Text>
+                </View>
+              </Callout>
+            </Marker>
 
-                {/* Park Güell */}
-                <Marker
-                  coordinate={{
-                    latitude: 41.4036,
-                    longitude: 2.1744,
-                  }}
-                  title="Park Güell Area"
-                  description="Gaudí's famous park and architectural masterpiece"
-                >
-                  <View style={styles.customMarker}>
-                    <Text style={styles.markerText}>🌳</Text>
-                  </View>
-                  <Callout>
-                    <View style={styles.calloutContainer}>
-                      <Text style={styles.calloutTitle}>Park Güell Area</Text>
-                      <Text style={styles.calloutDescription}>Gaudí's famous park and architectural masterpiece</Text>
-                    </View>
-                  </Callout>
-                </Marker>
+            {/* Park Güell */}
+            <Marker
+              coordinate={{
+                latitude: 41.4036,
+                longitude: 2.1744,
+              }}
+              title="Park Güell Area"
+              description="Gaudí's famous park and architectural masterpiece"
+            >
+              <View style={styles.customMarker}>
+                <Text style={styles.markerText}>🌳</Text>
+              </View>
+              <Callout>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>Park Güell Area</Text>
+                  <Text style={styles.calloutDescription}>
+                    Gaudí's famous park and architectural masterpiece
+                  </Text>
+                </View>
+              </Callout>
+            </Marker>
 
-                {/* Sagrada Familia */}
-                <Marker
-                  coordinate={{
-                    latitude: 41.3809,
-                    longitude: 2.1228,
-                  }}
-                  title="Sagrada Familia Area"
-                  description="Antoni Gaudí's unfinished masterpiece"
-                >
-                  <View style={styles.customMarker}>
-                    <Text style={styles.markerText}>⛪</Text>
-                  </View>
-                  <Callout>
-                    <View style={styles.calloutContainer}>
-                      <Text style={styles.calloutTitle}>Sagrada Familia Area</Text>
-                      <Text style={styles.calloutDescription}>Antoni Gaudí's unfinished masterpiece</Text>
-                    </View>
-                  </Callout>
-                </Marker>
-              </MapView>
-            </View>
-          ) : (
-            <View style={styles.hobbyGrid}>
-              {filteredImages.map((img: any, index: number) => (
-                <Pressable
-                  key={index}
-                  style={[
-                    styles.hobbyCard,
-                    {
-                      width: itemSize,
-                      marginRight: (index % 3) === 2 ? 0 : gap,
-                      marginBottom: gap,
-                    },
-                  ]}
-                >
-                  <Image
-                    source={img}
-                    style={[styles.hobbyImage, { height: itemSize }]}
-                    resizeMode="cover"
-                  />
-                </Pressable>
-              ))}
-            </View>
-          )}
+            {/* Sagrada Familia */}
+            <Marker
+              coordinate={{
+                latitude: 41.3809,
+                longitude: 2.1228,
+              }}
+              title="Sagrada Familia Area"
+              description="Antoni Gaudí's unfinished masterpiece"
+            >
+              <View style={styles.customMarker}>
+                <Text style={styles.markerText}>⛪</Text>
+              </View>
+              <Callout>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>Sagrada Familia Area</Text>
+                  <Text style={styles.calloutDescription}>
+                    Antoni Gaudí's unfinished masterpiece
+                  </Text>
+                </View>
+              </Callout>
+            </Marker>
+          </MapView>
+        </View>
+      ) : (
+        <View style={styles.hobbyGrid}>
+          {filteredImages.map((img: any, index: number) => (
+            <Pressable
+              key={index}
+              style={[
+                styles.hobbyCard,
+                {
+                  width: itemSize,
+                  marginRight: index % 3 === 2 ? 0 : gap,
+                  marginBottom: gap,
+                },
+              ]}
+            >
+              <Image
+                source={img}
+                style={[styles.hobbyImage, { height: itemSize }]}
+                resizeMode="cover"
+              />
+            </Pressable>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -216,7 +236,7 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     paddingHorizontal: 0,
-    marginTop: 16
+    marginTop: 16,
   },
   hobbiesTitle: {
     fontSize: 24,

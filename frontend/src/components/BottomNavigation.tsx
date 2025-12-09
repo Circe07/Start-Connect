@@ -1,8 +1,13 @@
+/**
+ * Bottom Navigation Component
+ * This component represents the bottom navigation bar of the app.
+ */
+
 import React from 'react';
-import { View, Text, Pressable, useColorScheme } from 'react-native';
+import { View, Pressable, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const BRAND_ORANGE = '#FF7F3F';
+const BRAND_ORANGE = '#ff5703ff';
 const BRAND_GRAY = '#9E9E9E';
 
 interface BottomNavigationProps {
@@ -40,26 +45,28 @@ export default function BottomNavigation({
           size={26}
           color={activeTab === 'home' ? BRAND_ORANGE : BRAND_GRAY}
         />
-        <Text
-          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
-        >
-          INICIO
-        </Text>
       </Pressable>
+
+      <Pressable
+        style={styles.navItem}
+        onPress={() => handleTabPress('search')}
+      >
+        <Icon
+          name="search"
+          size={26}
+          color={activeTab === 'search' ? BRAND_ORANGE : BRAND_GRAY}
+        />
+      </Pressable>
+
       <Pressable
         style={styles.navItem}
         onPress={() => handleTabPress('tienda')}
       >
         <Icon
-          name="store"
+          name="shopping-bag"
           size={26}
           color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
         />
-        <Text
-          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
-        >
-          TIENDA
-        </Text>
       </Pressable>
 
       <Pressable
@@ -67,28 +74,18 @@ export default function BottomNavigation({
         onPress={() => handleTabPress('hobbie')}
       >
         <Icon
-          name="star"
+          name="fitness-center"
           size={26}
           color={activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY}
         />
-        <Text
-          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
-        >
-          HOBBIE
-        </Text>
       </Pressable>
 
       <Pressable style={styles.navItem} onPress={() => handleTabPress('chat')}>
         <Icon
-          name="chat"
+          name="wechat"
           size={26}
           color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
         />
-        <Text
-          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
-        >
-          CHAT
-        </Text>
       </Pressable>
 
       <Pressable
@@ -100,12 +97,6 @@ export default function BottomNavigation({
           size={26}
           color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
         />
-
-        <Text
-          style={[styles.navLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}
-        >
-          PERFIL
-        </Text>
       </Pressable>
     </View>
   );

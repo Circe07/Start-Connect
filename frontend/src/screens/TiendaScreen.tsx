@@ -1,5 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, useColorScheme, Pressable, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  useColorScheme,
+  Pressable,
+  Dimensions,
+} from 'react-native';
 
 type Product = {
   id: string;
@@ -9,10 +18,30 @@ type Product = {
 };
 
 const PRODUCTS: Product[] = [
-  { id: '1', title: 'Pack Iniciación', price: '200 €', image: require('../assets/images/pr1.jpg') },
-  { id: '2', title: 'Sportiva Theory W', price: '145,99 €', image: require('../assets/images/pr2.png') },
-  { id: '3', title: 'Arnés Escalada', price: '89,99 €', image: require('../assets/images/pr3.jpg') },
-  { id: '4', title: 'Mosquetón', price: '12,50 €', image: require('../assets/images/pr4.png') },
+  {
+    id: '1',
+    title: 'Pack Iniciación',
+    price: '200 €',
+    image: require('@/assets/images/pr1.jpg'),
+  },
+  {
+    id: '2',
+    title: 'Sportiva Theory W',
+    price: '145,99 €',
+    image: require('@/assets/images/pr2.png'),
+  },
+  {
+    id: '3',
+    title: 'Arnés Escalada',
+    price: '89,99 €',
+    image: require('@/assets/images/pr3.jpg'),
+  },
+  {
+    id: '4',
+    title: 'Mosquetón',
+    price: '12,50 €',
+    image: require('@/assets/images/pr4.png'),
+  },
 ];
 
 export default function TiendaScreen() {
@@ -23,11 +52,40 @@ export default function TiendaScreen() {
   const cardWidth = Math.floor((screenWidth - side * 2 - gap) / 2);
 
   const renderItem = ({ item, index }: { item: Product; index: number }) => (
-    <View style={[styles.card, { width: cardWidth, marginRight: (index % 2) === 1 ? 0 : gap }] }>
-      <Image source={item.image} style={[styles.cardImage, { width: '100%', height: cardWidth }]} resizeMode="contain" />
-      <View style={[styles.caption, { backgroundColor: isDarkMode ? '#222' : '#f4f4f4' }]}>
-        <Text style={[styles.captionTitle, { color: isDarkMode ? '#f2f2f2' : '#333' }]} numberOfLines={1}>{item.title}</Text>
-        <Text style={[styles.captionPrice, { color: isDarkMode ? '#dcdcdc' : '#666' }]}>{item.price}</Text>
+    <View
+      style={[
+        styles.card,
+        { width: cardWidth, marginRight: index % 2 === 1 ? 0 : gap },
+      ]}
+    >
+      <Image
+        source={item.image}
+        style={[styles.cardImage, { width: '100%', height: cardWidth }]}
+        resizeMode="contain"
+      />
+      <View
+        style={[
+          styles.caption,
+          { backgroundColor: isDarkMode ? '#222' : '#f4f4f4' },
+        ]}
+      >
+        <Text
+          style={[
+            styles.captionTitle,
+            { color: isDarkMode ? '#f2f2f2' : '#333' },
+          ]}
+          numberOfLines={1}
+        >
+          {item.title}
+        </Text>
+        <Text
+          style={[
+            styles.captionPrice,
+            { color: isDarkMode ? '#dcdcdc' : '#666' },
+          ]}
+        >
+          {item.price}
+        </Text>
       </View>
     </View>
   );
@@ -35,11 +93,14 @@ export default function TiendaScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        contentContainerStyle={[styles.gridContent, { paddingTop: 7, paddingHorizontal: side }]}
+        contentContainerStyle={[
+          styles.gridContent,
+          { paddingTop: 7, paddingHorizontal: side },
+        ]}
         numColumns={2}
         columnWrapperStyle={{ marginBottom: gap }}
         data={PRODUCTS}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
       />
@@ -101,5 +162,3 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 });
-
-
