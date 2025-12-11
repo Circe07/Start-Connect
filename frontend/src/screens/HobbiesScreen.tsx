@@ -5,10 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  TextInput,
   Pressable,
   useColorScheme,
 } from 'react-native';
+
 import { Dimensions } from 'react-native';
 // React Native Maps import
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -17,19 +17,19 @@ const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
 
 const DATA = {
-  football: [require('../assets/images/hobbies/football/5.jpg')],
-  basketball: [require('../assets/images/hobbies/basketball/2.jpg')],
-  cycling: [require('../assets/images/hobbies/cycling/4.jpg')],
+  football: [require('@/assets/images/hobbies/football/5.jpg')],
+  basketball: [require('@/assets/images/hobbies/basketball/2.jpg')],
+  cycling: [require('@/assets/images/hobbies/cycling/4.jpg')],
   martialArt: [
-    require('../assets/images/hobbies/martialArt/3.jpg'),
-    require('../assets/images/hobbies/martialArt/6.jpg'),
+    require('@/assets/images/hobbies/martialArt/3.jpg'),
+    require('@/assets/images/hobbies/martialArt/6.jpg'),
   ],
-  mClimbing: [require('../assets/images/hobbies/mClimbing/9.jpg')],
+  mClimbing: [require('@/assets/images/hobbies/mClimbing/9.jpg')],
   ski: [
-    require('../assets/images/hobbies/ski/1.jpg'),
-    require('../assets/images/hobbies/ski/7.jpg'),
+    require('@/assets/images/hobbies/ski/1.jpg'),
+    require('@/assets/images/hobbies/ski/7.jpg'),
   ],
-  surf: [require('../assets/images/hobbies/surf/8.jpg')],
+  surf: [require('@/assets/images/hobbies/surf/8.jpg')],
 };
 
 const ALL_IMAGES = Object.values(DATA).flat();
