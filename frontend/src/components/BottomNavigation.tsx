@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, Pressable, useColorScheme } from 'react-native';
+import { View, Pressable, useColorScheme, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BRAND_ORANGE = '#ff5703ff';
@@ -63,7 +63,7 @@ export default function BottomNavigation({
         onPress={() => handleTabPress('tienda')}
       >
         <Icon
-          name="shopping-bag"
+          name="shopping-cart"
           size={26}
           color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
         />
@@ -102,13 +102,17 @@ export default function BottomNavigation({
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row' as const,
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   navItem: {
     flex: 1,
@@ -141,4 +145,4 @@ const styles = {
     fontSize: 12,
     fontWeight: '500' as const,
   },
-};
+});

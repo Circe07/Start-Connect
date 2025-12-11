@@ -15,8 +15,8 @@ import {
 } from 'react-native-safe-area-context';
 import { getUserById as getFirebaseUserById, updateUser, signOut, getCurrentUser as getFirebaseCurrentUser, User } from '../services/firebase';
 import { getCurrentUser as getAPICurrentUser, getUserById as getAPIUserById, updateCurrentUser, getAuthToken } from '../services/api';
-import { getFallbackUserData, shouldUseFallback } from '../utils/firestoreFallback';
-import BottomNavigation from '../components/BottomNavigation';
+import { getFallbackUserData, shouldUseFallback } from '@/utils/firestoreFallback';
+import BottomNavigation from '@/components/BottomNavigation';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';

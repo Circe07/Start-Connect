@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // import { configureGoogleSignIn, signInWithGoogle } from '../services/googleAuth';
-import { loginUser, getCurrentUser, getAuthToken } from '../services/api';
-import { validateEmail, validatePassword } from '../utils/authDebug';
+import { loginUser, getCurrentUser, getAuthToken } from '@/services/api';
+import { validateEmail, validatePassword } from '@/utils/authDebug';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#060505ff';

@@ -81,3 +81,7 @@ flutter_export_environment.sh
 
 # Scripts de utilidad
 .getToken.js
+
+
+# Scripts unicos e individuales
+.local.properties

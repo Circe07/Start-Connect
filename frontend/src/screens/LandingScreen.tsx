@@ -7,9 +7,7 @@ import {
   Pressable,
   useColorScheme,
 } from 'react-native';
-import {
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
@@ -18,24 +16,51 @@ export default function LandingScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}> 
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      ]}
+    >
       <View style={styles.container}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/images/logo.png')}
+            source={require('@/assets/images/logo.png')}
             resizeMode="contain"
             style={styles.logoImage}
           />
         </View>
 
-        <Text style={[styles.title, { color: isDarkMode ? '#f2f2f2' : '#666' }]}>Bienvenido</Text>
-        <Text style={[styles.subtitle, { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' }]}>¿Listo para emprender tu nuevo hobbie?</Text>
+        <Text
+          style={[styles.title, { color: isDarkMode ? '#f2f2f2' : '#666' }]}
+        >
+          Bienvenido
+        </Text>
+        <Text
+          style={[
+            styles.subtitle,
+            { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
+          ]}
+        >
+          ¿Listo para emprender tu nuevo hobbie?
+        </Text>
 
-        <Pressable style={({ pressed }) => [styles.signInButton, { opacity: pressed ? 0.85 : 1 }]} onPress={() => navigation.navigate('Login')}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.signInButton,
+            { opacity: pressed ? 0.85 : 1 },
+          ]}
+          onPress={() => navigation.navigate('Login')}
+        >
           <Text style={styles.signInText}>Sign in</Text>
         </Pressable>
 
-        <Text style={[styles.footerText, { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' }]}>
+        <Text
+          style={[
+            styles.footerText,
+            { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' },
+          ]}
+        >
           Don't have an account?{' '}
           <Pressable onPress={() => navigation.navigate('SignUp')}>
             <Text style={[styles.footerLink]}>Sign up here</Text>
@@ -68,7 +93,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  
+
   title: {
     fontSize: 28,
     fontWeight: '600',
@@ -102,5 +127,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-

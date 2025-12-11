@@ -13,3 +13,6 @@ C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/a
 C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
 C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
 C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/RNVectorIconsSpec_autolinked_build/CMakeFiles/react_codegen_RNVectorIconsSpec.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/RNVectorIconsSpec_autolinked_build/CMakeFiles/edit_cache.dir
+C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/RNVectorIconsSpec_autolinked_build/CMakeFiles/rebuild_cache.dir

@@ -48,6 +48,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/RNMapsSpecs_autolinked_build/cmake_install.cmake")
   include("C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/safeareacontext_autolinked_build/cmake_install.cmake")
   include("C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/rnscreens_autolinked_build/cmake_install.cmake")
+  include("C:/Users/dam1/Documents/Start-Connect/frontend/android/app/.cxx/Debug/6b5p5q1y/arm64-v8a/RNVectorIconsSpec_autolinked_build/cmake_install.cmake")
 
 endif()
 

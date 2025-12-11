@@ -14,7 +14,7 @@ import {
 import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
-import { registerUser } from '../services/api';
+import { registerUser } from '@/services/api';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
