@@ -306,7 +306,7 @@ export default function LoginScreen({ navigation }: any) {
               { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
             ]}
           >
-            Welcome back
+            Sign in to your account
           </Text>
         </View>
 
@@ -425,7 +425,7 @@ export default function LoginScreen({ navigation }: any) {
             disabled={isLoading}
           >
             <Image
-              source={require('../assets/images/icon/google.png')}
+              source={require('@/assets/images/icon/google.png')}
               style={styles.googleIcon}
               resizeMode="contain"
             />
@@ -448,7 +448,7 @@ export default function LoginScreen({ navigation }: any) {
             disabled={isLoading}
           >
             <Image
-              source={require('../assets/images/icon/apple.png')}
+              source={require('@/assets/images/icon/apple.png')}
               style={styles.appleIcon}
               resizeMode="contain"
             />

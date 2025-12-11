@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Image,
   TextInput,
   Pressable,
@@ -13,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HobbiesScreen from './HobbiesScreen';
-import BottomNavigation from '../components/BottomNavigation';
+import BottomNavigation from '@/components/BottomNavigation';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
@@ -22,6 +21,7 @@ const BRAND_GRAY = '#9E9E9E';
 import TiendaScreen from './TiendaScreen';
 import SearchUser from './SearchUser';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ProfileScreen from './ProfileScreen';
 
 const HobbieScreen = () => <HobbiesScreen />;
 
@@ -33,17 +33,7 @@ const ChatScreen = () => (
 );
 
 const PerfilScreen = ({ navigation }: any) => {
-  // Navigate directly to Profile screen
-  React.useEffect(() => {
-    navigation.navigate('Profile');
-  }, [navigation]);
-
-  return (
-    <View style={styles.tabContent}>
-      <Text style={styles.tabTitle}>PERFIL</Text>
-      <Text style={styles.tabSubtitle}>Loading profile...</Text>
-    </View>
-  );
+  return <ProfileScreen navigation={navigation} />;
 };
 
 export default function HomeScreen({ navigation }: any) {
@@ -92,7 +82,16 @@ export default function HomeScreen({ navigation }: any) {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeScreen />;
+      case 'experiences':
+        return (
+          <ExperiencesContent
+            filter={searchQuery}
+            onToggleSearch={toggleSearch}
+            isSearchExpanded={isSearchExpanded}
+            searchAnimation={searchAnimation}
+            addButtonAnimation={addButtonAnimation}
+          />
+        );
       case 'search':
         return <SearchUser />;
       case 'tienda':
@@ -104,15 +103,7 @@ export default function HomeScreen({ navigation }: any) {
       case 'perfil':
         return <PerfilScreen navigation={navigation} />;
       default:
-        return (
-          <ExperiencesContent
-            filter={searchQuery}
-            onToggleSearch={toggleSearch}
-            isSearchExpanded={isSearchExpanded}
-            searchAnimation={searchAnimation}
-            addButtonAnimation={addButtonAnimation}
-          />
-        );
+        return <Text>404- Tab Not Found</Text>;
     }
   };
 
@@ -130,26 +121,22 @@ export default function HomeScreen({ navigation }: any) {
             <View style={styles.header}>
               <View style={styles.headerLeft}>
                 <Pressable onPress={() => setActiveTab('experiences')}>
-                  <View style={styles.headerTitleContainer}>
-                    <Text
-                      style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}
-                    >
-                      START&
-                    </Text>
-                    <Text
-                      style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}
-                    >
-                      CONNECT
-                    </Text>
-                  </View>
+                  <Icon name="add" size={30} color={BRAND_ORANGE} />
                 </Pressable>
               </View>
               <View style={styles.headerRight}>
-                <Image
-                  source={require('../assets/images/logo.png')}
-                  style={styles.logoImage as any}
-                  resizeMode="contain"
-                />
+                <View style={styles.headerTitleContainer}>
+                  <Text
+                    style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}
+                  >
+                    START&
+                  </Text>
+                  <Text
+                    style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}
+                  >
+                    CONNECT
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -171,7 +158,7 @@ export default function HomeScreen({ navigation }: any) {
                         ]}
                       >
                         <Image
-                          source={require('../assets/images/pr1.jpg')}
+                          source={require('@/assets/images/pr1.jpg')}
                           style={styles.communityImage as any}
                           resizeMode="cover"
                         />
@@ -199,17 +186,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Scrollable Main Content */}
-        {activeTab === 'experiences' ? (
-          <ExperiencesContent
-            filter={searchQuery}
-            onToggleSearch={toggleSearch}
-            isSearchExpanded={isSearchExpanded}
-            searchAnimation={searchAnimation}
-            addButtonAnimation={addButtonAnimation}
-          />
-        ) : (
-          renderTabContent()
-        )}
+        {renderTabContent()}
 
         {/* Bottom Navigation */}
         <BottomNavigation
@@ -283,23 +260,14 @@ const ExperiencesContent = ({
   // Create header component for FlatList
   const renderHeader = () => (
     <View style={styles.experiencesContainer}>
-      <Text
-        style={[
-          styles.experiencesTitle,
-          { color: isDarkMode ? '#f2f2f2' : '#333' },
-        ]}
-      >
-        EXPERIENCIAS
-      </Text>
-
       {/* Search and Add Button */}
       <View style={styles.searchAddContainer}>
         <Pressable style={styles.searchIconButton} onPress={onToggleSearch}>
-          <Text
-            style={[styles.searchIcon, { color: isDarkMode ? '#666' : '#999' }]}
-          >
-            🔍
-          </Text>
+          <Icon
+            name="search"
+            size={30}
+            style={{ color: isDarkMode ? '#666' : '#999' }}
+          />
         </Pressable>
 
         {isSearchExpanded && (
@@ -333,7 +301,7 @@ const ExperiencesContent = ({
         <Pressable
           style={[styles.addButton, { backgroundColor: BRAND_ORANGE }]}
         >
-          <Text style={styles.addButtonText}>+</Text>
+          <Icon name="add" size={27} style={styles.addButtonText} />
         </Pressable>
       </View>
     </View>
@@ -615,8 +583,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    width: 44,
-    height: 44,
+    width: 24,
+    height: 24,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
@@ -627,8 +595,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   searchIconButton: {
     padding: 12,
@@ -638,9 +604,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'transparent',
   },
-  searchIcon: {
-    fontSize: 20,
-  },
+
   postContainer: {
     marginBottom: 16,
     borderRadius: 8,

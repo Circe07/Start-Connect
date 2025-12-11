@@ -3,6 +3,7 @@
  * This component represents the bottom navigation bar of the app.
  */
 
+import HomeScreen from '@/screens/HomeScreen';
 import React from 'react';
 import { View, Pressable, useColorScheme, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -24,12 +25,7 @@ export default function BottomNavigation({
   const isDarkMode = useColorScheme() === 'dark';
 
   const handleTabPress = (tab: string) => {
-    if (tab === 'perfil' && navigation) {
-      // Navigate to Profile screen
-      navigation.navigate('Profile');
-    } else {
-      onTabChange(tab);
-    }
+    onTabChange(tab);
   };
 
   return (
@@ -39,11 +35,14 @@ export default function BottomNavigation({
         { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
       ]}
     >
-      <Pressable style={styles.navItem} onPress={() => handleTabPress('home')}>
+      <Pressable
+        style={styles.navItem}
+        onPress={() => handleTabPress('experiences')}
+      >
         <Icon
           name="home"
           size={26}
-          color={activeTab === 'home' ? BRAND_ORANGE : BRAND_GRAY}
+          color={activeTab === 'experiences' ? BRAND_ORANGE : BRAND_GRAY}
         />
       </Pressable>
 

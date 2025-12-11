@@ -11,9 +11,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import {
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { registerUser } from '@/services/api';
 
 const BRAND_ORANGE = '#FF7F3F';
@@ -64,15 +62,15 @@ export default function SignUpScreen({ navigation }: any) {
     if (bmi < 18.5) {
       // Underweight - lighter yellow with more transparency
       const intensity = Math.max(0, Math.min((18.5 - bmi) / 10, 1));
-      const alpha = 0.2 + (intensity * 0.2); // 0.2 → 0.4 (lighter)
+      const alpha = 0.2 + intensity * 0.2; // 0.2 → 0.4 (lighter)
       return `rgba(255, 204, 0, ${Math.min(alpha, 0.4)})`;
     } else if (bmi > 25) {
       // Overweight - lighter red with more transparency
       const intensity = Math.max(0, Math.min((bmi - 25) / 15, 1));
-      const alpha = 0.2 + (intensity * 0.2); // 0.2 → 0.4 (lighter)
+      const alpha = 0.2 + intensity * 0.2; // 0.2 → 0.4 (lighter)
       return `rgba(255, 100, 100, ${Math.min(alpha, 0.4)})`;
     }
-    
+
     // Normal weight - default grey
     return isDarkMode ? '#1a1a1a' : '#f8f8f8';
   };
@@ -84,19 +82,19 @@ export default function SignUpScreen({ navigation }: any) {
     if (bmi < 18.5) {
       // Underweight - trend toward pure yellow placeholder as BMI gets lower
       const intensity = Math.max(0, Math.min((18.5 - bmi) / 10, 1));
-      const alpha = 0.65 + (intensity * 0.3); // 0.65 → 0.95
+      const alpha = 0.65 + intensity * 0.3; // 0.65 → 0.95
       return `rgba(255, 204, 0, ${Math.min(alpha, 0.95)})`;
     } else if (bmi > 25) {
       // Overweight - trend toward pure red placeholder as BMI gets higher
       const intensity = Math.max(0, Math.min((bmi - 25) / 15, 1));
-      const alpha = 0.65 + (intensity * 0.3); // 0.65 → 0.95
+      const alpha = 0.65 + intensity * 0.3; // 0.65 → 0.95
       return `rgba(198, 0, 0, ${Math.min(alpha, 0.95)})`;
     }
-    
+
     // Normal weight - keep dark placeholder
     return '#666';
   };
-  
+
   // Form state
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -119,23 +117,30 @@ export default function SignUpScreen({ navigation }: any) {
     Alert.alert(
       'Profile Picture',
       'Profile image selection will be implemented when we connect to Firebase',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
-
   const toggleInterest = (interestId: string) => {
-    setSelectedInterests(prev => 
+    setSelectedInterests(prev =>
       prev.includes(interestId)
         ? prev.filter(id => id !== interestId)
-        : [...prev, interestId]
+        : [...prev, interestId],
     );
   };
 
   const handleCreateAccount = async () => {
     // Validation
-    if (!name.trim() || !firstSurname.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields (Name, First Surname, Email, Password)');
+    if (
+      !name.trim() ||
+      !firstSurname.trim() ||
+      !email.trim() ||
+      !password.trim()
+    ) {
+      Alert.alert(
+        'Error',
+        'Please fill in all required fields (Name, First Surname, Email, Password)',
+      );
       return;
     }
 
@@ -144,9 +149,17 @@ export default function SignUpScreen({ navigation }: any) {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
+    }
+
+    const regexPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regexPassword.test(password)) {
+      Alert.alert(
+        'Error',
+        'Password must contain at least one letter, one number, and one special character',
+      );
     }
 
     if (!dataConsent) {
@@ -160,7 +173,7 @@ export default function SignUpScreen({ navigation }: any) {
       // Generate username from name if not provided
       // The API expects username, so we'll create one from the name
       const username = email.trim().split('@')[0]; // Use email prefix as username
-      
+
       // Prepare user data for API registration
       // The API register endpoint expects: email, password, username
       // Additional fields can be sent if the API supports them
@@ -193,7 +206,7 @@ export default function SignUpScreen({ navigation }: any) {
       console.log('📝 Registering user with API...');
       console.log('📧 Email:', registerData.email);
       console.log('👤 Username:', registerData.username);
-      
+
       // Register user via API
       const result = await registerUser(registerData);
 
@@ -201,22 +214,18 @@ export default function SignUpScreen({ navigation }: any) {
 
       if (result.success) {
         console.log('✅ Registration successful!');
-        Alert.alert(
-          'Success!',
-          'Your account has been created successfully!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Login')
-            }
-          ]
-        );
+        Alert.alert('Success!', 'Your account has been created successfully!', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ]);
       } else {
         console.error('❌ Registration failed:', result.error);
         Alert.alert(
           'Error',
           result.error || 'Failed to create account. Please try again.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
       }
     } catch (error: any) {
@@ -225,7 +234,7 @@ export default function SignUpScreen({ navigation }: any) {
       Alert.alert(
         'Error',
         error.message || 'An unexpected error occurred. Please try again.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }
   };
@@ -234,9 +243,17 @@ export default function SignUpScreen({ navigation }: any) {
     // Auto-format date as DD/MM/YYYY
     const cleaned = text.replace(/\D/g, '');
     if (cleaned.length >= 8) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8);
+      return (
+        cleaned.slice(0, 2) +
+        '/' +
+        cleaned.slice(2, 4) +
+        '/' +
+        cleaned.slice(4, 8)
+      );
     } else if (cleaned.length >= 4) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4);
+      return (
+        cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4)
+      );
     } else if (cleaned.length >= 2) {
       return cleaned.slice(0, 2) + '/' + cleaned.slice(2);
     }
@@ -244,15 +261,29 @@ export default function SignUpScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      ]}
+    >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTitleContainer}>
-            <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>CREATE</Text>
-            <Text style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}>ACCOUNT</Text>
+            <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>
+              CREATE
+            </Text>
+            <Text style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}>
+              ACCOUNT
+            </Text>
           </View>
-          <Text style={[styles.subtitle, { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' }]}>
+          <Text
+            style={[
+              styles.subtitle,
+              { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
+            ]}
+          >
             Start a habbit and connect
           </Text>
         </View>
@@ -260,18 +291,34 @@ export default function SignUpScreen({ navigation }: any) {
         <View style={styles.form}>
           {/* Profile Picture */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel,{ color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
               Profile Picture
             </Text>
-            <Pressable 
-              style={[styles.imagePickerContainer, { borderColor: isDarkMode ? '#444' : '#ccc' }]}
+            <Pressable
+              style={[
+                styles.imagePickerContainer,
+                { borderColor: isDarkMode ? '#444' : '#ccc' },
+              ]}
               onPress={handleImagePicker}
             >
               {profileImage ? (
-                <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: profileImage }}
+                  style={styles.profileImage}
+                />
               ) : (
                 <View style={styles.imagePlaceholder}>
-                  <Text style={[styles.imagePlaceholderText, { color: isDarkMode ? '#888' : '#666' }]}>
+                  <Text
+                    style={[
+                      styles.imagePlaceholderText,
+                      { color: isDarkMode ? '#888' : '#666' },
+                    ]}
+                  >
                     📷 Add Photo
                   </Text>
                 </View>
@@ -281,13 +328,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Name */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Name *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Name *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your name"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={name}
@@ -297,13 +354,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* First Surname */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>First Surname *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              First Surname *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your first surname"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={firstSurname}
@@ -313,15 +380,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Second Surname (Optional) */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
               Second Surname (Optional)
             </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your second surname"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={secondSurname}
@@ -331,17 +406,27 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Birthdate */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Birthdate *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Birthdate *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="DD/MM/YYYY"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={birthdate}
-              onChangeText={(text) => setBirthdate(formatDate(text))}
+              onChangeText={text => setBirthdate(formatDate(text))}
               keyboardType="numeric"
               maxLength={10}
             />
@@ -349,30 +434,45 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Gender */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Gender *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Gender *
+            </Text>
             <View style={styles.genderContainer}>
-              {['Male', 'Female', 'Other'].map((genderOption) => (
+              {['Male', 'Female', 'Other'].map(genderOption => (
                 <Pressable
                   key={genderOption}
-                    style={[
-                      styles.genderOption,
-                      {
-                        backgroundColor: gender === genderOption 
-                          ? BRAND_ORANGE 
-                          : (isDarkMode ? '#1a1a1a' : '#f8f8f8'),
-                        borderColor: isDarkMode ? '#333' : '#ddd',
-                      }
-                    ]}
+                  style={[
+                    styles.genderOption,
+                    {
+                      backgroundColor:
+                        gender === genderOption
+                          ? BRAND_ORANGE
+                          : isDarkMode
+                          ? '#1a1a1a'
+                          : '#f8f8f8',
+                      borderColor: isDarkMode ? '#333' : '#ddd',
+                    },
+                  ]}
                   onPress={() => setGender(genderOption)}
                 >
-                  <Text style={[
-                    styles.genderOptionText,
-                    { 
-                      color: gender === genderOption 
-                        ? '#fff' 
-                        : (isDarkMode ? '#f2f2f2' : '#333')
-                    }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.genderOptionText,
+                      {
+                        color:
+                          gender === genderOption
+                            ? '#fff'
+                            : isDarkMode
+                            ? '#f2f2f2'
+                            : '#333',
+                      },
+                    ]}
+                  >
                     {genderOption}
                   </Text>
                 </Pressable>
@@ -383,13 +483,23 @@ export default function SignUpScreen({ navigation }: any) {
           {/* Height and Weight */}
           <View style={styles.row}>
             <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
-              <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Height (cm) *</Text>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Height (cm) *
+              </Text>
               <TextInput
-                style={[styles.input, {
-                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                  color: isDarkMode ? '#f2f2f2' : '#333',
-                  borderColor: isDarkMode ? '#333' : '#ddd',
-                }]}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                    color: isDarkMode ? '#f2f2f2' : '#333',
+                    borderColor: isDarkMode ? '#333' : '#ddd',
+                  },
+                ]}
                 placeholder="170"
                 placeholderTextColor={isDarkMode ? '#888' : '#666'}
                 value={height}
@@ -398,15 +508,27 @@ export default function SignUpScreen({ navigation }: any) {
               />
             </View>
             <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
-              <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Weight (kg) *</Text>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Weight (kg) *
+              </Text>
               <TextInput
-                style={[styles.input, {
-                  backgroundColor: getWeightFieldBackgroundColor(),
-                  color: isDarkMode ? '#f2f2f2' : '#333',
-                  borderColor: isDarkMode ? '#333' : '#ddd',
-                }]}
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: getWeightFieldBackgroundColor(),
+                    color: isDarkMode ? '#f2f2f2' : '#333',
+                    borderColor: isDarkMode ? '#333' : '#ddd',
+                  },
+                ]}
                 placeholder="70"
-                placeholderTextColor={isDarkMode ? '#888' : getWeightFieldPlaceholderColor()}
+                placeholderTextColor={
+                  isDarkMode ? '#888' : getWeightFieldPlaceholderColor()
+                }
                 value={weight}
                 onChangeText={setWeight}
                 keyboardType="numeric"
@@ -416,13 +538,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* City */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>City *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              City *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your city"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={city}
@@ -432,35 +564,48 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Interests */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
               Interests (Select your favorite activities)
             </Text>
             <View style={styles.interestsGrid}>
-              {INTERESTS.map((interest) => (
+              {INTERESTS.map(interest => (
                 <Pressable
                   key={interest.id}
-                    style={[
-                      styles.interestChip,
-                      {
-                        backgroundColor: selectedInterests.includes(interest.id)
-                          ? LIGHT_ORANGE
-                          : (isDarkMode ? '#1a1a1a' : '#f8f8f8'),
-                        borderColor: selectedInterests.includes(interest.id)
-                          ? LIGHT_ORANGE
-                          : (isDarkMode ? '#333' : '#ddd'),
-                      }
-                    ]}
+                  style={[
+                    styles.interestChip,
+                    {
+                      backgroundColor: selectedInterests.includes(interest.id)
+                        ? LIGHT_ORANGE
+                        : isDarkMode
+                        ? '#1a1a1a'
+                        : '#f8f8f8',
+                      borderColor: selectedInterests.includes(interest.id)
+                        ? LIGHT_ORANGE
+                        : isDarkMode
+                        ? '#333'
+                        : '#ddd',
+                    },
+                  ]}
                   onPress={() => toggleInterest(interest.id)}
                 >
                   <Text style={styles.interestIcon}>{interest.icon}</Text>
-                  <Text style={[
-                    styles.interestText,
-                    {
-                      color: selectedInterests.includes(interest.id)
-                        ? '#fff'
-                        : (isDarkMode ? '#f2f2f2' : '#333')
-                    }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.interestText,
+                      {
+                        color: selectedInterests.includes(interest.id)
+                          ? '#fff'
+                          : isDarkMode
+                          ? '#f2f2f2'
+                          : '#333',
+                      },
+                    ]}
+                  >
                     {interest.name}
                   </Text>
                 </Pressable>
@@ -470,13 +615,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Phone Number */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Phone Number *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Phone Number *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="+34 (123) 456-789"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={phoneNumber}
@@ -487,13 +642,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Email */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Email Address *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Email Address *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your email"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={email}
@@ -506,13 +671,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Password */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Password *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Password *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Enter your password"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={password}
@@ -524,13 +699,25 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Retype Password */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>Retype Password *</Text>
+            <Text
+              style={[
+                styles.inputLabel,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              Retype Password *
+            </Text>
             <TextInput
-              style={[styles.input, {
-                backgroundColor: isDarkMode ? HALLOWEEN_ORANGE_BG_DARK : HALLOWEEN_ORANGE_BG,
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                borderColor: isDarkMode ? '#333' : '#ddd',
-              }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDarkMode
+                    ? HALLOWEEN_ORANGE_BG_DARK
+                    : HALLOWEEN_ORANGE_BG,
+                  color: isDarkMode ? '#f2f2f2' : '#333',
+                  borderColor: isDarkMode ? '#333' : '#ddd',
+                },
+              ]}
               placeholder="Retype your password"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={retypePassword}
@@ -541,34 +728,47 @@ export default function SignUpScreen({ navigation }: any) {
           </View>
 
           {/* Data Consent */}
-          <Pressable 
+          <Pressable
             style={styles.consentContainer}
             onPress={() => setDataConsent(!dataConsent)}
           >
-            <View style={[
-              styles.checkbox,
-              {
-                backgroundColor: dataConsent ? BRAND_ORANGE : 'transparent',
-                borderColor: dataConsent ? BRAND_ORANGE : (isDarkMode ? '#444' : '#ccc'),
-              }
-            ]}>
+            <View
+              style={[
+                styles.checkbox,
+                {
+                  backgroundColor: dataConsent ? BRAND_ORANGE : 'transparent',
+                  borderColor: dataConsent
+                    ? BRAND_ORANGE
+                    : isDarkMode
+                    ? '#444'
+                    : '#ccc',
+                },
+              ]}
+            >
               {dataConsent && <Text style={styles.checkmark}>✓</Text>}
             </View>
-            <Text style={[styles.consentText, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+            <Text
+              style={[
+                styles.consentText,
+                { color: isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
               I agree to the processing of my personal data and accept the{' '}
-              <Text style={{ color: BRAND_ORANGE, fontWeight: '600' }}>Terms & Conditions</Text>
+              <Text style={{ color: BRAND_ORANGE, fontWeight: '600' }}>
+                Terms & Conditions
+              </Text>
             </Text>
           </Pressable>
 
           {/* Create Account Button */}
-          <Pressable 
+          <Pressable
             style={({ pressed }) => [
-              styles.createAccountButton, 
-              { 
+              styles.createAccountButton,
+              {
                 opacity: pressed || isLoading ? 0.85 : 1,
-                backgroundColor: isLoading ? '#ccc' : BRAND_ORANGE 
-              }
-            ]} 
+                backgroundColor: isLoading ? '#ccc' : BRAND_ORANGE,
+              },
+            ]}
             onPress={handleCreateAccount}
             disabled={isLoading}
           >
@@ -579,10 +779,17 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' }]}>
+            <Text
+              style={[
+                styles.footerText,
+                { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' },
+              ]}
+            >
               Already have an account?{' '}
               <Pressable onPress={() => navigation.navigate('Login')}>
-                <Text style={[styles.footerLink, { color: BRAND_ORANGE }]}>Sign in</Text>
+                <Text style={[styles.footerLink, { color: BRAND_ORANGE }]}>
+                  Sign in
+                </Text>
               </Pressable>
             </Text>
           </View>
