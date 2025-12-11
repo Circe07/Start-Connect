@@ -21,6 +21,7 @@ const BRAND_GRAY = '#9E9E9E';
 // Placeholder screens for each tab
 import TiendaScreen from './TiendaScreen';
 import SearchUser from './SearchUser';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const HobbieScreen = () => <HobbiesScreen />;
 
@@ -238,17 +239,17 @@ const ExperiencesContent = ({
   const [posts, setPosts] = useState([
     {
       id: 1,
-      user: 'climber_anna',
-      image: require('../assets/images/escalada1.jpg'),
+      user: 'chanchito_feliz',
+      image: require('@/assets/images/escalada1.jpg'),
       caption: 'Amazing day at the crag! 🧗‍♀️ #climbing #outdoor',
-      likes: 42,
+      likes: 142,
       comments: 8,
       isLiked: false,
     },
     {
       id: 2,
-      user: 'swim_team_mike',
-      image: require('../assets/images/natacion 2.jpg'),
+      user: 'unai',
+      image: require('@/assets/images/natacion 2.jpg'),
       caption: 'Morning swim session complete! 💪 #swimming #fitness',
       likes: 28,
       comments: 5,
@@ -257,7 +258,7 @@ const ExperiencesContent = ({
     {
       id: 3,
       user: 'climber_anna',
-      image: require('../assets/images/escalada2.png'),
+      image: require('@/assets/images/escalada2.png'),
       caption: 'New route conquered! The view was incredible 🏔️',
       likes: 67,
       comments: 12,
@@ -380,20 +381,17 @@ const ExperiencesContent = ({
               style={styles.postAction}
               onPress={() => handleLike(post.id)}
             >
-              <Text
-                style={[
-                  styles.postActionIcon,
-                  { color: post.isLiked ? '#ff3040' : '#000' },
-                ]}
-              >
-                {post.isLiked ? '❤️' : '🤍'}
-              </Text>
+              <Icon
+                name="favorite"
+                size={30}
+                style={[{ color: post.isLiked ? '#ff3040' : '#999' }]}
+              />
             </Pressable>
             <Pressable style={styles.postAction}>
-              <Text style={styles.postActionIcon}>💬</Text>
+              <Icon name="comment" size={30} />
             </Pressable>
             <Pressable style={styles.postAction}>
-              <Text style={styles.postActionIcon}>📤</Text>
+              <Icon name="send" size={30} />
             </Pressable>
           </View>
 
@@ -662,12 +660,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   postAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   postUsername: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
   postImage: {
@@ -691,7 +689,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   postLikes: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
   postCaption: {
@@ -699,7 +697,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   postCaptionText: {
-    fontSize: 14,
+    fontSize: 18,
     lineHeight: 18,
   },
   postCaptionUser: {
@@ -718,5 +716,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  postIcon: {
+    color: 'fff',
+    borderColor: 'black',
   },
 });
