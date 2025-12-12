@@ -14,23 +14,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import HobbiesScreen from './HobbiesScreen';
 import BottomNavigation from '@/components/BottomNavigation';
 
-const BRAND_ORANGE = '#FF7F3F';
-const BRAND_GRAY = '#9E9E9E';
-
 // Placeholder screens for each tab
 import TiendaScreen from './TiendaScreen';
 import SearchUser from './SearchUser';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProfileScreen from './ProfileScreen';
+import ChatListScreen from './ChatListScreen';
+
+const BRAND_ORANGE = '#FF7F3F';
+const BRAND_GRAY = '#9E9E9E';
 
 const HobbieScreen = () => <HobbiesScreen />;
 
-const ChatScreen = () => (
-  <View style={styles.tabContent}>
-    <Text style={styles.tabTitle}>CHAT</Text>
-    <Text style={styles.tabSubtitle}>Chat content coming soon...</Text>
-  </View>
-);
+const ChatScreen = () => <ChatListScreen />;
 
 const PerfilScreen = ({ navigation }: any) => {
   return <ProfileScreen navigation={navigation} />;
