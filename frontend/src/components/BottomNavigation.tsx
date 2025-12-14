@@ -75,19 +75,19 @@ export default function BottomNavigation({
           onPress={() => handleTabPress('menu')}
         >
           <View style={styles.centerButtonCircle}>
-            <Icon name="add" size={32} color="#fff" />
+            <Icon name="menu" size={32} color="#fff" />
           </View>
         </Pressable>
 
         {/* Chat */}
         <Pressable
           style={styles.navItem}
-          onPress={() => handleTabPress('chat')}
+          onPress={() => handleTabPress('groups')}
         >
           <Icon
-            name="chat-bubble-outline"
+            name="groups"
             size={28}
-            color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
+            color={activeTab === 'groups' ? BRAND_ORANGE : BRAND_GRAY}
           />
         </Pressable>
 

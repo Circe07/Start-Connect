@@ -257,23 +257,23 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
-  const handleAppleLogin = async () => {
+  const handleFacebookLogin = async () => {
     setIsLoading(true);
     try {
-      // Placeholder: Apple Sign-In to be configured later
+      // Placeholder: Facebook Sign-In to be configured later
       setTimeout(() => {
         setIsLoading(false);
         Alert.alert(
-          'Apple Login',
-          'Apple Sign-In requires configuration. For now, please use the regular Sign In button.',
+          'Facebook Login',
+          'Facebook Sign-In requires configuration. For now, please use the regular Sign In button.',
           [{ text: 'OK' }],
         );
       }, 400);
     } catch (e) {
       setIsLoading(false);
       Alert.alert(
-        'Apple Login',
-        'Apple Sign-In requires configuration. For now, please use the regular Sign In button.',
+        'Facebook Login',
+        'Facebook Sign-In requires configuration. For now, please use the regular Sign In button.',
         [{ text: 'OK' }],
       );
     }
@@ -325,7 +325,7 @@ export default function LoginScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#e0e0e0',
                 },
               ]}
-              placeholder="Enter your email"
+              placeholder="Introduce tu correo electrónico"
               placeholderTextColor={isDarkMode ? '#666' : '#999'}
               value={email}
               onChangeText={setEmail}
@@ -353,7 +353,7 @@ export default function LoginScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#e0e0e0',
                 },
               ]}
-              placeholder="Enter your password"
+              placeholder="Introduce tu contraseña"
               placeholderTextColor={isDarkMode ? '#666' : '#999'}
               value={password}
               onChangeText={setPassword}
@@ -385,7 +385,7 @@ export default function LoginScreen({ navigation }: any) {
             disabled={isLoading}
           >
             <Text style={styles.loginButtonText}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
             </Text>
           </Pressable>
 
@@ -402,7 +402,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#666' : '#999' },
               ]}
             >
-              O
+              OR
             </Text>
             <View
               style={[
@@ -437,24 +437,24 @@ export default function LoginScreen({ navigation }: any) {
 
           <Pressable
             style={({ pressed }) => [
-              styles.appleButton,
+              styles.facebookButton,
               { opacity: pressed || isLoading ? 0.85 : 1 },
             ]}
-            onPress={handleAppleLogin}
+            onPress={handleFacebookLogin}
             disabled={isLoading}
           >
             <Image
-              source={require('@/assets/images/icon/apple.png')}
-              style={styles.appleIcon}
+              source={require('@/assets/images/icon/facebook.webp')}
+              style={styles.facebookIcon}
               resizeMode="contain"
             />
             <Text
               style={[
-                styles.appleButtonText,
+                styles.facebookButtonText,
                 { color: isDarkMode ? '#f2f2f2' : '#000' },
               ]}
             >
-              Continua con Apple
+              Continua con Facebook
             </Text>
           </Pressable>
         </View>
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 12,
   },
-  appleButton: {
+  facebookButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -585,11 +585,11 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
   },
-  appleIcon: {
+  facebookIcon: {
     width: 22,
     height: 22,
   },
-  appleIconText: {
+  facebookIconText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
-  appleButtonText: {
+  facebookButtonText: {
     fontSize: 18,
     fontWeight: '700',
   },

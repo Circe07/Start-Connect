@@ -9,17 +9,14 @@ import {
   ScrollView,
   Image,
   Alert,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { registerUser } from '@/services/api';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
-const DARK_ORANGE_PLACEHOLDER = 'rgba(255, 127, 63, 0.6)'; // Dark orange with transparency
 const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)'; // Halloween dark orange for input backgrounds
 const HALLOWEEN_ORANGE_BG_DARK = 'rgba(204, 85, 0, 0.2)'; // Darker for dark mode
-const LIGHT_RED_YELLOW = 'rgba(255, 204, 0, 0.3)'; // Lighter red/yellow for weight field
 const LIGHT_ORANGE = 'rgba(255, 127, 63, 0.4)'; // Lighter orange for interests
 
 const INTERESTS = [
@@ -149,17 +146,18 @@ export default function SignUpScreen({ navigation }: any) {
       return;
     }
 
-    if (password.length < 8) {
+    if (password.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
 
-    const regexPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    const regexPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
     if (!regexPassword.test(password)) {
       Alert.alert(
         'Error',
         'Password must contain at least one letter, one number, and one special character',
       );
+      return;
     }
 
     if (!dataConsent) {
@@ -272,10 +270,10 @@ export default function SignUpScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.headerTitleContainer}>
             <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>
-              CREATE
+              CREAR
             </Text>
             <Text style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}>
-              ACCOUNT
+              CUENTA
             </Text>
           </View>
           <Text
@@ -284,7 +282,7 @@ export default function SignUpScreen({ navigation }: any) {
               { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
             ]}
           >
-            Unete a Start Connect
+            Unete a Start&Connect
           </Text>
         </View>
 
@@ -319,7 +317,7 @@ export default function SignUpScreen({ navigation }: any) {
                       { color: isDarkMode ? '#888' : '#666' },
                     ]}
                   >
-                    📷 Añadir foto
+                    Agregar foto
                   </Text>
                 </View>
               )}
@@ -345,7 +343,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your name"
+              placeholder="Introduce tu nombre"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={name}
               onChangeText={setName}
@@ -371,7 +369,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your first surname"
+              placeholder="Introduce tu apellido"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={firstSurname}
               onChangeText={setFirstSurname}
@@ -397,7 +395,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your second surname"
+              placeholder="Introduce tu segundo apellido"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={secondSurname}
               onChangeText={setSecondSurname}
@@ -489,7 +487,7 @@ export default function SignUpScreen({ navigation }: any) {
                   { color: isDarkMode ? '#f2f2f2' : '#333' },
                 ]}
               >
-                Height (cm) *
+                Altura (cm) *
               </Text>
               <TextInput
                 style={[
@@ -500,7 +498,7 @@ export default function SignUpScreen({ navigation }: any) {
                     borderColor: isDarkMode ? '#333' : '#ddd',
                   },
                 ]}
-                placeholder="170"
+                placeholder="175"
                 placeholderTextColor={isDarkMode ? '#888' : '#666'}
                 value={height}
                 onChangeText={setHeight}
@@ -514,7 +512,7 @@ export default function SignUpScreen({ navigation }: any) {
                   { color: isDarkMode ? '#f2f2f2' : '#333' },
                 ]}
               >
-                Weight (kg) *
+                Peso (kg) *
               </Text>
               <TextInput
                 style={[
@@ -525,7 +523,7 @@ export default function SignUpScreen({ navigation }: any) {
                     borderColor: isDarkMode ? '#333' : '#ddd',
                   },
                 ]}
-                placeholder="70"
+                placeholder="75"
                 placeholderTextColor={
                   isDarkMode ? '#888' : getWeightFieldPlaceholderColor()
                 }
@@ -544,7 +542,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              City *
+              Ciudad *
             </Text>
             <TextInput
               style={[
@@ -555,7 +553,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your city"
+              placeholder="Introduce tu ciudad"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={city}
               onChangeText={setCity}
@@ -648,7 +646,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Email *
+              Correo electronico *
             </Text>
             <TextInput
               style={[
@@ -659,7 +657,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your email"
+              placeholder="Introduce tu correo electronico"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={email}
               onChangeText={setEmail}
@@ -688,7 +686,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Enter your password"
+              placeholder="Introduce tu contraseña"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={password}
               onChangeText={setPassword}
@@ -718,7 +716,7 @@ export default function SignUpScreen({ navigation }: any) {
                   borderColor: isDarkMode ? '#333' : '#ddd',
                 },
               ]}
-              placeholder="Retype your password"
+              placeholder="Repite la contraseña"
               placeholderTextColor={isDarkMode ? '#888' : '#666'}
               value={retypePassword}
               onChangeText={setRetypePassword}
@@ -773,7 +771,7 @@ export default function SignUpScreen({ navigation }: any) {
             disabled={isLoading}
           >
             <Text style={styles.createAccountButtonText}>
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? 'Creando Cuenta...' : 'Crear Cuenta'}
             </Text>
           </Pressable>
 

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
-  Image,
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 12,
-    paddingBottom: 100, // Space for bottom navigation
+    paddingBottom: 100,
   },
   groupCard: {
     flexDirection: 'row',

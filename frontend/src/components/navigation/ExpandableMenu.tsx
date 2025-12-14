@@ -19,7 +19,6 @@ interface ExpandableMenuProps {
 const BRAND_ORANGE = '#FF7F3F';
 
 const MENU_OPTIONS = [
-  { id: 'groups', label: 'Grupos', icon: 'groups' },
   { id: 'centers', label: 'Centros', icon: 'location-city' },
   { id: 'reservations', label: 'Mis Reservas', icon: 'event' },
   { id: 'tienda', label: 'Tienda', icon: 'shopping-cart' },

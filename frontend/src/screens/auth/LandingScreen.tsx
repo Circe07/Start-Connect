@@ -52,7 +52,7 @@ export default function LandingScreen({ navigation }: any) {
           ]}
           onPress={() => navigation.navigate('Login')}
         >
-          <Text style={styles.signInText}>Sign in</Text>
+          <Text style={styles.signInText}>Iniciar sesión</Text>
         </Pressable>
 
         <Text

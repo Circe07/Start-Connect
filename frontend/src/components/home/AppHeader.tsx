@@ -12,12 +12,12 @@ const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
 
 interface AppHeaderProps {
-  onAddPress?: () => void;
+  navigation: any;
   showTiendaHeader?: boolean;
 }
 
 export default function AppHeader({
-  onAddPress,
+  navigation,
   showTiendaHeader = false,
 }: AppHeaderProps) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -42,12 +42,14 @@ export default function AppHeader({
 
   return (
     <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        <Pressable onPress={onAddPress}>
-          <Icon name="add" size={30} color={BRAND_ORANGE} />
-        </Pressable>
-      </View>
-      <View style={styles.headerRight}>
+      <Pressable
+        onPress={() => {
+          navigation.navigate('CreatePost');
+        }}
+      >
+        <Icon name="add-a-photo" size={30} color={BRAND_ORANGE} />
+      </Pressable>
+      <View style={styles.headerCenter}>
         <View style={styles.headerTitleContainer}>
           <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>
             START&
@@ -57,6 +59,9 @@ export default function AppHeader({
           </Text>
         </View>
       </View>
+      <Pressable onPress={() => navigation.navigate('ChatListScreen')}>
+        <Icon name="chat" size={30} color={BRAND_GRAY} />
+      </Pressable>
     </View>
   );
 }
@@ -69,9 +74,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  headerLeft: {
-    flex: 1,
-  },
+
   headerTitleContainer: {
     flexDirection: 'row',
   },
@@ -82,6 +85,13 @@ const styles = StyleSheet.create({
   headerTitleConnect: {
     fontSize: 22,
     fontWeight: 'bold',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignSelf: 'center',
   },
   headerRight: {
     alignItems: 'center',

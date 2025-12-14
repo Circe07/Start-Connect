@@ -3,7 +3,6 @@ import { View, StyleSheet, Animated, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomNavigation from '@/components/BottomNavigation';
 import AppHeader from '@/components/home/AppHeader';
-import CommunityBar from '@/components/home/CommunityBar';
 import ExperiencesFeed from '@/components/experiences/ExperiencesFeed';
 
 // Screens
@@ -18,6 +17,7 @@ import MyReservationsScreen from './centers/MyReservationsScreen';
 
 export default function HomeScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
+
   const [activeTab, setActiveTab] = useState('experiences');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -102,11 +102,11 @@ export default function HomeScreen({ navigation }: any) {
         {/* Header */}
         {activeTab !== 'tienda' ? (
           <>
-            <AppHeader onAddPress={() => setActiveTab('experiences')} />
-            {activeTab === 'experiences' && <CommunityBar />}
+            <AppHeader navigation={navigation} />
+            {activeTab === 'experiences'}
           </>
         ) : (
-          <AppHeader showTiendaHeader />
+          <AppHeader showTiendaHeader navigation={navigation} />
         )}
 
         {/* Main Content */}
