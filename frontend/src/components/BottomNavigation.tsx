@@ -1,12 +1,12 @@
 /**
- * Bottom Navigation Component
- * This component represents the bottom navigation bar of the app.
+ * Bottom Navigation Component - Instagram Style
+ * 5 main icons with center expandable menu button
  */
 
-import HomeScreen from '@/screens/HomeScreen';
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Pressable, useColorScheme, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ExpandableMenu from '@/components/navigation/ExpandableMenu';
 
 const BRAND_ORANGE = '#ff5703ff';
 const BRAND_GRAY = '#9E9E9E';
@@ -23,125 +23,131 @@ export default function BottomNavigation({
   navigation,
 }: BottomNavigationProps) {
   const isDarkMode = useColorScheme() === 'dark';
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const handleTabPress = (tab: string) => {
-    onTabChange(tab);
+    if (tab === 'menu') {
+      setMenuVisible(true);
+    } else {
+      onTabChange(tab);
+    }
+  };
+
+  const handleMenuOptionSelect = (option: string) => {
+    onTabChange(option);
   };
 
   return (
-    <View
-      style={[
-        styles.bottomNav,
-        { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
-      ]}
-    >
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('experiences')}
+    <>
+      <View
+        style={[
+          styles.bottomNav,
+          { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
+        ]}
       >
-        <Icon
-          name="home"
-          size={26}
-          color={activeTab === 'experiences' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+        {/* Home / Experiences */}
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('experiences')}
+        >
+          <Icon
+            name="home"
+            size={28}
+            color={activeTab === 'experiences' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
 
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('search')}
-      >
-        <Icon
-          name="search"
-          size={26}
-          color={activeTab === 'search' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+        {/* Search */}
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('search')}
+        >
+          <Icon
+            name="search"
+            size={28}
+            color={activeTab === 'search' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
 
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('tienda')}
-      >
-        <Icon
-          name="shopping-cart"
-          size={26}
-          color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+        {/* Center Expandable Menu Button */}
+        <Pressable
+          style={[styles.navItem, styles.centerButton]}
+          onPress={() => handleTabPress('menu')}
+        >
+          <View style={styles.centerButtonCircle}>
+            <Icon name="add" size={32} color="#fff" />
+          </View>
+        </Pressable>
 
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('hobbie')}
-      >
-        <Icon
-          name="fitness-center"
-          size={26}
-          color={activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+        {/* Chat */}
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('chat')}
+        >
+          <Icon
+            name="chat-bubble-outline"
+            size={28}
+            color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
 
-      <Pressable style={styles.navItem} onPress={() => handleTabPress('chat')}>
-        <Icon
-          name="wechat"
-          size={26}
-          color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+        {/* Profile */}
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('perfil')}
+        >
+          <Icon
+            name="person"
+            size={28}
+            color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+      </View>
 
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('perfil')}
-      >
-        <Icon
-          name="person"
-          size={26}
-          color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
-    </View>
+      {/* Expandable Menu Modal */}
+      <ExpandableMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        onOptionSelect={handleMenuOptionSelect}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row' as const,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    alignItems: 'center',
   },
   navItem: {
     flex: 1,
     alignItems: 'center' as const,
-    gap: 4,
+    justifyContent: 'center' as const,
+    paddingVertical: 8,
   },
-  navIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
+  centerButton: {
+    position: 'relative',
+    bottom: 8,
   },
-  perfilIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  centerButtonCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: BRAND_ORANGE,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    borderWidth: 1,
-  },
-  dotsContainer: {
-    flexDirection: 'row' as const,
-    gap: 2,
-  },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-  },
-  navLabel: {
-    fontSize: 12,
-    fontWeight: '500' as const,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
 });

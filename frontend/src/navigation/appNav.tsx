@@ -6,6 +6,11 @@ import LoginScreen from '@/screens/LoginScreen';
 import SignUpScreen from '@/screens/SignUpScreen';
 import HomeScreen from '@/screens/HomeScreen';
 import ProfileScreen from '@/screens/ProfileScreen';
+import ChatScreen from '@/screens/chat/ChatScreen';
+import GroupsScreen from '@/screens/groups/GroupsScreen';
+import CentersScreen from '@/screens/centers/CentersScreen';
+import CenterDetailScreen from '@/screens/centers/CenterDetailScreen';
+import MyReservationsScreen from '@/screens/centers/MyReservationsScreen';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +28,11 @@ export default function AppNavigation() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="Groups" component={GroupsScreen} />
+        <Stack.Screen name="Centers" component={CentersScreen} />
+        <Stack.Screen name="CenterDetail" component={CenterDetailScreen} />
+        <Stack.Screen name="MyReservations" component={MyReservationsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

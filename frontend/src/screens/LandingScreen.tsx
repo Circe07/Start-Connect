@@ -61,9 +61,9 @@ export default function LandingScreen({ navigation }: any) {
             { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' },
           ]}
         >
-          Don't have an account?{' '}
+          No tienes cuenta?{' '}
           <Pressable onPress={() => navigation.navigate('SignUp')}>
-            <Text style={[styles.footerLink]}>Sign up here</Text>
+            <Text style={[styles.footerLink]}>Registrate aqui</Text>
           </Pressable>
         </Text>
       </View>

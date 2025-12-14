@@ -6,7 +6,11 @@ import { DUMMY_CHATS } from '@/data/mockChats';
 import SearchInputBox from '@/components/ui/SearchInputBox';
 const BRAND_GRAY = '#9E9E9E';
 
-export default function ChatListScreen() {
+interface ChatListScreenProps {
+  navigation?: any;
+}
+
+export default function ChatListScreen({ navigation }: ChatListScreenProps) {
   const [searchText, setSearchText] = useState('');
 
   const filteredChats = DUMMY_CHATS.filter(
@@ -16,7 +20,14 @@ export default function ChatListScreen() {
   );
 
   const handleChatPress = (chatId: string) => {
-    console.log(`Abriendo chat con ID: ${chatId}`);
+    const chat = DUMMY_CHATS.find(c => c.id === chatId);
+    if (chat && navigation) {
+      navigation.navigate('Chat', {
+        chatId: chat.id,
+        chatName: chat.name,
+        chatAvatar: chat.avatar,
+      });
+    }
   };
 
   return (
@@ -52,6 +63,7 @@ export default function ChatListScreen() {
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay chats con ese nombre.</Text>
         }
+        contentContainerStyle={styles.listContent}
       />
     </View>
   );
@@ -87,6 +99,9 @@ const styles = StyleSheet.create({
   },
   inputBoxStyle: {
     height: 36,
+  },
+  listContent: {
+    paddingBottom: 100, // Space for bottom navigation
   },
   emptyText: {
     textAlign: 'center',

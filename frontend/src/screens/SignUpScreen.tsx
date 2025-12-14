@@ -284,7 +284,7 @@ export default function SignUpScreen({ navigation }: any) {
               { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
             ]}
           >
-            Start a habbit and connect
+            Unete a Start Connect
           </Text>
         </View>
 
@@ -297,7 +297,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Profile Picture
+              Foto de perfil
             </Text>
             <Pressable
               style={[
@@ -319,7 +319,7 @@ export default function SignUpScreen({ navigation }: any) {
                       { color: isDarkMode ? '#888' : '#666' },
                     ]}
                   >
-                    📷 Add Photo
+                    📷 Añadir foto
                   </Text>
                 </View>
               )}
@@ -334,7 +334,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Name *
+              Nombre *
             </Text>
             <TextInput
               style={[
@@ -360,7 +360,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              First Surname *
+              Primer apellido *
             </Text>
             <TextInput
               style={[
@@ -386,7 +386,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Second Surname (Optional)
+              Segundo apellido (Opcional)
             </Text>
             <TextInput
               style={[
@@ -412,7 +412,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Birthdate *
+              Fecha de nacimiento *
             </Text>
             <TextInput
               style={[
@@ -440,10 +440,10 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Gender *
+              Genero *
             </Text>
             <View style={styles.genderContainer}>
-              {['Male', 'Female', 'Other'].map(genderOption => (
+              {['Masculino', 'Femenino', 'Otro'].map(genderOption => (
                 <Pressable
                   key={genderOption}
                   style={[
@@ -570,7 +570,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Interests (Select your favorite activities)
+              Intereses (Selecciona tus actividades favoritas)
             </Text>
             <View style={styles.interestsGrid}>
               {INTERESTS.map(interest => (
@@ -621,7 +621,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Phone Number *
+              Numero de telefono *
             </Text>
             <TextInput
               style={[
@@ -648,7 +648,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Email Address *
+              Email *
             </Text>
             <TextInput
               style={[
@@ -677,7 +677,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Password *
+              Contraseña *
             </Text>
             <TextInput
               style={[
@@ -705,7 +705,7 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Retype Password *
+              Repite contraseña *
             </Text>
             <TextInput
               style={[
@@ -753,9 +753,9 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              I agree to the processing of my personal data and accept the{' '}
+              Acepto el tratamiento de mis datos personales y acepto los{' '}
               <Text style={{ color: BRAND_ORANGE, fontWeight: '600' }}>
-                Terms & Conditions
+                Términos y Condiciones
               </Text>
             </Text>
           </Pressable>
@@ -785,10 +785,10 @@ export default function SignUpScreen({ navigation }: any) {
                 { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' },
               ]}
             >
-              Already have an account?{' '}
+              Ya tienes una cuenta?{' '}
               <Pressable onPress={() => navigation.navigate('Login')}>
                 <Text style={[styles.footerLink, { color: BRAND_ORANGE }]}>
-                  Sign in
+                  Inicia sesión
                 </Text>
               </Pressable>
             </Text>

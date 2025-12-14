@@ -23,10 +23,6 @@ export default function LoginScreen({ navigation }: any) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // useEffect(() => {
-  //   configureGoogleSignIn();
-  // }, []);
-
   const handleLogin = async () => {
     // Enhanced validation
     if (!email.trim() || !password.trim()) {
@@ -306,7 +302,7 @@ export default function LoginScreen({ navigation }: any) {
               { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
             ]}
           >
-            Sign in to your account
+            Inicia sesión en tu cuenta
           </Text>
         </View>
 
@@ -318,7 +314,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Email Address
+              Correo electrónico
             </Text>
             <TextInput
               style={[
@@ -346,7 +342,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#333' },
               ]}
             >
-              Password
+              Contraseña
             </Text>
             <TextInput
               style={[
@@ -373,7 +369,7 @@ export default function LoginScreen({ navigation }: any) {
             ]}
           >
             <Text style={[styles.forgotPasswordText, { color: BRAND_ORANGE }]}>
-              Forgot Password?
+              ¿Olvidaste tu contraseña?
             </Text>
           </Pressable>
 
@@ -406,7 +402,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#666' : '#999' },
               ]}
             >
-              OR
+              O
             </Text>
             <View
               style={[
@@ -435,7 +431,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#000' },
               ]}
             >
-              Continue with Google
+              Continua con Google
             </Text>
           </Pressable>
 
@@ -458,7 +454,7 @@ export default function LoginScreen({ navigation }: any) {
                 { color: isDarkMode ? '#f2f2f2' : '#000' },
               ]}
             >
-              Continue with Apple
+              Continua con Apple
             </Text>
           </Pressable>
         </View>
@@ -470,10 +466,10 @@ export default function LoginScreen({ navigation }: any) {
               { color: isDarkMode ? '#9E9E9E' : '#BDBDBD' },
             ]}
           >
-            Don't have an account?{' '}
+            No tienes una cuenta?{' '}
             <Pressable onPress={() => navigation.navigate('SignUp')}>
               <Text style={[styles.footerLink, { color: BRAND_ORANGE }]}>
-                Sign up
+                Registrarse
               </Text>
             </Pressable>
           </Text>
