@@ -12,31 +12,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { registerUser } from '@/services/api';
+import { INTERESTS } from '@/constants/interests';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
 const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)'; // Halloween dark orange for input backgrounds
 const HALLOWEEN_ORANGE_BG_DARK = 'rgba(204, 85, 0, 0.2)'; // Darker for dark mode
 const LIGHT_ORANGE = 'rgba(255, 127, 63, 0.4)'; // Lighter orange for interests
-
-const INTERESTS = [
-  { id: 'football', name: 'Football', icon: '⚽' },
-  { id: 'basketball', name: 'Basketball', icon: '🏀' },
-  { id: 'swimming', name: 'Swimming', icon: '🏊' },
-  { id: 'climbing', name: 'Climbing', icon: '🧗' },
-  { id: 'skiing', name: 'Skiing', icon: '🎿' },
-  { id: 'skating', name: 'Skating', icon: '⛸️' },
-  { id: 'martialarts', name: 'Martial Arts', icon: '🥋' },
-  { id: 'tennis', name: 'Tennis', icon: '🎾' },
-  { id: 'cycling', name: 'Cycling', icon: '🚴' },
-  { id: 'running', name: 'Running', icon: '🏃' },
-  { id: 'yoga', name: 'Yoga', icon: '🧘' },
-  { id: 'boxing', name: 'Boxing', icon: '🥊' },
-  { id: 'surfing', name: 'Surfing', icon: '🏄' },
-  { id: 'volleyball', name: 'Volleyball', icon: '🏐' },
-  { id: 'golf', name: 'Golf', icon: '⛳' },
-  { id: 'hiking', name: 'Hiking', icon: '🥾' },
-];
 
 export default function SignUpScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';

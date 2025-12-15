@@ -10,12 +10,17 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// import { configureGoogleSignIn, signInWithGoogle } from '../services/googleAuth';
 import { loginUser, getCurrentUser, getAuthToken } from '@/services/api';
 import { validateEmail, validatePassword } from '@/utils/authDebug';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#060505ff';
+const WEB_CLIENT_ID =
+  '752455978145-u569j5ctob5cacmtg6un552rkkaivtf5.apps.googleusercontent.com';
 
 export default function LoginScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -235,48 +240,59 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: WEB_CLIENT_ID,
+    });
+  }, []);
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Placeholder: Google Sign-In to be configured later
-      setTimeout(() => {
-        setIsLoading(false);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken, user } = userInfo; // Paso 1: Llamada al Backend con idToken
+
+      const backendLoginResult = await loginUserWithGoogle({ idToken });
+      if (backendLoginResult.success) {
+        // Paso 2: Backend exitoso, ahora carga el perfil
+        const userResult = await getCurrentUser();
+        if (userResult.success && userResult.user) {
+          // ÉXITO TOTAL
+          const displayName = userResult.user.name || user.name || 'Usuario';
+          Alert.alert('¡Éxito!', `Bienvenido, ${displayName}!`);
+          navigation.navigate('Home');
+        } else {
+          // Fallo en la carga del perfil después de la autenticación
+          Alert.alert(
+            'Error',
+            'Inició sesión, pero no pudimos cargar su perfil. Por favor, intente de nuevo.',
+          ); // ¡Ajuste 1: Asegura que el indicador de carga se desactive!
+          setIsLoading(false);
+        }
+      } else {
+        // Fallo en la autenticación del backend
         Alert.alert(
-          'Google Login',
-          'Google Sign-In requires configuration. For now, please use the regular Sign In button.',
-          [{ text: 'OK' }],
-        );
-      }, 400);
-    } catch (error) {
+          'Error de Sesión',
+          backendLoginResult.error ||
+            'El servidor rechazó la autenticación de Google. Intente de nuevo.',
+        ); // ¡Ajuste 2: Asegura que el indicador de carga se desactive!
+        setIsLoading(false);
+      }
+    } catch (error: any) {
+      // ¡Ajuste 3: Captura el error para ver los detalles del código!
+      // ... (El manejo de errores en el 'catch' debe ser mejorado, ver punto 2)
       setIsLoading(false);
       Alert.alert(
-        'Google Login',
-        'Google Sign-In requires configuration. For now, please use the regular Sign In button.',
+        'Error de Google Sign-In',
+        error.message || 'Ocurrió un error de conexión o configuración.',
         [{ text: 'OK' }],
       );
     }
   };
 
-  const handleFacebookLogin = async () => {
-    setIsLoading(true);
-    try {
-      // Placeholder: Facebook Sign-In to be configured later
-      setTimeout(() => {
-        setIsLoading(false);
-        Alert.alert(
-          'Facebook Login',
-          'Facebook Sign-In requires configuration. For now, please use the regular Sign In button.',
-          [{ text: 'OK' }],
-        );
-      }, 400);
-    } catch (e) {
-      setIsLoading(false);
-      Alert.alert(
-        'Facebook Login',
-        'Facebook Sign-In requires configuration. For now, please use the regular Sign In button.',
-        [{ text: 'OK' }],
-      );
-    }
+  const handleFacebookLogin = () => {
+    console.log('Facebook Login');
   };
 
   return (
@@ -613,3 +629,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+function loginUserWithGoogle(arg0: { idToken: string | null }) {
+  throw new Error('Function not implemented.');
+}

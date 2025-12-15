@@ -7,7 +7,6 @@
 
 
 const { admin, db } = require("../config/firebase");
-const functions = require("firebase-functions");
 const fetch = require('node-fetch');
 
 /**
