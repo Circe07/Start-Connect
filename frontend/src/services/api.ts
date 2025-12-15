@@ -504,15 +504,14 @@ export const getCurrentUser = async (): Promise<AuthResponse> => {
  * POST /auth/change-password
  */
 export const changePassword = async (
-  currentPassword: string,
-  newPassword: string,
-): Promise<{ success: boolean; error?: string }> => {
+  email: string,
+): Promise<{
+  success: boolean;
+  error?: string;
+}> => {
   return apiRequest('/auth/change-password', {
     method: 'POST',
-    body: JSON.stringify({
-      currentPassword,
-      newPassword,
-    }),
+    body: email,
   });
 };
 

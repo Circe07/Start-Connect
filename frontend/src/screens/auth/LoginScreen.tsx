@@ -9,16 +9,23 @@ import {
   Alert,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { loginUser, getCurrentUser, getAuthToken } from '@/services/api';
-import { validateEmail, validatePassword } from '@/utils/authDebug';
 import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import {
+  loginUser,
+  getCurrentUser,
+  getAuthToken,
+  changePassword,
+} from '@/services/api';
+import { validateEmail, validatePassword } from '@/utils/authDebug';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#060505ff';
+
 const WEB_CLIENT_ID =
   '752455978145-u569j5ctob5cacmtg6un552rkkaivtf5.apps.googleusercontent.com';
 
@@ -240,6 +247,10 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
+  /**
+   * Google login
+   * TODO -> FIX THE LOGIN
+   */
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: WEB_CLIENT_ID,
@@ -251,37 +262,31 @@ export default function LoginScreen({ navigation }: any) {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const { idToken, user } = userInfo; // Paso 1: Llamada al Backend con idToken
+      const { idToken, user } = userInfo;
 
       const backendLoginResult = await loginUserWithGoogle({ idToken });
       if (backendLoginResult.success) {
-        // Paso 2: Backend exitoso, ahora carga el perfil
         const userResult = await getCurrentUser();
         if (userResult.success && userResult.user) {
-          // ÉXITO TOTAL
           const displayName = userResult.user.name || user.name || 'Usuario';
           Alert.alert('¡Éxito!', `Bienvenido, ${displayName}!`);
           navigation.navigate('Home');
         } else {
-          // Fallo en la carga del perfil después de la autenticación
           Alert.alert(
             'Error',
             'Inició sesión, pero no pudimos cargar su perfil. Por favor, intente de nuevo.',
-          ); // ¡Ajuste 1: Asegura que el indicador de carga se desactive!
+          );
           setIsLoading(false);
         }
       } else {
-        // Fallo en la autenticación del backend
         Alert.alert(
           'Error de Sesión',
           backendLoginResult.error ||
             'El servidor rechazó la autenticación de Google. Intente de nuevo.',
-        ); // ¡Ajuste 2: Asegura que el indicador de carga se desactive!
+        );
         setIsLoading(false);
       }
     } catch (error: any) {
-      // ¡Ajuste 3: Captura el error para ver los detalles del código!
-      // ... (El manejo de errores en el 'catch' debe ser mejorado, ver punto 2)
       setIsLoading(false);
       Alert.alert(
         'Error de Google Sign-In',
@@ -291,8 +296,16 @@ export default function LoginScreen({ navigation }: any) {
     }
   };
 
+  /**
+   * Facebook Login
+   * TODO -> IMPLEMENT LOGIN
+   */
   const handleFacebookLogin = () => {
     console.log('Facebook Login');
+  };
+
+  const handleForgotPassword = () => {
+    changePassword(JSON.stringify({ email }));
   };
 
   return (
@@ -379,6 +392,7 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           <Pressable
+            onPress={handleForgotPassword}
             style={({ pressed }) => [
               styles.forgotPassword,
               { opacity: pressed ? 0.7 : 1 },

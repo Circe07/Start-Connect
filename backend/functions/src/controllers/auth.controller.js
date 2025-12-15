@@ -209,7 +209,14 @@ exports.changePassword = async (req, res) => {
      * Generate password reset link for user
      * Password reset link is sent to user's email
      */
+
+    if (!email.trim()) {
+      return res.status(400).json({ message: 'El email es requerido' })
+    }
+
     const resetLink = await admin.auth().generatePasswordResetLink(email);
+
+
 
     res.status(200).json({ message: 'Enlace generado correctamente', resetLink });
   } catch (error) {
