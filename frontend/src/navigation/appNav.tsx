@@ -15,6 +15,7 @@ import MyReservationsScreen from '@/screens/centers/MyReservationsScreen';
 import ReservationScreen from '@/screens/centers/ReservationScreen';
 import CreatePostScreen from '@/screens/posts/CreatePostScreen';
 import ChatListScreen from '@/screens/chat/ChatListScreen';
+import ForgotPassword from '@/screens/auth/ForgotPassword';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +31,7 @@ export default function AppNavigation() {
         <Stack.Screen name="Landing" component={LandingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
 
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />

@@ -210,7 +210,7 @@ exports.changePassword = async (req, res) => {
      * Password reset link is sent to user's email
      */
 
-    if (!email.trim()) {
+    if (!email) {
       return res.status(400).json({ message: 'El email es requerido' })
     }
 

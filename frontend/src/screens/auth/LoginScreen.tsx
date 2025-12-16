@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 import { validateEmail, validatePassword } from '@/utils/authDebug';
-import { loginUser, changePassword } from '@/services/auth/authService';
+import { loginUser } from '@/services/auth/authService';
 import { getCurrentUser } from '@/services/user/userService';
 import { getAuthToken } from '@/services/storage/authStorage';
 
@@ -298,8 +298,8 @@ export default function LoginScreen({ navigation }: any) {
     console.log('Facebook Login');
   };
 
-  const handleForgotPassword = () => {
-    changePassword(JSON.stringify({ email }));
+  const navigateForgotPasswordScreen = () => {
+    navigation.navigate('ForgotPassword');
   };
 
   return (
@@ -386,7 +386,7 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           <Pressable
-            onPress={handleForgotPassword}
+            onPress={navigateForgotPasswordScreen}
             style={({ pressed }) => [
               styles.forgotPassword,
               { opacity: pressed ? 0.7 : 1 },
