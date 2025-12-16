@@ -9,19 +9,13 @@ import {
   Alert,
   Image,
 } from 'react-native';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-import {
-  loginUser,
-  getCurrentUser,
-  getAuthToken,
-  changePassword,
-} from '@/services/api';
 import { validateEmail, validatePassword } from '@/utils/authDebug';
+import { loginUser, changePassword } from '@/services/auth/authService';
+import { getCurrentUser } from '@/services/user/userService';
+import { getAuthToken } from '@/services/storage/authStorage';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#060505ff';

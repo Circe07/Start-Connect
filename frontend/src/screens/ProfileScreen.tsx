@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import {
   getUserById as getFirebaseUserById,
   updateUser,
@@ -18,41 +19,17 @@ import {
   getCurrentUser as getFirebaseCurrentUser,
   User,
 } from '../services/firebase';
-import {
-  getCurrentUser as getAPICurrentUser,
-  getUserById as getAPIUserById,
-  updateCurrentUser,
-  getAuthToken,
-} from '../services/api';
+import { getCurrentUser as getAPICurrentUser } from '@/services/user/userService';
 import {
   getFallbackUserData,
   shouldUseFallback,
 } from '@/utils/firestoreFallback';
-import BottomNavigation from '@/components/BottomNavigation';
+import { getAuthToken } from '@/services/storage/authStorage';
+import { INTERESTS } from '@/constants/interests';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
 const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)';
-const HALLOWEEN_ORANGE_BG_DARK = 'rgba(204, 85, 0, 0.2)';
-
-const INTERESTS = [
-  { id: 'football', name: 'Football', icon: '⚽' },
-  { id: 'basketball', name: 'Basketball', icon: '🏀' },
-  { id: 'swimming', name: 'Swimming', icon: '🏊' },
-  { id: 'climbing', name: 'Climbing', icon: '🧗' },
-  { id: 'skiing', name: 'Skiing', icon: '🎿' },
-  { id: 'skating', name: 'Skating', icon: '⛸️' },
-  { id: 'martialarts', name: 'Martial Arts', icon: '🥋' },
-  { id: 'tennis', name: 'Tennis', icon: '🎾' },
-  { id: 'cycling', name: 'Cycling', icon: '🚴' },
-  { id: 'running', name: 'Running', icon: '🏃' },
-  { id: 'yoga', name: 'Yoga', icon: '🧘' },
-  { id: 'boxing', name: 'Boxing', icon: '🥊' },
-  { id: 'surfing', name: 'Surfing', icon: '🏄' },
-  { id: 'volleyball', name: 'Volleyball', icon: '🏐' },
-  { id: 'golf', name: 'Golf', icon: '⛳' },
-  { id: 'hiking', name: 'Hiking', icon: '🥾' },
-];
 
 export default function ProfileScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';

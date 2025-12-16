@@ -11,28 +11,19 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { registerUser } from '@/services/api';
+
 import { INTERESTS } from '@/constants/interests';
+import { registerUser } from '@/services/auth/authService';
+import { calculateBMI } from '@/utils/math/calculateBmi';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
-const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)'; // Halloween dark orange for input backgrounds
-const HALLOWEEN_ORANGE_BG_DARK = 'rgba(204, 85, 0, 0.2)'; // Darker for dark mode
-const LIGHT_ORANGE = 'rgba(255, 127, 63, 0.4)'; // Lighter orange for interests
+const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)';
+const HALLOWEEN_ORANGE_BG_DARK = 'rgba(204, 85, 0, 0.2)';
+const LIGHT_ORANGE = 'rgba(255, 127, 63, 0.4)';
 
 export default function SignUpScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
-
-  // BMI calculation and color determination
-  const calculateBMI = (heightCm: string, weightKg: string) => {
-    const h = parseFloat(heightCm);
-    const w = parseFloat(weightKg);
-    if (h && w && h > 0) {
-      const heightM = h / 100;
-      return w / (heightM * heightM);
-    }
-    return null;
-  };
 
   const getWeightFieldBackgroundColor = () => {
     const bmi = calculateBMI(height, weight);
