@@ -1,3 +1,4 @@
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import SearchInputBox from '@/components/ui/SearchInputBox';
 import { DUMMY_GROUPS } from '@/data/mockGroups';
 

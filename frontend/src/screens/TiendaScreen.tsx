@@ -6,7 +6,6 @@ import {
   FlatList,
   Image,
   useColorScheme,
-  Pressable,
   Dimensions,
 } from 'react-native';
 
@@ -48,7 +47,7 @@ export default function TiendaScreen() {
   const isDarkMode = useColorScheme() === 'dark';
   const screenWidth = Dimensions.get('window').width;
   const gap = 2;
-  const side = 18; // 5px side padding
+  const side = 18;
   const cardWidth = Math.floor((screenWidth - side * 2 - gap) / 2);
 
   const renderItem = ({ item, index }: { item: Product; index: number }) => (

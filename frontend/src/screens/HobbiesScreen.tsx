@@ -273,9 +273,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 0,
   },
-  hobbyCard: {
-    // width is set inline via calculated itemWidth
-  },
+
   hobbyImage: {
     width: '100%',
     height: 120,

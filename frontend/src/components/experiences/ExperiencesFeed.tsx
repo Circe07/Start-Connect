@@ -5,7 +5,6 @@ import {
   Image,
   Pressable,
   FlatList,
-  TextInput,
   Animated,
   StyleSheet,
   useColorScheme,
@@ -26,7 +25,6 @@ interface Post {
 
 interface ExperiencesFeedProps {
   filter?: string;
-  onToggleSearch: () => void;
   isSearchExpanded: boolean;
   searchAnimation: Animated.Value;
   addButtonAnimation: Animated.Value;
@@ -34,7 +32,6 @@ interface ExperiencesFeedProps {
 
 export default function ExperiencesFeed({
   filter = '',
-  onToggleSearch,
   isSearchExpanded,
   searchAnimation,
   addButtonAnimation,
@@ -84,59 +81,10 @@ export default function ExperiencesFeed({
     );
   };
 
-  const renderHeader = () => (
-    <View style={styles.experiencesContainer}>
-      <View style={styles.searchAddContainer}>
-        <Pressable style={styles.searchIconButton} onPress={onToggleSearch}>
-          <Icon
-            name="search"
-            size={30}
-            style={{ color: isDarkMode ? '#666' : '#999' }}
-          />
-        </Pressable>
-
-        {isSearchExpanded && (
-          <Animated.View
-            style={[
-              styles.searchContainer,
-              {
-                flex: searchAnimation,
-                opacity: searchAnimation,
-              },
-            ]}
-          >
-            <TextInput
-              style={[
-                styles.searchInput,
-                {
-                  color: isDarkMode ? '#f2f2f2' : '#333',
-                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                },
-              ]}
-              placeholder="Search experiences..."
-              placeholderTextColor={isDarkMode ? '#666' : '#999'}
-              value={filter}
-              onChangeText={text => {
-                /* Handle search */
-              }}
-            />
-          </Animated.View>
-        )}
-
-        <Pressable
-          style={[styles.addButton, { backgroundColor: BRAND_ORANGE }]}
-        >
-          <Icon name="add" size={27} style={styles.addButtonText} />
-        </Pressable>
-      </View>
-    </View>
-  );
-
   return (
     <FlatList
       data={posts}
       keyExtractor={item => item.id.toString()}
-      ListHeaderComponent={renderHeader}
       renderItem={({ item: post }) => (
         <View
           style={[
@@ -283,7 +231,7 @@ const styles = StyleSheet.create({
   postContainer: {
     marginBottom: 16,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: 'scroll',
     borderWidth: 1,
     borderColor: '#e0e0e0',
   },
@@ -304,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   postUsername: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
   },
   postImage: {
@@ -325,7 +273,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   postLikes: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
   },
   postCaption: {
@@ -333,13 +281,13 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   postCaptionText: {
-    fontSize: 18,
+    fontSize: 15,
     lineHeight: 18,
   },
   postCaptionUser: {
     fontWeight: '600',
   },
   postsList: {
-    paddingBottom: 100, // Space for bottom navigation
+    paddingBottom: 100,
   },
 });

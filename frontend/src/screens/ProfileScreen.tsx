@@ -37,7 +37,6 @@ export default function ProfileScreen({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState('perfil');
 
   // Form state for editing
   const [name, setName] = useState('');
@@ -969,6 +968,7 @@ export default function ProfileScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingBottom: 80,
   },
   mainContainer: {
     flex: 1,

@@ -64,7 +64,6 @@ export default function HomeScreen({ navigation }: any) {
         return (
           <ExperiencesFeed
             filter={searchQuery}
-            onToggleSearch={toggleSearch}
             isSearchExpanded={isSearchExpanded}
             searchAnimation={searchAnimation}
             addButtonAnimation={addButtonAnimation}

@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: 40,
   },
   header: {
     flexDirection: 'row',
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     height: 36,
   },
   listContent: {
-    paddingBottom: 100, // Space for bottom navigation
+    paddingBottom: 100,
   },
   emptyText: {
     textAlign: 'center',

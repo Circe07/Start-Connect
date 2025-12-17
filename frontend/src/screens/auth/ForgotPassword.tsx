@@ -30,6 +30,7 @@ export default function ForgotPassword() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.container}>
+          
           {/* Header */}
           <View style={styles.headerContainer}>
             <Text style={styles.title}>¿Olvidaste tu contraseña?</Text>
