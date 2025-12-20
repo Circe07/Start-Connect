@@ -9,8 +9,10 @@ import {
   ScrollView,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
   getUserById as getFirebaseUserById,
@@ -19,7 +21,7 @@ import {
   getCurrentUser as getFirebaseCurrentUser,
   User,
 } from '../services/firebase';
-import { getCurrentUser as getAPICurrentUser } from '@/services/user/userService';
+import { getCurrentUser as getAPICurrentUser, updateCurrentUser } from '@/services/user/userService';
 import {
   getFallbackUserData,
   shouldUseFallback,
@@ -29,26 +31,23 @@ import { INTERESTS } from '@/constants/interests';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
-const HALLOWEEN_ORANGE_BG = 'rgba(204, 85, 0, 0.15)';
 
 export default function ProfileScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
-  // Form state for editing
+  // Form state for editing - Firestore fields
   const [name, setName] = useState('');
-  const [firstSurname, setFirstSurname] = useState('');
-  const [secondSurname, setSecondSurname] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [gender, setGender] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [city, setCity] = useState('');
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
+  const [bio, setBio] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [photo, setPhoto] = useState('');
+  const [sports, setSports] = useState<string[]>([]);
 
   useEffect(() => {
     loadUserData();
@@ -57,111 +56,30 @@ export default function ProfileScreen({ navigation }: any) {
   const loadUserData = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 ProfileScreen: Loading user data...');
-      console.log('🔍 ProfileScreen: Starting loadUserData function');
 
       // Check if we have an API token (API-based authentication)
       const token = getAuthToken();
-      console.log(
-        '🔑 ProfileScreen: Token check result:',
-        token ? `Found (length: ${token.length})` : 'NOT FOUND',
-      );
 
       if (token) {
-        console.log('🔑 API token found, fetching user profile from API...');
         try {
           // Get user profile from API
           const apiUserResult = await getAPICurrentUser();
 
-          console.log('📦 API response received:', {
-            success: apiUserResult.success,
-            hasUser: !!apiUserResult.user,
-            hasError: !!apiUserResult.error,
-            responseKeys: Object.keys(apiUserResult),
-          });
-
           if (apiUserResult.success && apiUserResult.user) {
-            console.log('✅ User data loaded from API:', apiUserResult.user);
-            console.log('📋 API user keys:', Object.keys(apiUserResult.user));
-
-            // Convert API user data to User type format
             const apiUser = apiUserResult.user;
-            const userData: User = {
-              id: apiUser.uid || apiUser.id || '',
-              agreed: apiUser.agreed !== undefined ? apiUser.agreed : true,
-              email_address: apiUser.email || apiUser.email_address || '',
-              name: apiUser.name || '',
-              first_surname:
-                apiUser.first_surname || apiUser.firstSurname || '',
-              second_surname:
-                apiUser.second_surname || apiUser.secondSurname || '',
-              password: apiUser.password || '', // Required field, but we don't store it from API response
-              birthdate: apiUser.birthdate || '',
-              gender: apiUser.gender || '',
-              height: apiUser.height || undefined,
-              weight: apiUser.weight || undefined,
-              city: apiUser.city || '',
-              phone_number: apiUser.phone_number || apiUser.phoneNumber || '',
-              interests: apiUser.interests || [],
-              profile_img_path:
-                apiUser.profile_img_path ||
-                apiUser.profileImage ||
-                apiUser.profile_img_path ||
-                '',
-            };
-
-            console.log('✅ Converted user data:', {
-              id: userData.id,
-              email_address: userData.email_address,
-              name: userData.name,
-              first_surname: userData.first_surname,
-              hasAllRequiredFields: !!(
-                userData.id &&
-                userData.email_address &&
-                userData.name &&
-                userData.first_surname
-              ),
-            });
-
-            // Validate that we have at least the minimum required fields
-            if (
-              !userData.email_address ||
-              !userData.name ||
-              !userData.first_surname
-            ) {
-              console.warn('⚠️ User data missing required fields:', {
-                hasEmail: !!userData.email_address,
-                hasName: !!userData.name,
-                hasFirstSurname: !!userData.first_surname,
-              });
-            }
-
-            setUserData(userData);
-            populateForm(userData);
+            setUserData(apiUser);
+            populateForm(apiUser);
             setIsLoading(false);
             return;
-          } else {
-            console.error('❌ Failed to load user from API:', {
-              success: apiUserResult.success,
-              error: apiUserResult.error,
-              hasUser: !!apiUserResult.user,
-              rawResponse: apiUserResult,
-            });
-            // Don't return here - fall through to Firebase fallback
           }
         } catch (apiError: any) {
-          console.error('❌ API error loading user:', apiError);
-          // Don't return here - fall through to Firebase fallback
+          console.error('API error loading user:', apiError);
         }
       }
 
-      // Fallback to Firebase Auth (if using Firebase authentication)
-      console.log('🔄 Trying Firebase Auth as fallback...');
+      // Fallback to Firebase Auth
       const currentUser = getFirebaseCurrentUser();
       if (!currentUser) {
-        console.log(
-          '❌ No authenticated user found (neither API token nor Firebase)',
-        );
         Alert.alert('Error', 'Please log in to view your profile', [
           { text: 'OK', onPress: () => navigation.navigate('Login') },
         ]);
@@ -169,43 +87,35 @@ export default function ProfileScreen({ navigation }: any) {
         return;
       }
 
-      console.log('✅ Firebase user found:', currentUser.uid);
-
       try {
         const user = await getFirebaseUserById(currentUser.uid);
 
         if (user) {
-          console.log('✅ User data loaded successfully from Firestore');
           setUserData(user);
           populateForm(user);
         } else {
-          console.log('❌ User data not found in Firestore');
           Alert.alert('Error', 'User data not found. Please contact support.', [
             { text: 'OK' },
           ]);
           navigation.navigate('Login');
         }
       } catch (error: any) {
-        console.error('💥 Error getting user data:', error);
-
-        // Check if we should use fallback data
         if (shouldUseFallback(error)) {
-          console.log('🔄 Using fallback data due to Firestore unavailability');
           const fallbackUser = getFallbackUserData(currentUser.uid);
           setUserData(fallbackUser);
           populateForm(fallbackUser);
 
           Alert.alert(
             'Service Unavailable',
-            'Firestore is temporarily unavailable. Showing demo data. Changes will not be saved.',
+            'Using demo data. Changes will not be saved.',
             [{ text: 'OK' }],
           );
         } else {
-          throw error; // Re-throw if it's not a service unavailable error
+          throw error;
         }
       }
     } catch (error) {
-      console.error('💥 Error loading user data:', error);
+      console.error('Error loading user data:', error);
       Alert.alert('Error', 'Failed to load user data. Please try again.', [
         { text: 'OK' },
       ]);
@@ -214,60 +124,63 @@ export default function ProfileScreen({ navigation }: any) {
     }
   };
 
-  const populateForm = (user: User) => {
+  const populateForm = (user: any) => {
     setName(user.name || '');
-    setFirstSurname(user.first_surname || '');
-    setSecondSurname(user.second_surname || '');
-    setBirthdate(user.birthdate || '');
-    setGender(user.gender || '');
-    setHeight(user.height?.toString() || '');
-    setWeight(user.weight?.toString() || '');
-    setCity(user.city || '');
-    setSelectedInterests(user.interests || []);
-    setPhoneNumber(user.phone_number || '');
+    setUsername(user.username || '');
+    setEmail(user.email || '');
+    setLocation(user.location || '');
+    setBio(user.bio || '');
+    setPhoneNumber(user.phoneNumber || user.phone_number || '');
+    setPhoto(user.photo || user.profile_img_path || user.profileImage || '');
+    setSports(user.sports || []);
   };
 
   const handleSave = async () => {
     if (!userData) return;
 
-    // Check if we're using fallback data
-    if (userData.email_address === 'user@example.com') {
-      Alert.alert(
-        'Cannot Save',
-        'You are viewing demo data. Firestore is unavailable, so changes cannot be saved.',
-        [{ text: 'OK' }],
-      );
+    // Validation
+    if (!name.trim() || !username.trim()) {
+      Alert.alert('Error', 'Name and username are required', [{ text: 'OK' }]);
       return;
     }
 
     setIsSaving(true);
     try {
-      const updateData: Partial<User> = {
+      const updateData = {
         name: name.trim(),
-        first_surname: firstSurname.trim(),
-        second_surname: secondSurname.trim() || undefined,
-        birthdate: birthdate.trim() || undefined,
-        gender: gender || undefined,
-        height: height.trim() ? parseInt(height.trim()) : undefined,
-        weight: weight.trim() ? parseInt(weight.trim()) : undefined,
-        city: city.trim() || undefined,
-        interests: selectedInterests.length > 0 ? selectedInterests : undefined,
-        phone_number: phoneNumber.trim() || undefined,
+        username: username.trim(),
+        email: email.trim(),
+        location: location.trim(),
+        bio: bio.trim(),
+        phoneNumber: phoneNumber.trim(),
+        photo: photo.trim(),
+        sports: sports || [],
       };
 
-      const result = await updateUser(userData.id!, updateData);
+      // Try API update first
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const apiResult = await updateCurrentUser(updateData);
+          if (apiResult.success) {
+            Alert.alert('Success', 'Profile updated!', [{ text: 'OK' }]);
+            setIsEditing(false);
+            await loadUserData();
+            return;
+          }
+        } catch (apiError) {
+          console.error('Error updating via API:', apiError);
+        }
+      }
 
+      // Fallback to Firebase
+      const result = await updateUser(userData.uid || userData.id, updateData);
       if (result.success) {
-        Alert.alert('Success', 'Profile updated successfully!', [
-          { text: 'OK' },
-        ]);
+        Alert.alert('Success', 'Profile updated!', [{ text: 'OK' }]);
         setIsEditing(false);
-        // Reload user data
         await loadUserData();
       } else {
-        Alert.alert('Error', result.error || 'Failed to update profile', [
-          { text: 'OK' },
-        ]);
+        Alert.alert('Error', result.error || 'Failed to update profile', [{ text: 'OK' }]);
       }
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -309,34 +222,6 @@ export default function ProfileScreen({ navigation }: any) {
     }
   };
 
-  const toggleInterest = (interestId: string) => {
-    setSelectedInterests(prev =>
-      prev.includes(interestId)
-        ? prev.filter(id => id !== interestId)
-        : [...prev, interestId],
-    );
-  };
-
-  const formatDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    if (cleaned.length >= 8) {
-      return (
-        cleaned.slice(0, 2) +
-        '/' +
-        cleaned.slice(2, 4) +
-        '/' +
-        cleaned.slice(4, 8)
-      );
-    } else if (cleaned.length >= 4) {
-      return (
-        cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4)
-      );
-    } else if (cleaned.length >= 2) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2);
-    }
-    return cleaned;
-  };
-
   if (isLoading) {
     return (
       <SafeAreaView
@@ -346,6 +231,7 @@ export default function ProfileScreen({ navigation }: any) {
         ]}
       >
         <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={BRAND_ORANGE} />
           <Text
             style={[
               styles.loadingText,
@@ -412,47 +298,45 @@ export default function ProfileScreen({ navigation }: any) {
                 { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
               ]}
             >
-              {isEditing ? 'Edit your information' : 'View your profile'}
+              {isEditing ? 'Edit your information' : 'View and manage your profile'}
             </Text>
           </View>
 
-          <View style={styles.form}>
-            {/* Profile Picture */}
-            <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
-                Profile Picture
-              </Text>
-              <View
-                style={[
-                  styles.imageContainer,
-                  { borderColor: isDarkMode ? '#444' : '#ccc' },
-                ]}
-              >
-                {userData.profile_img_path ? (
-                  <Image
-                    source={{ uri: userData.profile_img_path }}
-                    style={styles.profileImage}
-                  />
-                ) : (
-                  <View style={styles.imagePlaceholder}>
-                    <Text
-                      style={[
-                        styles.imagePlaceholderText,
-                        { color: isDarkMode ? '#888' : '#666' },
-                      ]}
-                    >
-                      📷 No Photo
-                    </Text>
-                  </View>
-                )}
-              </View>
+          {/* Profile Picture Section */}
+          <View style={[styles.profilePictureCard, { backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8' }]}>
+            <View
+              style={[
+                styles.imageContainer,
+                { borderColor: BRAND_ORANGE },
+              ]}
+            >
+              {userData.profile_img_path ? (
+                <Image
+                  source={{ uri: userData.profile_img_path }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Icon name="account-circle" size={64} color={BRAND_ORANGE} />
+                </View>
+              )}
             </View>
+            <View style={styles.profileNameContainer}>
+              <Text style={[styles.profileNameText, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+                {userData.name}
+              </Text>
+              <Text style={[styles.profileEmailText, { color: isDarkMode ? '#bdbdbd' : '#666' }]}>
+                @{userData.username}
+              </Text>
+              {userData.email && (
+                <Text style={[styles.profileEmailText, { color: isDarkMode ? '#bdbdbd' : '#666', marginTop: 4 }]}>
+                  {userData.email}
+                </Text>
+              )}
+            </View>
+          </View>
 
+          <View style={styles.form}>
             {/* Name */}
             <View style={styles.inputContainer}>
               <Text
@@ -475,6 +359,7 @@ export default function ProfileScreen({ navigation }: any) {
                   ]}
                   value={name}
                   onChangeText={setName}
+                  placeholder="Your name"
                 />
               ) : (
                 <Text
@@ -483,12 +368,12 @@ export default function ProfileScreen({ navigation }: any) {
                     { color: isDarkMode ? '#f2f2f2' : '#333' },
                   ]}
                 >
-                  {userData.name}
+                  {userData.name || 'Not set'}
                 </Text>
               )}
             </View>
 
-            {/* First Surname */}
+            {/* Username */}
             <View style={styles.inputContainer}>
               <Text
                 style={[
@@ -496,7 +381,7 @@ export default function ProfileScreen({ navigation }: any) {
                   { color: isDarkMode ? '#f2f2f2' : '#333' },
                 ]}
               >
-                First Surname
+                Username
               </Text>
               {isEditing ? (
                 <TextInput
@@ -508,8 +393,9 @@ export default function ProfileScreen({ navigation }: any) {
                       borderColor: isDarkMode ? '#333' : '#ddd',
                     },
                   ]}
-                  value={firstSurname}
-                  onChangeText={setFirstSurname}
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="Your username"
                 />
               ) : (
                 <Text
@@ -518,47 +404,10 @@ export default function ProfileScreen({ navigation }: any) {
                     { color: isDarkMode ? '#f2f2f2' : '#333' },
                   ]}
                 >
-                  {userData.first_surname}
+                  @{userData.username || 'Not set'}
                 </Text>
               )}
             </View>
-
-            {/* Second Surname */}
-            {userData.second_surname && (
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.inputLabel,
-                    { color: isDarkMode ? '#f2f2f2' : '#333' },
-                  ]}
-                >
-                  Second Surname
-                </Text>
-                {isEditing ? (
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                        color: isDarkMode ? '#f2f2f2' : '#333',
-                        borderColor: isDarkMode ? '#333' : '#ddd',
-                      },
-                    ]}
-                    value={secondSurname}
-                    onChangeText={setSecondSurname}
-                  />
-                ) : (
-                  <Text
-                    style={[
-                      styles.displayValue,
-                      { color: isDarkMode ? '#f2f2f2' : '#333' },
-                    ]}
-                  >
-                    {userData.second_surname}
-                  </Text>
-                )}
-              </View>
-            )}
 
             {/* Email */}
             <View style={styles.inputContainer}>
@@ -570,58 +419,148 @@ export default function ProfileScreen({ navigation }: any) {
               >
                 Email
               </Text>
-              <Text
-                style={[
-                  styles.displayValue,
-                  { color: isDarkMode ? '#888' : '#666' },
-                ]}
-              >
-                {userData.email_address}
-              </Text>
+              {isEditing ? (
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                      color: isDarkMode ? '#f2f2f2' : '#333',
+                      borderColor: isDarkMode ? '#333' : '#ddd',
+                    },
+                  ]}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="your@email.com"
+                  editable={false}
+                />
+              ) : (
+                <Text
+                  style={[
+                    styles.displayValue,
+                    { color: isDarkMode ? '#888' : '#999' },
+                  ]}
+                >
+                  {userData.email || 'Not set'}
+                </Text>
+              )}
             </View>
 
-            {/* Birthdate */}
-            {userData.birthdate && (
-              <View style={styles.inputContainer}>
+            {/* Location */}
+            <View style={styles.inputContainer}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Location
+              </Text>
+              {isEditing ? (
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                      color: isDarkMode ? '#f2f2f2' : '#333',
+                      borderColor: isDarkMode ? '#333' : '#ddd',
+                    },
+                  ]}
+                  value={location}
+                  onChangeText={setLocation}
+                  placeholder="City, Country"
+                />
+              ) : (
                 <Text
                   style={[
-                    styles.inputLabel,
+                    styles.displayValue,
                     { color: isDarkMode ? '#f2f2f2' : '#333' },
                   ]}
                 >
-                  Birthdate
+                  {userData.location || 'Not set'}
                 </Text>
-                {isEditing ? (
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                        color: isDarkMode ? '#f2f2f2' : '#333',
-                        borderColor: isDarkMode ? '#333' : '#ddd',
-                      },
-                    ]}
-                    placeholder="DD/MM/YYYY"
-                    value={birthdate}
-                    onChangeText={text => setBirthdate(formatDate(text))}
-                    keyboardType="numeric"
-                    maxLength={10}
-                  />
-                ) : (
-                  <Text
-                    style={[
-                      styles.displayValue,
-                      { color: isDarkMode ? '#f2f2f2' : '#333' },
-                    ]}
-                  >
-                    {userData.birthdate}
-                  </Text>
-                )}
-              </View>
-            )}
+              )}
+            </View>
 
-            {/* Gender */}
-            {userData.gender && (
+            {/* Phone Number */}
+            <View style={styles.inputContainer}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Phone Number
+              </Text>
+              {isEditing ? (
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                      color: isDarkMode ? '#f2f2f2' : '#333',
+                      borderColor: isDarkMode ? '#333' : '#ddd',
+                    },
+                  ]}
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                  placeholder="+1 (555) 000-0000"
+                />
+              ) : (
+                <Text
+                  style={[
+                    styles.displayValue,
+                    { color: isDarkMode ? '#f2f2f2' : '#333' },
+                  ]}
+                >
+                  {userData.phoneNumber || 'Not set'}
+                </Text>
+              )}
+            </View>
+
+            {/* Bio */}
+            <View style={styles.inputContainer}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Bio
+              </Text>
+              {isEditing ? (
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.bioInput,
+                    {
+                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+                      color: isDarkMode ? '#f2f2f2' : '#333',
+                      borderColor: isDarkMode ? '#333' : '#ddd',
+                    },
+                  ]}
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Tell us about yourself"
+                  multiline
+                  numberOfLines={4}
+                  maxLength={500}
+                />
+              ) : (
+                <Text
+                  style={[
+                    styles.displayValue,
+                    { color: isDarkMode ? '#f2f2f2' : '#333' },
+                  ]}
+                >
+                  {userData.bio || 'Not set'}
+                </Text>
+              )}
+            </View>
+
+            {/* Sports */}
+            {sports.length > 0 && (
               <View style={styles.inputContainer}>
                 <Text
                   style={[
@@ -629,142 +568,29 @@ export default function ProfileScreen({ navigation }: any) {
                     { color: isDarkMode ? '#f2f2f2' : '#333' },
                   ]}
                 >
-                  Gender
+                  Sports
                 </Text>
-                {isEditing ? (
-                  <View style={styles.genderContainer}>
-                    {['Male', 'Female', 'Other'].map(genderOption => (
-                      <Pressable
-                        key={genderOption}
-                        style={[
-                          styles.genderOption,
-                          {
-                            backgroundColor:
-                              gender === genderOption
-                                ? BRAND_ORANGE
-                                : isDarkMode
-                                ? '#1a1a1a'
-                                : '#f8f8f8',
-                            borderColor: isDarkMode ? '#333' : '#ddd',
-                          },
-                        ]}
-                        onPress={() => setGender(genderOption)}
-                      >
-                        <Text
-                          style={[
-                            styles.genderOptionText,
-                            {
-                              color:
-                                gender === genderOption
-                                  ? '#fff'
-                                  : isDarkMode
-                                  ? '#f2f2f2'
-                                  : '#333',
-                            },
-                          ]}
+                <View style={styles.sportsContainer}>
+                  {sports.map((sport, index) => (
+                    <View key={index} style={styles.sportTag}>
+                      <Text style={styles.sportText}>{sport}</Text>
+                      {isEditing && (
+                        <Pressable
+                          onPress={() =>
+                            setSports(sports.filter((_, i) => i !== index))
+                          }
                         >
-                          {genderOption}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : (
-                  <Text
-                    style={[
-                      styles.displayValue,
-                      { color: isDarkMode ? '#f2f2f2' : '#333' },
-                    ]}
-                  >
-                    {userData.gender}
-                  </Text>
-                )}
+                          <Icon name="close" size={16} color={BRAND_ORANGE} />
+                        </Pressable>
+                      )}
+                    </View>
+                  ))}
+                </View>
               </View>
             )}
 
-            {/* Height and Weight */}
-            {(userData.height || userData.weight) && (
-              <View style={styles.row}>
-                {userData.height && (
-                  <View
-                    style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}
-                  >
-                    <Text
-                      style={[
-                        styles.inputLabel,
-                        { color: isDarkMode ? '#f2f2f2' : '#333' },
-                      ]}
-                    >
-                      Height (cm)
-                    </Text>
-                    {isEditing ? (
-                      <TextInput
-                        style={[
-                          styles.input,
-                          {
-                            backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                            color: isDarkMode ? '#f2f2f2' : '#333',
-                            borderColor: isDarkMode ? '#333' : '#ddd',
-                          },
-                        ]}
-                        value={height}
-                        onChangeText={setHeight}
-                        keyboardType="numeric"
-                      />
-                    ) : (
-                      <Text
-                        style={[
-                          styles.displayValue,
-                          { color: isDarkMode ? '#f2f2f2' : '#333' },
-                        ]}
-                      >
-                        {userData.height}
-                      </Text>
-                    )}
-                  </View>
-                )}
-                {userData.weight && (
-                  <View
-                    style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}
-                  >
-                    <Text
-                      style={[
-                        styles.inputLabel,
-                        { color: isDarkMode ? '#f2f2f2' : '#333' },
-                      ]}
-                    >
-                      Weight (kg)
-                    </Text>
-                    {isEditing ? (
-                      <TextInput
-                        style={[
-                          styles.input,
-                          {
-                            backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                            color: isDarkMode ? '#f2f2f2' : '#333',
-                            borderColor: isDarkMode ? '#333' : '#ddd',
-                          },
-                        ]}
-                        value={weight}
-                        onChangeText={setWeight}
-                        keyboardType="numeric"
-                      />
-                    ) : (
-                      <Text
-                        style={[
-                          styles.displayValue,
-                          { color: isDarkMode ? '#f2f2f2' : '#333' },
-                        ]}
-                      >
-                        {userData.weight}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              </View>
-            )}
-
-            {/* City */}
-            {userData.city && (
+            {/* Sports/Activities */}
+            {userData.sports && userData.sports.length > 0 && (
               <View style={styles.inputContainer}>
                 <Text
                   style={[
@@ -772,95 +598,11 @@ export default function ProfileScreen({ navigation }: any) {
                     { color: isDarkMode ? '#f2f2f2' : '#333' },
                   ]}
                 >
-                  City
+                  Sports & Activities
                 </Text>
-                {isEditing ? (
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                        color: isDarkMode ? '#f2f2f2' : '#333',
-                        borderColor: isDarkMode ? '#333' : '#ddd',
-                      },
-                    ]}
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                ) : (
-                  <Text
-                    style={[
-                      styles.displayValue,
-                      { color: isDarkMode ? '#f2f2f2' : '#333' },
-                    ]}
-                  >
-                    {userData.city}
-                  </Text>
-                )}
-              </View>
-            )}
-
-            {/* Interests */}
-            {userData.interests && userData.interests.length > 0 && (
-              <View style={styles.inputContainer}>
-                <Text
-                  style={[
-                    styles.inputLabel,
-                    { color: isDarkMode ? '#f2f2f2' : '#333' },
-                  ]}
-                >
-                  Interests
-                </Text>
-                {isEditing ? (
-                  <View style={styles.interestsGrid}>
-                    {INTERESTS.map(interest => (
-                      <Pressable
-                        key={interest.id}
-                        style={[
-                          styles.interestChip,
-                          {
-                            backgroundColor: selectedInterests.includes(
-                              interest.id,
-                            )
-                              ? HALLOWEEN_ORANGE_BG
-                              : isDarkMode
-                              ? '#1a1a1a'
-                              : '#f8f8f8',
-                            borderColor: selectedInterests.includes(interest.id)
-                              ? HALLOWEEN_ORANGE_BG
-                              : isDarkMode
-                              ? '#333'
-                              : '#ddd',
-                          },
-                        ]}
-                        onPress={() => toggleInterest(interest.id)}
-                      >
-                        <Text style={styles.interestIcon}>{interest.icon}</Text>
-                        <Text
-                          style={[
-                            styles.interestText,
-                            {
-                              color: selectedInterests.includes(interest.id)
-                                ? '#fff'
-                                : isDarkMode
-                                ? '#f2f2f2'
-                                : '#333',
-                            },
-                          ]}
-                        >
-                          {interest.name}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : (
-                  <View style={styles.interestsDisplay}>
-                    {userData.interests.map((interest, index) => {
-                      const interestObj = INTERESTS.find(
-                        i => i.id === interest,
-                      );
-                      return interestObj ? (
-                        <View key={index} style={styles.interestDisplayChip}>
+                <View style={styles.sportsDisplay}>
+                  {userData.sports.map((sport, index) => (
+                    <View key={index} style={styles.sportDisplayChip}>
                           <Text style={styles.interestIcon}>
                             {interestObj.icon}
                           </Text>
@@ -927,9 +669,12 @@ export default function ProfileScreen({ navigation }: any) {
                     onPress={handleSave}
                     disabled={isSaving}
                   >
-                    <Text style={styles.saveButtonText}>
-                      {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Text>
+                    <View style={styles.buttonContent}>
+                      <Icon name="check" size={20} color="#fff" />
+                      <Text style={styles.saveButtonText}>
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </Text>
+                    </View>
                   </Pressable>
                   <Pressable
                     style={styles.cancelButton}
@@ -938,7 +683,10 @@ export default function ProfileScreen({ navigation }: any) {
                       populateForm(userData);
                     }}
                   >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                    <View style={styles.buttonContent}>
+                      <Icon name="close" size={20} color="#fff" />
+                      <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </View>
                   </Pressable>
                 </>
               ) : (
@@ -947,13 +695,19 @@ export default function ProfileScreen({ navigation }: any) {
                     style={styles.editButton}
                     onPress={() => setIsEditing(true)}
                   >
-                    <Text style={styles.editButtonText}>Edit Profile</Text>
+                    <View style={styles.buttonContent}>
+                      <Icon name="edit" size={20} color="#fff" />
+                      <Text style={styles.editButtonText}>Edit Profile</Text>
+                    </View>
                   </Pressable>
                   <Pressable
                     style={styles.signOutButton}
                     onPress={handleSignOut}
                   >
-                    <Text style={styles.signOutButtonText}>Sign Out</Text>
+                    <View style={styles.buttonContent}>
+                      <Icon name="logout" size={20} color="#fff" />
+                      <Text style={styles.signOutButtonText}>Sign Out</Text>
+                    </View>
                   </Pressable>
                 </>
               )}
@@ -981,6 +735,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
   loadingText: {
     fontSize: 16,
@@ -990,10 +745,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
   errorText: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   retryButton: {
     backgroundColor: BRAND_ORANGE,
@@ -1009,7 +765,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   headerTitleContainer: {
     flexDirection: 'row',
@@ -1026,8 +782,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
+  },
+  profilePictureCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  profileNameContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  profileNameText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  profileEmailText: {
+    fontSize: 12,
   },
   form: {
     paddingBottom: 40,
@@ -1051,10 +832,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(255, 127, 63, 0.1)',
+    backgroundColor: 'rgba(255, 127, 63, 0.08)',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 127, 63, 0.3)',
+    borderColor: 'rgba(255, 127, 63, 0.2)',
   },
   row: {
     flexDirection: 'row',
@@ -1064,10 +845,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 2,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
   },
   profileImage: {
     width: 96,
@@ -1122,7 +902,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 127, 63, 0.2)',
+    backgroundColor: 'rgba(255, 127, 63, 0.15)',
     borderWidth: 1,
     borderColor: 'rgba(255, 127, 63, 0.4)',
     gap: 6,
@@ -1143,6 +923,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
   },
   editButtonText: {
     color: '#fff',
@@ -1154,6 +937,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   saveButtonText: {
     color: '#fff',
@@ -1165,6 +950,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   cancelButtonText: {
     color: '#fff',
@@ -1176,10 +963,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
   },
   signOutButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
 });

@@ -94,7 +94,7 @@ exports.getCenters = async (req, res) => {
         }
 
         const centers = snapshot.docs.map(doc => Center.fromFirestore(doc));
-        res.status(200).json(centers);
+        res.status(200).json({ centers });
 
     } catch (error) {
         console.error("Error getCenters:", error);

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from 'react';
 import {
@@ -11,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import SearchInputBox from '@/components/ui/SearchInputBox';
-import { DUMMY_GROUPS } from '@/data/mockGroups';
+import { getPublicGroups } from '@/services/groups/authGroup';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
@@ -25,21 +26,21 @@ export default function GroupsScreen(
 ) {
   const isDarkMode = useColorScheme() === 'dark';
   const [searchText, setSearchText] = useState('');
-  const [groups, setGroups] = useState(DUMMY_GROUPS);
 
-  const filteredGroups = groups.filter(
+  const { data: groups } = useQuery({
+    queryKey: ['group'],
+    queryFn: getPublicGroups,
+    staleTime: 50000,
+  });
+  if (!groups) {
+    return <Text>Loading...</Text>;
+  }
+
+  const filteredGroups = groups.groups.filter(
     group =>
       group.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      group.activityType.toLowerCase().includes(searchText.toLowerCase()),
+      group.sport.toLowerCase().includes(searchText.toLowerCase()),
   );
-
-  const handleJoinToggle = (groupId: string) => {
-    setGroups(prevGroups =>
-      prevGroups.map(group =>
-        group.id === groupId ? { ...group, isJoined: !group.isJoined } : group,
-      ),
-    );
-  };
 
   return (
     <SafeAreaView
@@ -115,11 +116,11 @@ export default function GroupsScreen(
               >
                 {group.name}
               </Text>
-              <Text style={styles.groupActivity}>{group.activityType}</Text>
+              <Text style={styles.groupActivity}>{group.sport}</Text>
               <View style={styles.groupMeta}>
                 <Icon name="people" size={16} color={BRAND_GRAY} />
                 <Text style={styles.groupMetaText}>
-                  {group.memberCount} miembros
+                  {group.members.length} miembros
                 </Text>
               </View>
               <Text
@@ -138,28 +139,23 @@ export default function GroupsScreen(
               style={[
                 styles.joinButton,
                 {
-                  backgroundColor: group.isJoined
+                  backgroundColor: true
                     ? isDarkMode
                       ? '#2a2a2a'
                       : '#f5f5f5'
                     : BRAND_ORANGE,
                 },
               ]}
-              onPress={() => handleJoinToggle(group.id)}
             >
               <Text
                 style={[
                   styles.joinButtonText,
                   {
-                    color: group.isJoined
-                      ? isDarkMode
-                        ? '#f2f2f2'
-                        : '#333'
-                      : '#fff',
+                    color: true ? (isDarkMode ? '#f2f2f2' : '#333') : '#fff',
                   },
                 ]}
               >
-                {group.isJoined ? 'Unirse' : 'Unido'}
+                {true ? 'Unirse' : 'Unido'}
               </Text>
             </Pressable>
           </View>

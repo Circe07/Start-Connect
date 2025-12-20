@@ -1,3 +1,6 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
   View,
@@ -7,10 +10,10 @@ import {
   Pressable,
   useColorScheme,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import SearchInputBox from '@/components/ui/SearchInputBox';
-import { DUMMY_CENTERS } from '@/data/mockCenters';
+import { getCenters } from '@/services/centers/authCenters';
+import useGetCenters from '@/hooks/useGetCenters';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
@@ -25,10 +28,20 @@ export default function CentersScreen(
   const isDarkMode = useColorScheme() === 'dark';
   const [searchText, setSearchText] = useState('');
 
-  const filteredCenters = DUMMY_CENTERS.filter(
+  const { data: centers, isError } = useGetCenters();
+
+  if (isError) {
+    console.error('Error to get centers');
+  }
+
+  if (!centers) {
+    return <Text>Loading...</Text>;
+  }
+
+  const filteredCenters = centers.centers.filter(
     center =>
       center.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      center.location.toLowerCase().includes(searchText.toLowerCase()),
+      center.address.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const renderStars = (rating: number) => {
@@ -125,34 +138,20 @@ export default function CentersScreen(
 
               <View style={styles.locationContainer}>
                 <Icon name="location-on" size={16} color={BRAND_GRAY} />
-                <Text style={styles.locationText}>{center.location}</Text>
-              </View>
-
-              <View style={styles.ratingContainer}>
-                {renderStars(center.rating)}
-                <Text style={styles.ratingText}>
-                  {center.rating} ({center.reviewCount} reseñas)
-                </Text>
+                <Text style={styles.locationText}>{center.address}</Text>
               </View>
 
               <View style={styles.activitiesContainer}>
-                {center.activities.slice(0, 3).map((activity, index) => (
-                  <View key={activity.id} style={styles.activityTag}>
-                    <Text style={styles.activityTagText}>{activity.name}</Text>
+                {center.services.slice(0, 3).map((service, index) => (
+                  <View key={service.id} style={styles.activityTag}>
+                    <Text style={styles.activityTagText}>{service.name}</Text>
                   </View>
                 ))}
-                {center.activities.length > 3 && (
+                {center.services.length > 3 && (
                   <Text style={styles.moreActivities}>
-                    +{center.activities.length - 3} más
+                    +{center.services.length - 3} más
                   </Text>
                 )}
-              </View>
-
-              <View style={styles.hoursContainer}>
-                <Icon name="schedule" size={16} color={BRAND_GRAY} />
-                <Text style={styles.hoursText}>
-                  {center.hours.open} - {center.hours.close}
-                </Text>
               </View>
 
               {/* Action Buttons */}
@@ -160,7 +159,9 @@ export default function CentersScreen(
                 <Pressable
                   style={[styles.button, styles.detailsButton]}
                   onPress={() =>
-                    navigation?.navigate('CenterDetail', { center })
+                    navigation?.navigate('CenterDetail', {
+                      centerId: center.id,
+                    })
                   }
                 >
                   <Text style={styles.detailsButtonText}>Ver Detalles</Text>
@@ -168,7 +169,7 @@ export default function CentersScreen(
                 <Pressable
                   style={[styles.button, styles.reserveButton]}
                   onPress={() =>
-                    navigation?.navigate('Reservation', { center })
+                    navigation?.navigate('Reservation', { centerId: center.id })
                   }
                 >
                   <Text style={styles.reserveButtonText}>Reservar</Text>

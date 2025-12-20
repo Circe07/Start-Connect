@@ -1,4 +1,5 @@
-import React from 'react';
+import useGetCenters from '@/hooks/useGetCenters';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,36 +7,85 @@ import {
   ScrollView,
   Pressable,
   useColorScheme,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Center } from '@/types/models.d';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
 
 interface CenterDetailScreenProps {
-  route?: {
-    params?: {
-      center?: Center;
-    };
-  };
   navigation?: any;
+  route?: any;
 }
 
 export default function CenterDetailScreen(
   {
-    route,
     navigation,
+    route,
   }: CenterDetailScreenProps = {} as CenterDetailScreenProps,
 ) {
-  const center = route?.params?.center;
+  const { data: centers, isLoading } = useGetCenters();
+  const centerId = route?.params?.centerId;
+
   const isDarkMode = useColorScheme() === 'dark';
+
+  // Get the center from the list
+  const center = useMemo(() => {
+    if (!centers?.centers) return null;
+    return centers.centers.find(c => c.id === centerId);
+  }, [centers, centerId]) as any;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: isDarkMode ? '#000' : '#fff' },
+        ]}
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={BRAND_ORANGE} />
+          <Text
+            style={[
+              styles.loadingText,
+              { color: isDarkMode ? '#f2f2f2' : '#333' },
+            ]}
+          >
+            Cargando detalles del centro...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!center) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Centro no encontrado</Text>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: isDarkMode ? '#000' : '#fff' },
+        ]}
+      >
+        <View style={styles.errorContainer}>
+          <Icon name="error-outline" size={64} color={BRAND_ORANGE} />
+          <Text
+            style={[
+              styles.errorText,
+              { color: isDarkMode ? '#f2f2f2' : '#333' },
+            ]}
+          >
+            Centro no encontrado
+          </Text>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => navigation?.goBack()}
+          >
+            <Text style={styles.backButtonText}>Volver</Text>
+          </Pressable>
+        </View>
       </SafeAreaView>
     );
   }
@@ -47,11 +97,19 @@ export default function CenterDetailScreen(
           <Icon
             key={star}
             name={star <= Math.floor(rating) ? 'star' : 'star-border'}
-            size={20}
+            size={18}
             color={BRAND_ORANGE}
           />
         ))}
       </View>
+    );
+  };
+
+  const handleReserve = (activityId?: string) => {
+    Alert.alert(
+      'Reservar',
+      'Esta funcionalidad estará disponible pronto. Puedes contactar al centro directamente.',
+      [{ text: 'OK' }],
     );
   };
 
@@ -85,9 +143,12 @@ export default function CenterDetailScreen(
             { color: isDarkMode ? '#f2f2f2' : '#333' },
           ]}
         >
-          Detalles del Centro
+          Centro Deportivo
         </Text>
-        <Pressable hitSlop={10}>
+        <Pressable
+          hitSlop={10}
+          onPress={() => Alert.alert('Agregado a favoritos')}
+        >
           <Icon
             name="favorite-border"
             size={24}
@@ -128,92 +189,134 @@ export default function CenterDetailScreen(
               >
                 {center.address}
               </Text>
-              <Text style={styles.locationSubtext}>{center.location}</Text>
+              {typeof center.location === 'string' && (
+                <Text
+                  style={[
+                    styles.locationSubtext,
+                    { color: isDarkMode ? '#999' : BRAND_GRAY },
+                  ]}
+                >
+                  {center.location}
+                </Text>
+              )}
             </View>
           </View>
 
           {/* Rating */}
           <View style={styles.ratingRow}>
-            {renderStars(center.rating)}
-            <Text style={styles.ratingText}>
-              {center.rating} ({center.reviewCount} reseñas)
+            {renderStars(center.rating || 4)}
+            <Text
+              style={[
+                styles.ratingText,
+                { color: isDarkMode ? '#bdbdbd' : BRAND_GRAY },
+              ]}
+            >
+              {((center.rating || 4) as number).toFixed(1)} (
+              {center.reviewCount || 0} reseñas)
             </Text>
           </View>
 
           {/* Hours */}
-          <View style={styles.infoRow}>
-            <Icon name="schedule" size={20} color={BRAND_GRAY} />
-            <Text style={styles.infoText}>
-              {center.hours.open} - {center.hours.close}
-            </Text>
-          </View>
+          {center.hours && (
+            <View style={styles.infoRow}>
+              <Icon name="schedule" size={20} color={BRAND_GRAY} />
+              <Text
+                style={[
+                  styles.infoText,
+                  { color: isDarkMode ? '#bdbdbd' : BRAND_GRAY },
+                ]}
+              >
+                {center.hours.open} - {center.hours.close}
+              </Text>
+            </View>
+          )}
 
           {/* Amenities */}
-          <View style={styles.section}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: isDarkMode ? '#f2f2f2' : '#333' },
-              ]}
-            >
-              Servicios
-            </Text>
-            <View style={styles.amenitiesContainer}>
-              {center.amenities.map((amenity, index) => (
-                <View key={index} style={styles.amenityTag}>
-                  <Icon name="check-circle" size={16} color={BRAND_ORANGE} />
-                  <Text style={styles.amenityText}>{amenity}</Text>
+          {center.amenities && center.amenities.length > 0 && (
+            <View style={styles.section}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Servicios
+              </Text>
+              <View style={styles.amenitiesContainer}>
+                {center.amenities.map((amenity: string, index: number) => (
+                  <View key={index} style={styles.amenityTag}>
+                    <Icon name="check-circle" size={16} color={BRAND_ORANGE} />
+                    <Text style={styles.amenityText}>{amenity}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Activities */}
+          {center.activities && center.activities.length > 0 && (
+            <View style={styles.section}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
+                Actividades Disponibles
+              </Text>
+              {center.activities.map((activity: any) => (
+                <View
+                  key={activity.id}
+                  style={[
+                    styles.activityCard,
+                    {
+                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f9f9f9',
+                      borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                    },
+                  ]}
+                >
+                  <View style={styles.activityInfo}>
+                    <Text
+                      style={[
+                        styles.activityName,
+                        { color: isDarkMode ? '#f2f2f2' : '#333' },
+                      ]}
+                    >
+                      {activity.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.activityDescription,
+                        { color: isDarkMode ? '#bdbdbd' : BRAND_GRAY },
+                      ]}
+                    >
+                      {activity.description}
+                    </Text>
+                    <View style={styles.activityMeta}>
+                      <Text
+                        style={[
+                          styles.activityDuration,
+                          { color: isDarkMode ? '#999' : BRAND_GRAY },
+                        ]}
+                      >
+                        ⏱ {activity.duration} min
+                      </Text>
+                      <Text style={styles.activityPrice}>
+                        {activity.price}€
+                      </Text>
+                    </View>
+                  </View>
+                  <Pressable
+                    style={styles.activityButton}
+                    onPress={() => handleReserve(activity.id)}
+                  >
+                    <Icon name="calendar-today" size={16} color="#fff" />
+                    <Text style={styles.activityButtonText}>Reservar</Text>
+                  </Pressable>
                 </View>
               ))}
             </View>
-          </View>
-
-          {/* Activities */}
-          <View style={styles.section}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: isDarkMode ? '#f2f2f2' : '#333' },
-              ]}
-            >
-              Actividades Disponibles
-            </Text>
-            {center.activities.map(activity => (
-              <View
-                key={activity.id}
-                style={[
-                  styles.activityCard,
-                  {
-                    backgroundColor: isDarkMode ? '#1a1a1a' : '#f9f9f9',
-                    borderColor: isDarkMode ? '#333' : '#e0e0e0',
-                  },
-                ]}
-              >
-                <View style={styles.activityInfo}>
-                  <Text
-                    style={[
-                      styles.activityName,
-                      { color: isDarkMode ? '#f2f2f2' : '#333' },
-                    ]}
-                  >
-                    {activity.name}
-                  </Text>
-                  <Text style={styles.activityDescription}>
-                    {activity.description}
-                  </Text>
-                  <View style={styles.activityMeta}>
-                    <Text style={styles.activityDuration}>
-                      {activity.duration} min
-                    </Text>
-                    <Text style={styles.activityPrice}>{activity.price}€</Text>
-                  </View>
-                </View>
-                <Pressable style={styles.activityButton}>
-                  <Text style={styles.activityButtonText}>Reservar</Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
+          )}
         </View>
       </ScrollView>
 
@@ -227,8 +330,9 @@ export default function CenterDetailScreen(
           },
         ]}
       >
-        <Pressable style={styles.reserveButton}>
-          <Text style={styles.reserveButtonText}>Hacer Reserva</Text>
+        <Pressable style={styles.reserveButton} onPress={() => handleReserve()}>
+          <Icon name="event-available" size={20} color="#fff" />
+          <Text style={styles.reserveButtonText}>Hacer Reserva General</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -239,8 +343,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 24,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  backButton: {
+    backgroundColor: BRAND_ORANGE,
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   scrollContent: {
-    paddingBottom: 100, // Space for footer and bottom navigation
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
@@ -256,7 +393,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 250,
+    height: 200,
     backgroundColor: BRAND_ORANGE + '20',
     alignItems: 'center',
     justifyContent: 'center',
@@ -265,7 +402,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   centerName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 16,
   },
@@ -273,17 +410,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 12,
-    gap: 8,
+    gap: 12,
   },
   locationInfo: {
     flex: 1,
   },
   locationText: {
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 4,
+    fontWeight: '500',
   },
   locationSubtext: {
-    fontSize: 14,
+    fontSize: 13,
     color: BRAND_GRAY,
   },
   ratingRow: {
@@ -294,15 +432,17 @@ const styles = StyleSheet.create({
   },
   starsContainer: {
     flexDirection: 'row',
+    gap: 2,
   },
   ratingText: {
-    fontSize: 14,
+    fontSize: 13,
     color: BRAND_GRAY,
+    fontWeight: '500',
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
     gap: 8,
   },
   infoText: {
@@ -314,7 +454,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 12,
   },
   amenitiesContainer: {
@@ -325,43 +465,48 @@ const styles = StyleSheet.create({
   amenityTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: BRAND_ORANGE + '20',
+    backgroundColor: BRAND_ORANGE + '15',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     gap: 6,
   },
   amenityText: {
-    fontSize: 14,
+    fontSize: 13,
     color: BRAND_ORANGE,
     fontWeight: '500',
   },
   activityCard: {
-    padding: 16,
+    padding: 14,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
   },
   activityInfo: {
-    marginBottom: 12,
+    flex: 1,
   },
   activityName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 4,
   },
   activityDescription: {
-    fontSize: 14,
-    color: BRAND_GRAY,
+    fontSize: 13,
     marginBottom: 8,
+    lineHeight: 18,
   },
   activityMeta: {
     flexDirection: 'row',
     gap: 16,
+    alignItems: 'center',
   },
   activityDuration: {
-    fontSize: 13,
-    color: BRAND_GRAY,
+    fontSize: 12,
+    fontWeight: '500',
   },
   activityPrice: {
     fontSize: 16,
@@ -370,35 +515,43 @@ const styles = StyleSheet.create({
   },
   activityButton: {
     backgroundColor: BRAND_ORANGE,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   activityButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 12,
   },
   footer: {
     padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   reserveButton: {
     backgroundColor: BRAND_ORANGE,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   reserveButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  errorText: {
-    fontSize: 16,
-    color: BRAND_GRAY,
-    textAlign: 'center',
-    marginTop: 40,
+    fontWeight: '700',
   },
 });

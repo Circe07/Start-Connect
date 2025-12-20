@@ -1,4 +1,4 @@
-import API_CONFIG from '@/config/api-config';
+import API_CONFIG from '@/api/api-config';
 import { getAuthToken } from '../storage/authStorage';
 
 /**
