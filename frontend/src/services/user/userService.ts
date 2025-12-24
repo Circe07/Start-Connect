@@ -3,6 +3,22 @@ import { apiRequest } from '../core/apiClient';
 import { responseNormalizer } from '../core/responseNormalizer';
 import { getAuthToken } from '../storage/authStorage';
 
+export interface PublicUserSummary {
+  id: string;
+  uid?: string;
+  name?: string;
+  username?: string;
+  photo?: string;
+  bio?: string;
+  interests?: string[];
+}
+
+export interface UserSearchResponse {
+  success: boolean;
+  users?: PublicUserSummary[];
+  error?: string;
+}
+
 /**
  * Get profile by id
  * GET /users/:uid
@@ -67,4 +83,32 @@ export const getCurrentUser = async (): Promise<AuthResponse> => {
   }
 
   return responseNormalizer(usersMeResponse);
+};
+
+export const searchUsers = async (
+  query: string,
+  limit = 20,
+): Promise<UserSearchResponse> => {
+  const trimmedQuery = query.trim();
+  const params = new URLSearchParams();
+  if (trimmedQuery.length > 0) {
+    params.append('q', trimmedQuery);
+  }
+  params.append('limit', limit.toString());
+
+  const response = await apiRequest(`/users?${params.toString()}`, {
+    method: 'GET',
+  });
+
+  if (!response.success) {
+    return {
+      success: false,
+      error: response.error || 'No se pudieron buscar usuarios',
+    };
+  }
+
+  return {
+    success: true,
+    users: (response.data?.users || []) as PublicUserSummary[],
+  };
 };

@@ -142,14 +142,34 @@ export default function CentersScreen(
               </View>
 
               <View style={styles.activitiesContainer}>
-                {center.services.slice(0, 3).map((service, index) => (
-                  <View key={service.id} style={styles.activityTag}>
-                    <Text style={styles.activityTagText}>{service.name}</Text>
-                  </View>
-                ))}
-                {center.services.length > 3 && (
+                {Array.isArray(center.services) &&
+                center.services.length > 0 ? (
+                  <>
+                    {center.services.slice(0, 3).map((service, index) => {
+                      const label =
+                        typeof service === 'string'
+                          ? service
+                          : service?.name || service?.id || 'Actividad';
+                      const key =
+                        typeof service === 'string'
+                          ? `${center.id}-${label}-${index}`
+                          : service?.id || `${center.id}-${index}`;
+
+                      return (
+                        <View key={key} style={styles.activityTag}>
+                          <Text style={styles.activityTagText}>{label}</Text>
+                        </View>
+                      );
+                    })}
+                    {center.services.length > 3 && (
+                      <Text style={styles.moreActivities}>
+                        +{center.services.length - 3} más
+                      </Text>
+                    )}
+                  </>
+                ) : (
                   <Text style={styles.moreActivities}>
-                    +{center.services.length - 3} más
+                    Servicios no disponibles
                   </Text>
                 )}
               </View>

@@ -109,6 +109,100 @@ exports.getNearbyPlaces = async (req, res) => {
     }
 };
 
+/**
+ * GET -> Search places by text query and optional coordinates
+ */
+exports.searchPlaces = async (req, res) => {
+    try {
+        const { q = "", lat, lng, radius } = req.query;
+        const normalizedQuery = q.trim().toLowerCase();
+        const hasQuery = normalizedQuery.length > 0;
+        const hasCoordinates = lat !== undefined && lng !== undefined;
+
+        if (!hasQuery && !hasCoordinates) {
+            return res.status(400).json({
+                success: false,
+                message: "Debe proporcionar al menos un texto de búsqueda o coordenadas.",
+            });
+        }
+
+        const snapshot = await db.collection("centers").get();
+
+        if (snapshot.empty) {
+            return res.status(200).json({ success: true, count: 0, places: [] });
+        }
+
+        const userLat = hasCoordinates ? parseFloat(lat) : null;
+        const userLng = hasCoordinates ? parseFloat(lng) : null;
+        const searchRadius = hasCoordinates ? parseFloat(radius) || 5000 : null;
+
+        if (hasCoordinates && (Number.isNaN(userLat) || Number.isNaN(userLng))) {
+            return res.status(400).json({
+                success: false,
+                message: "Las coordenadas proporcionadas no son válidas.",
+            });
+        }
+
+        const centers = snapshot.docs.map(doc => Center.fromFirestore(doc));
+        const filteredCenters = hasQuery
+            ? centers.filter(center => {
+                const haystack = `${center.name} ${center.description || ""} ${center.address || ""}`.toLowerCase();
+                return haystack.includes(normalizedQuery);
+            })
+            : centers;
+
+        const places = [];
+
+        filteredCenters.forEach(center => {
+            const basePlace = {
+                id: center.id,
+                name: center.name,
+                description: center.description,
+                address: center.address,
+                location: center.location,
+                services: center.services,
+                prices: center.prices,
+                socialMedia: center.socialMedia,
+            };
+
+            if (!hasCoordinates) {
+                places.push(basePlace);
+                return;
+            }
+
+            const centerLat = parseFloat(center.location?.lat);
+            const centerLng = parseFloat(center.location?.lng);
+
+            if (Number.isNaN(centerLat) || Number.isNaN(centerLng)) {
+                return;
+            }
+
+            const distance = getDistanceFromLatLonInKm(userLat, userLng, centerLat, centerLng) * 1000;
+
+            if (searchRadius && distance > searchRadius) {
+                return;
+            }
+
+            places.push({ ...basePlace, distance: Math.round(distance) });
+        });
+
+        if (hasCoordinates) {
+            places.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        } else {
+            places.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        res.status(200).json({
+            success: true,
+            count: places.length,
+            places,
+        });
+    } catch (error) {
+        console.error("Error searchPlaces:", error);
+        res.status(500).json({ message: "Error interno del servidor", error: error.message });
+    }
+};
+
 // Función auxiliar: Fórmula de Haversine
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radio de la tierra en km

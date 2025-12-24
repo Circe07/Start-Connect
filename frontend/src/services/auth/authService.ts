@@ -78,7 +78,7 @@ export const changePassword = async (
 }> => {
   return apiRequest('/auth/change-password', {
     method: 'POST',
-    body: email,
+    body: JSON.stringify({ email }),
   });
 };
 

@@ -1,30 +1,46 @@
-import { useState } from 'react';
-import { MOCK_USERS } from '@/data/mockUsers';
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { PublicUserSummary, searchUsers } from '@/services/user/userService';
+
+const MINIMUM_CHARACTERS = 2;
+const DEBOUNCE_DELAY = 350;
 
 export default function useSearchUser() {
-  const [inputUserValue, setInputUserValue] = useState<string>('');
-  const [filteredUsers, setFilteredUsers] = useState(MOCK_USERS);
+  const [searchText, setSearchText] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState('');
 
-  const handleSearch = (text: string) => {
-    setInputUserValue(text);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(searchText.trim());
+    }, DEBOUNCE_DELAY);
 
-    if (text) {
-      const newData = MOCK_USERS.filter(item => {
-        const itemData = item.username
-          ? item.username.toUpperCase()
-          : ''.toUpperCase();
-        const textData = text.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
-      setFilteredUsers(newData);
-    } else {
-      setFilteredUsers(MOCK_USERS);
-    }
-  };
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
+  const query = useQuery<PublicUserSummary[]>({
+    queryKey: ['userSearch', debouncedValue],
+    enabled: debouncedValue.length >= MINIMUM_CHARACTERS,
+    queryFn: async () => {
+      const response = await searchUsers(debouncedValue);
+
+      if (!response.success) {
+        throw new Error(response.error || 'No se pudieron buscar usuarios');
+      }
+
+      return response.users || [];
+    },
+  });
+
+  const results = useMemo(() => query.data || [], [query.data]);
 
   return {
-    inputUserValue,
-    filteredUsers,
-    handleSearch,
+    searchText,
+    debouncedValue,
+    handleSearch: setSearchText,
+    results,
+    isLoading: query.isFetching,
+    error: (query.error as Error) || null,
+    minimumChars: MINIMUM_CHARACTERS,
+    hasTypedEnough: debouncedValue.length >= MINIMUM_CHARACTERS,
   };
 }

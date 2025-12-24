@@ -162,17 +162,17 @@ exports.login = async (req, res) => {
  * @param {*} req 
  * @param {*} res 
  */
-exports.logut = async (req, res) => {
+exports.logout = async (req, res) => {
   try {
     const uid = req.user.uid;
 
     // Revoke refresh token to invalidate session
     await admin.auth().revokeRefreshTokens(uid);
 
-    res.status(200).json({ message: 'Sesión cerrada correctamente' });
+    res.status(200).json({ message: 'Sesión cerrada correctamente' });
   } catch (error) {
-    console.error('Error al cerrar sesión:', error);
-    res.status(500).json({ message: 'Error al cerrar sesión', error: error.message });
+    console.error('Error al cerrar sesión:', error);
+    res.status(500).json({ message: 'Error al cerrar sesión', error: error.message });
   }
 };
 

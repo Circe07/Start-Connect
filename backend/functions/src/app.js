@@ -25,6 +25,8 @@ const usersRoutes = require("./routes/users");
 const mapsRoutes = require("./routes/maps");
 const centersRoutes = require("./routes/centers");
 const bookingsRoutes = require("./routes/bookings");
+const chatRoutes = require("./routes/chat");
+const friendsRoutes = require("./routes/friends");
 
 
 /**
@@ -52,6 +54,8 @@ app.use("/groupsRequests", groupsRequestsRoutes);
 app.use("/maps", mapsRoutes);
 app.use("/centers", centersRoutes);
 app.use("/bookings", bookingsRoutes);
+app.use("/chats", chatRoutes);
+app.use("/friends", friendsRoutes);
 
 
 

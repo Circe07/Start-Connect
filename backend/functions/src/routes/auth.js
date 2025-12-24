@@ -13,7 +13,7 @@ Router.get("/check", (req, res) => {
 Router.post("/register", authCtrl.register);
 Router.post("/login", authCtrl.login);
 Router.post("/change-password", authCtrl.changePassword);
-Router.post("/logout", authMiddleware, authCtrl.logut);
+Router.post("/logout", authMiddleware, authCtrl.logout);
 Router.get("/me", authMiddleware, authCtrl.me);
 
 module.exports = Router;

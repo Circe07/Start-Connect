@@ -5,6 +5,7 @@ const {
     getMyProfile,
     updateMyProfile,
     getUserProfile,
+    searchUsers,
 } = require("../controllers/users.controller");
 const authMiddleware = require("../middleware/auth");
 
@@ -15,6 +16,7 @@ router.get("/check", (req, res) => {
     });
 });
 
+router.get("/", authMiddleware, searchUsers);
 router.get("/me", authMiddleware, getMyProfile);
 router.patch("/me", authMiddleware, updateMyProfile);
 router.get("/:uid", authMiddleware, getUserProfile);

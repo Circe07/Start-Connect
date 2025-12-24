@@ -21,7 +21,10 @@ import {
   getCurrentUser as getFirebaseCurrentUser,
   User,
 } from '../services/firebase';
-import { getCurrentUser as getAPICurrentUser, updateCurrentUser } from '@/services/user/userService';
+import {
+  getCurrentUser as getAPICurrentUser,
+  updateCurrentUser,
+} from '@/services/user/userService';
 import {
   getFallbackUserData,
   shouldUseFallback,
@@ -180,7 +183,9 @@ export default function ProfileScreen({ navigation }: any) {
         setIsEditing(false);
         await loadUserData();
       } else {
-        Alert.alert('Error', result.error || 'Failed to update profile', [{ text: 'OK' }]);
+        Alert.alert('Error', result.error || 'Failed to update profile', [
+          { text: 'OK' },
+        ]);
       }
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -298,17 +303,21 @@ export default function ProfileScreen({ navigation }: any) {
                 { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
               ]}
             >
-              {isEditing ? 'Edit your information' : 'View and manage your profile'}
+              {isEditing
+                ? 'Edit your information'
+                : 'View and manage your profile'}
             </Text>
           </View>
 
           {/* Profile Picture Section */}
-          <View style={[styles.profilePictureCard, { backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8' }]}>
+          <View
+            style={[
+              styles.profilePictureCard,
+              { backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8' },
+            ]}
+          >
             <View
-              style={[
-                styles.imageContainer,
-                { borderColor: BRAND_ORANGE },
-              ]}
+              style={[styles.imageContainer, { borderColor: BRAND_ORANGE }]}
             >
               {userData.profile_img_path ? (
                 <Image
@@ -322,14 +331,29 @@ export default function ProfileScreen({ navigation }: any) {
               )}
             </View>
             <View style={styles.profileNameContainer}>
-              <Text style={[styles.profileNameText, { color: isDarkMode ? '#f2f2f2' : '#333' }]}>
+              <Text
+                style={[
+                  styles.profileNameText,
+                  { color: isDarkMode ? '#f2f2f2' : '#333' },
+                ]}
+              >
                 {userData.name}
               </Text>
-              <Text style={[styles.profileEmailText, { color: isDarkMode ? '#bdbdbd' : '#666' }]}>
+              <Text
+                style={[
+                  styles.profileEmailText,
+                  { color: isDarkMode ? '#bdbdbd' : '#666' },
+                ]}
+              >
                 @{userData.username}
               </Text>
               {userData.email && (
-                <Text style={[styles.profileEmailText, { color: isDarkMode ? '#bdbdbd' : '#666', marginTop: 4 }]}>
+                <Text
+                  style={[
+                    styles.profileEmailText,
+                    { color: isDarkMode ? '#bdbdbd' : '#666', marginTop: 4 },
+                  ]}
+                >
                   {userData.email}
                 </Text>
               )}
@@ -602,23 +626,65 @@ export default function ProfileScreen({ navigation }: any) {
                 </Text>
                 <View style={styles.sportsDisplay}>
                   {userData.sports.map((sport, index) => (
-                    <View key={index} style={styles.sportDisplayChip}>
-                          <Text style={styles.interestIcon}>
-                            {interestObj.icon}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.interestText,
-                              { color: isDarkMode ? '#f2f2f2' : '#333' },
-                            ]}
-                          >
-                            {interestObj.name}
-                          </Text>
-                        </View>
-                      ) : null;
-                    })}
-                  </View>
-                )}
+                    <View
+                      key={`${sport}-${index}`}
+                      style={styles.sportDisplayChip}
+                    >
+                      <Text
+                        style={[
+                          styles.sportDisplayText,
+                          { color: isDarkMode ? '#f2f2f2' : '#333' },
+                        ]}
+                      >
+                        {sport}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Interests */}
+            {userData.interests && userData.interests.length > 0 && (
+              <View style={styles.inputContainer}>
+                <Text
+                  style={[
+                    styles.inputLabel,
+                    { color: isDarkMode ? '#f2f2f2' : '#333' },
+                  ]}
+                >
+                  Interests
+                </Text>
+                <View style={styles.interestsDisplay}>
+                  {userData.interests.map((interestId: any, index: any) => {
+                    const interestObj = INTERESTS.find(
+                      interest => interest.id === interestId,
+                    );
+
+                    if (!interestObj) {
+                      return null;
+                    }
+
+                    return (
+                      <View
+                        key={`${interestId}-${index}`}
+                        style={styles.interestDisplayChip}
+                      >
+                        <Text style={styles.interestIcon}>
+                          {interestObj.icon}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.interestText,
+                            { color: isDarkMode ? '#f2f2f2' : '#333' },
+                          ]}
+                        >
+                          {interestObj.name}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
               </View>
             )}
 
@@ -836,6 +902,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 127, 63, 0.2)',
+  },
+  sportsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sportTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 127, 63, 0.4)',
+    backgroundColor: 'rgba(255, 127, 63, 0.12)',
+    gap: 6,
+  },
+  sportText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  sportsDisplay: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sportDisplayChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 127, 63, 0.3)',
+    backgroundColor: 'rgba(255, 127, 63, 0.1)',
+  },
+  sportDisplayText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',

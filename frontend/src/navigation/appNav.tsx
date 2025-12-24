@@ -17,6 +17,8 @@ import CreatePostScreen from '@/screens/posts/CreatePostScreen';
 import ChatListScreen from '@/screens/chat/ChatListScreen';
 import ForgotPassword from '@/screens/auth/ForgotPassword';
 import PaymentScreen from '@/screens/payment/PaymentScreen';
+import SearchUser from '@/screens/SearchUser';
+import FriendsScreen from '@/screens/friends/FriendsScreen';
 
 const Stack = createStackNavigator();
 
@@ -37,6 +39,8 @@ export default function AppNavigation() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
+        <Stack.Screen name="SearchUser" component={SearchUser} />
+        <Stack.Screen name="Friends" component={FriendsScreen} />
         <Stack.Screen name="Groups" component={GroupsScreen} />
         <Stack.Screen name="Centers" component={CentersScreen} />
         <Stack.Screen name="CenterDetail" component={CenterDetailScreen} />
