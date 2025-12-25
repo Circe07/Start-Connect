@@ -7,7 +7,8 @@ const postsCollection = () => db.collection("posts");
 const usersCollection = () => db.collection("users");
 const storageBucket = () => admin.storage().bucket();
 const postRef = (postId) => postsCollection().doc(postId);
-const postLikesRef = (postId, userId) => postRef(postId).collection("likes").doc(userId);
+const postLikesRef = (postId, userId) =>
+  postRef(postId).collection("likes").doc(userId);
 const postCommentsRef = (postId) => postRef(postId).collection("comments");
 const postSharesRef = (postId) => postRef(postId).collection("shares");
 
@@ -226,7 +227,10 @@ exports.listPosts = async (req, res) => {
     }
 
     const snapshot = await query.get();
-    const viewerLikeMap = await resolveViewerLikes(req.user?.uid, snapshot.docs);
+    const viewerLikeMap = await resolveViewerLikes(
+      req.user?.uid,
+      snapshot.docs
+    );
     const posts = snapshot.docs.map((doc) => ({
       ...serializePostDoc(doc),
       viewerHasLiked: Boolean(viewerLikeMap[doc.id]),
@@ -257,7 +261,10 @@ exports.getPost = async (req, res) => {
     const post = serializePostDoc(doc);
 
     if (req.user?.uid) {
-      const likeSnap = await doc.ref.collection("likes").doc(req.user.uid).get();
+      const likeSnap = await doc.ref
+        .collection("likes")
+        .doc(req.user.uid)
+        .get();
       post.viewerHasLiked = likeSnap.exists;
     }
 
@@ -421,10 +428,13 @@ exports.addComment = async (req, res) => {
   try {
     const userId = req.user.uid;
     const { postId } = req.params;
-    const content = typeof req.body?.content === "string" ? req.body.content.trim() : "";
+    const content =
+      typeof req.body?.content === "string" ? req.body.content.trim() : "";
 
     if (!content) {
-      return res.status(400).json({ message: "El comentario no puede estar vacío." });
+      return res
+        .status(400)
+        .json({ message: "El comentario no puede estar vacío." });
     }
 
     const authorProfile = await fetchUserProfile(userId);
@@ -537,7 +547,9 @@ exports.deleteComment = async (req, res) => {
       return res.status(404).json({ message: "El comentario no existe." });
     }
     if (error.message === "forbidden") {
-      return res.status(403).json({ message: "No puedes eliminar este comentario." });
+      return res
+        .status(403)
+        .json({ message: "No puedes eliminar este comentario." });
     }
     console.error("Error deleteComment:", error);
     res.status(500).json({ message: "Error al eliminar el comentario." });

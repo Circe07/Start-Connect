@@ -39,7 +39,10 @@ export default function GroupRequestsScreen() {
     mutationFn: (requestId: string) => approveGroupRequest(requestId),
     onSuccess: () => requestsQuery.refetch(),
     onError: (error: any) => {
-      Alert.alert('Error', error?.message || 'No se pudo aprobar la solicitud.');
+      Alert.alert(
+        'Error',
+        error?.message || 'No se pudo aprobar la solicitud.',
+      );
     },
   });
 
@@ -47,7 +50,10 @@ export default function GroupRequestsScreen() {
     mutationFn: (requestId: string) => rejectGroupRequest(requestId),
     onSuccess: () => requestsQuery.refetch(),
     onError: (error: any) => {
-      Alert.alert('Error', error?.message || 'No se pudo rechazar la solicitud.');
+      Alert.alert(
+        'Error',
+        error?.message || 'No se pudo rechazar la solicitud.',
+      );
     },
   });
 
@@ -159,7 +165,9 @@ export default function GroupRequestsScreen() {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Icon name="inbox" size={48} color="#bbb" />
-              <Text style={styles.emptyText}>No hay solicitudes pendientes.</Text>
+              <Text style={styles.emptyText}>
+                No hay solicitudes pendientes.
+              </Text>
             </View>
           }
           contentContainerStyle={styles.listContent}

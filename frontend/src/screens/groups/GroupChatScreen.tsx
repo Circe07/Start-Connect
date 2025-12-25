@@ -35,12 +35,7 @@ export default function GroupChatScreen() {
   const { data: currentUser } = useCurrentUserProfile();
   const currentUserId = currentUser?.uid || currentUser?.id;
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useGroupMessages(groupId);
+  const { data, isLoading, isFetching, refetch } = useGroupMessages(groupId);
 
   const messages = data?.messages || [];
 
@@ -101,18 +96,12 @@ export default function GroupChatScreen() {
           ]}
         >
           <Text
-            style={[
-              styles.messageAuthor,
-              { color: isMine ? '#fff' : '#555' },
-            ]}
+            style={[styles.messageAuthor, { color: isMine ? '#fff' : '#555' }]}
           >
             {authorName}
           </Text>
           <Text
-            style={[
-              styles.messageText,
-              { color: isMine ? '#fff' : '#111' },
-            ]}
+            style={[styles.messageText, { color: isMine ? '#fff' : '#111' }]}
           >
             {item.content}
           </Text>
@@ -224,7 +213,8 @@ export default function GroupChatScreen() {
               styles.sendButton,
               {
                 opacity:
-                  messageText.trim().length === 0 || sendMessageMutation.isPending
+                  messageText.trim().length === 0 ||
+                  sendMessageMutation.isPending
                     ? 0.5
                     : 1,
               },

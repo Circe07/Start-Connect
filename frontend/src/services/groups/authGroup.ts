@@ -67,7 +67,11 @@ export const rejectGroupRequest = async (requestId: string) => {
 export const getGroupMessages = async (
   groupId: string,
   params?: { limit?: number; startAfterId?: string },
-): Promise<{ messages: GroupMessage[]; hasMore?: boolean; nextStartAfterId?: string | null }> => {
+): Promise<{
+  messages: GroupMessage[];
+  hasMore?: boolean;
+  nextStartAfterId?: string | null;
+}> => {
   const searchParams = new URLSearchParams();
   if (params?.limit) {
     searchParams.append('limit', params.limit.toString());

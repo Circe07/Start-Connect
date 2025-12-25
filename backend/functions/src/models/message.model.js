@@ -8,7 +8,8 @@ class Message {
     this.content = safeData.content || "";
     this.imageUrl = safeData.imageUrl || null;
     this.likes = typeof safeData.likes === "number" ? safeData.likes : 0;
-    this.commentCount = typeof safeData.commentCount === "number" ? safeData.commentCount : 0;
+    this.commentCount =
+      typeof safeData.commentCount === "number" ? safeData.commentCount : 0;
     this.createdAt = safeData.createdAt || null;
     this.authorProfile = safeData.authorProfile || null;
   }

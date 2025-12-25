@@ -86,11 +86,16 @@ export default function ExperiencesFeed({
       );
 
       setSelectedPost(prev =>
-        prev?.id === postId ? { ...prev, likeCount, viewerHasLiked: liked } : prev,
+        prev?.id === postId
+          ? { ...prev, likeCount, viewerHasLiked: liked }
+          : prev,
       );
     },
     onError: () => {
-      Alert.alert('No se pudo reaccionar', 'Intenta nuevamente en unos segundos.');
+      Alert.alert(
+        'No se pudo reaccionar',
+        'Intenta nuevamente en unos segundos.',
+      );
     },
   });
 
@@ -143,7 +148,7 @@ export default function ExperiencesFeed({
       }
 
       const shareCount =
-        response.data?.shareCount ?? ((post.shareCount || 0) + 1);
+        response.data?.shareCount ?? (post.shareCount || 0) + 1;
 
       queryClient.setQueryData<PostSummary[]>(['posts'], previous =>
         previous
@@ -433,16 +438,13 @@ function PostCommentsSheet({
       }
       const response = await deletePostComment(post.id, commentId);
       if (!response.success) {
-        throw new Error(
-          response.error || 'No se pudo eliminar el comentario.',
-        );
+        throw new Error(response.error || 'No se pudo eliminar el comentario.');
       }
       return { ...response.data, commentId };
     },
     onSuccess: (data, commentId) => {
-      queryClient.setQueryData<PostComment[]>(
-        ['postComments', post?.id],
-        old => (old || []).filter(comment => comment.id !== commentId),
+      queryClient.setQueryData<PostComment[]>(['postComments', post?.id], old =>
+        (old || []).filter(comment => comment.id !== commentId),
       );
       if (post?.id) {
         const fallbackCount = Math.max((post.commentCount || 1) - 1, 0);
@@ -493,14 +495,17 @@ function PostCommentsSheet({
       currentUserId &&
       (item.userId === currentUserId || post?.authorId === currentUserId);
 
-    const initials =
-      (item.authorProfile?.name || item.authorProfile?.username || 'U')
-        .split(' ')
-        .map(part => part[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join('')
-        .toUpperCase();
+    const initials = (
+      item.authorProfile?.name ||
+      item.authorProfile?.username ||
+      'U'
+    )
+      .split(' ')
+      .map(part => part[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
 
     return (
       <View style={styles.commentRow}>
@@ -531,7 +536,9 @@ function PostCommentsSheet({
           >
             {item.content}
           </Text>
-          <Text style={styles.commentMeta}>{formatTimestamp(item.createdAt)}</Text>
+          <Text style={styles.commentMeta}>
+            {formatTimestamp(item.createdAt)}
+          </Text>
         </View>
         {canDelete ? (
           <Pressable
@@ -637,8 +644,7 @@ function PostCommentsSheet({
                   },
                 ]}
                 disabled={
-                  newComment.trim().length === 0 ||
-                  addCommentMutation.isPending
+                  newComment.trim().length === 0 || addCommentMutation.isPending
                 }
                 onPress={handleSendComment}
               >

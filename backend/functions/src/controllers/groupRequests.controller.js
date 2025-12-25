@@ -19,9 +19,9 @@ exports.sendRequest = async (req, res) => {
     if (!groupDoc.exists) {
       return res.status(404).json({
         success: false,
-        message: "El grupo no existe."
+        message: "El grupo no existe.",
       });
-    };
+    }
 
     const group = groupDoc.data();
 
@@ -32,9 +32,9 @@ exports.sendRequest = async (req, res) => {
     if (alreadyMember) {
       return res.status(400).json({
         success: false,
-        message: "Ya eres miembro de este grupo."
+        message: "Ya eres miembro de este grupo.",
       });
-    };
+    }
 
     const existing = await groupRequestsRef()
       .where("groupId", "==", groupId)
@@ -44,7 +44,7 @@ exports.sendRequest = async (req, res) => {
     if (!existing.empty) {
       return res.status(400).json({
         success: false,
-        message: "Ya has enviado una solicitud para este grupo."
+        message: "Ya has enviado una solicitud para este grupo.",
       });
     }
 
@@ -114,7 +114,8 @@ exports.approveRequest = async (req, res) => {
     const userId = req.user.uid;
 
     const requestDoc = await groupRequestsRef().doc(requestId).get();
-    if (!requestDoc.exists) return res.status(404).json({ message: "Solicitud no existe" });
+    if (!requestDoc.exists)
+      return res.status(404).json({ message: "Solicitud no existe" });
 
     const request = GroupRequest.fromFirestore(requestDoc);
 
@@ -154,19 +155,20 @@ exports.rejectedRequest = async (req, res) => {
     const userId = req.user.uid;
 
     const requestDoc = await groupRequestsRef().doc(requestId).get();
-    if (!requestDoc.exists) return res.status(404).json({ message: "Solicitud no existe" });
+    if (!requestDoc.exists)
+      return res.status(404).json({ message: "Solicitud no existe" });
 
     const request = GroupRequest.fromFirestore(requestDoc);
     const groupDoc = await db.collection("groups").doc(request.groupId).get();
 
-    if (!groupDoc.exists) return res.status(404).json({ message: "Grupo no existe" });
+    if (!groupDoc.exists)
+      return res.status(404).json({ message: "Grupo no existe" });
 
     if (groupDoc.data().userId !== userId)
       return res.status(403).json({ message: "No autorizado" });
 
     await groupRequestsRef().doc(requestId).delete();
     res.json({ message: "Solicitud rechazada correctamente." });
-
   } catch (error) {
     console.error("Error al rechazar solicitud:", error);
     res.status(500).json({ message: "Error al rechazar solicitud" });

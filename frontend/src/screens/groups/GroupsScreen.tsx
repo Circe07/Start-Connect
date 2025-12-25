@@ -136,8 +136,8 @@ export default function GroupsScreen(
                 backgroundColor: isActive
                   ? BRAND_ORANGE
                   : isDarkMode
-                    ? '#1a1a1a'
-                    : '#f4f4f4',
+                  ? '#1a1a1a'
+                  : '#f4f4f4',
               },
             ]}
             onPress={() => setActiveSegment(segment.key)}
@@ -169,7 +169,9 @@ export default function GroupsScreen(
     if (isMember) {
       actionLabel = 'Ver grupo';
     } else if (!item.isPublic) {
-      actionLabel = hasPendingRequest ? 'Solicitud enviada' : 'Solicitar acceso';
+      actionLabel = hasPendingRequest
+        ? 'Solicitud enviada'
+        : 'Solicitar acceso';
     }
 
     return (
@@ -224,8 +226,8 @@ export default function GroupsScreen(
               backgroundColor: isMember
                 ? BRAND_ORANGE
                 : isDarkMode
-                  ? '#2a2a2a'
-                  : '#f5f5f5',
+                ? '#2a2a2a'
+                : '#f5f5f5',
               opacity:
                 hasPendingRequest && !isMember ? 0.5 : isProcessing ? 0.7 : 1,
             },
@@ -309,8 +311,8 @@ export default function GroupsScreen(
                 {searchText
                   ? 'No hay coincidencias para tu búsqueda.'
                   : activeSegment === 'discover'
-                    ? 'Aún no hay grupos públicos.'
-                    : 'Todavía no perteneces a ningún grupo.'}
+                  ? 'Aún no hay grupos públicos.'
+                  : 'Todavía no perteneces a ningún grupo.'}
               </Text>
             </View>
           }

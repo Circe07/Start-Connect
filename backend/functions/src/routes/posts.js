@@ -11,9 +11,9 @@ router.post("/:postId/like", authMiddleware, postsController.toggleLike);
 router.post("/:postId/comments", authMiddleware, postsController.addComment);
 router.get("/:postId/comments", authMiddleware, postsController.getComments);
 router.delete(
-	"/:postId/comments/:commentId",
-	authMiddleware,
-	postsController.deleteComment
+  "/:postId/comments/:commentId",
+  authMiddleware,
+  postsController.deleteComment
 );
 router.post("/:postId/share", authMiddleware, postsController.sharePost);
 

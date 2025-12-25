@@ -62,16 +62,34 @@ export default function GroupDetailScreen() {
 
   const infoRows = useMemo(
     () => [
-      { label: 'Ciudad', value: group?.city || 'Sin especificar', icon: 'location-on' },
-      { label: 'Deporte', value: group?.sport || 'General', icon: 'sports-tennis' },
-      { label: 'Nivel', value: group?.level || 'Todos los niveles', icon: 'trending-up' },
+      {
+        label: 'Ciudad',
+        value: group?.city || 'Sin especificar',
+        icon: 'location-on',
+      },
+      {
+        label: 'Deporte',
+        value: group?.sport || 'General',
+        icon: 'sports-tennis',
+      },
+      {
+        label: 'Nivel',
+        value: group?.level || 'Todos los niveles',
+        icon: 'trending-up',
+      },
       {
         label: 'Miembros',
         value: `${group?.members.length || 0} / ${group?.maxMembers || 0}`,
         icon: 'people',
       },
     ],
-    [group?.city, group?.sport, group?.level, group?.members, group?.maxMembers],
+    [
+      group?.city,
+      group?.sport,
+      group?.level,
+      group?.members,
+      group?.maxMembers,
+    ],
   );
 
   const handlePrimaryAction = () => {
@@ -131,10 +149,10 @@ export default function GroupDetailScreen() {
   const primaryLabel = viewerState?.isMember
     ? 'Abrir chat'
     : group.isPublic
-      ? 'Unirme al grupo'
-      : hasPending
-        ? 'Solicitud enviada'
-        : 'Solicitar acceso';
+    ? 'Unirme al grupo'
+    : hasPending
+    ? 'Solicitud enviada'
+    : 'Solicitar acceso';
 
   return (
     <ScrollView
@@ -144,19 +162,20 @@ export default function GroupDetailScreen() {
       ]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Text
-        style={[
-          styles.title,
-          { color: isDarkMode ? '#f2f2f2' : '#111' },
-        ]}
-      >
+      <Text style={[styles.title, { color: isDarkMode ? '#f2f2f2' : '#111' }]}>
         {group.name}
       </Text>
-      <Text style={styles.subtitle}>{group.description || 'Sin descripción'}</Text>
+      <Text style={styles.subtitle}>
+        {group.description || 'Sin descripción'}
+      </Text>
 
       <View style={styles.chipRow}>
         <View style={styles.chip}>
-          <Icon name={group.isPublic ? 'public' : 'lock'} size={14} color={BRAND_ORANGE} />
+          <Icon
+            name={group.isPublic ? 'public' : 'lock'}
+            size={14}
+            color={BRAND_ORANGE}
+          />
           <Text style={styles.chipLabel}>
             {group.isPublic ? 'Grupo público' : 'Grupo privado'}
           </Text>
@@ -199,8 +218,8 @@ export default function GroupDetailScreen() {
               backgroundColor: viewerState?.isMember
                 ? BRAND_ORANGE
                 : hasPending
-                  ? '#bdbdbd'
-                  : BRAND_ORANGE,
+                ? '#bdbdbd'
+                : BRAND_ORANGE,
               opacity: hasPending && !viewerState?.isMember ? 0.6 : 1,
             },
           ]}
@@ -215,10 +234,7 @@ export default function GroupDetailScreen() {
         </Pressable>
 
         {viewerState?.isMember ? (
-          <Pressable
-            style={styles.secondaryButton}
-            onPress={handleLeaveGroup}
-          >
+          <Pressable style={styles.secondaryButton} onPress={handleLeaveGroup}>
             {leaveMutation.isPending ? (
               <ActivityIndicator color={BRAND_ORANGE} />
             ) : (
