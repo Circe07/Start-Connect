@@ -10,6 +10,7 @@ class Message {
     this.likes = typeof safeData.likes === "number" ? safeData.likes : 0;
     this.commentCount = typeof safeData.commentCount === "number" ? safeData.commentCount : 0;
     this.createdAt = safeData.createdAt || null;
+    this.authorProfile = safeData.authorProfile || null;
   }
 
   static fromFirestore(doc) {
@@ -26,6 +27,7 @@ class Message {
       likes: this.likes,
       commentCount: this.commentCount,
       createdAt: this.createdAt || new Date(),
+      authorProfile: this.authorProfile,
     };
   }
 }

@@ -1,6 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,14 +6,26 @@ import {
   FlatList,
   Pressable,
   useColorScheme,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import SearchInputBox from '@/components/ui/SearchInputBox';
-import { getPublicGroups } from '@/services/groups/authGroup';
+import { Group } from '@/types/interface/group/group';
+import {
+  getPublicGroups,
+  getMyGroups,
+  joinGroup,
+  sendGroupRequest,
+} from '@/services/groups/authGroup';
 
 const BRAND_ORANGE = '#FF7F3F';
 const BRAND_GRAY = '#9E9E9E';
+
+type SegmentKey = 'discover' | 'my';
 
 interface GroupsScreenProps {
   navigation?: any;
@@ -26,21 +36,219 @@ export default function GroupsScreen(
 ) {
   const isDarkMode = useColorScheme() === 'dark';
   const [searchText, setSearchText] = useState('');
+  const [activeSegment, setActiveSegment] = useState<SegmentKey>('discover');
+  const queryClient = useQueryClient();
 
-  const { data: groups } = useQuery({
-    queryKey: ['group'],
+  const publicGroupsQuery = useQuery({
+    queryKey: ['groups', 'public'],
     queryFn: getPublicGroups,
-    staleTime: 50000,
+    staleTime: 60 * 1000,
   });
-  if (!groups) {
-    return <Text>Loading...</Text>;
-  }
 
-  const filteredGroups = groups.groups.filter(
-    group =>
-      group.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      group.sport.toLowerCase().includes(searchText.toLowerCase()),
+  const myGroupsQuery = useQuery({
+    queryKey: ['groups', 'my'],
+    queryFn: getMyGroups,
+    staleTime: 60 * 1000,
+  });
+
+  const joinGroupMutation = useMutation({
+    mutationFn: async (args: { groupId: string; isPublic: boolean }) => {
+      if (args.isPublic) {
+        return joinGroup(args.groupId);
+      }
+      return sendGroupRequest(args.groupId);
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['groups', 'public'] });
+      queryClient.invalidateQueries({ queryKey: ['groups', 'my'] });
+      if (!variables.isPublic) {
+        Alert.alert(
+          'Solicitud enviada',
+          'El administrador revisará tu petición pronto.',
+        );
+      }
+    },
+    onError: (mutationError: any) => {
+      Alert.alert(
+        'No se pudo completar',
+        mutationError?.message || 'Intenta nuevamente.',
+      );
+    },
+  });
+
+  const isLoading =
+    activeSegment === 'discover'
+      ? publicGroupsQuery.isLoading
+      : myGroupsQuery.isLoading;
+
+  const groups: Group[] = useMemo(() => {
+    const source =
+      activeSegment === 'discover'
+        ? publicGroupsQuery.data?.groups || []
+        : myGroupsQuery.data || [];
+
+    if (!searchText.trim()) {
+      return source;
+    }
+
+    const query = searchText.trim().toLowerCase();
+    return source.filter(group => {
+      const haystack = `${group.name} ${group.sport}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [activeSegment, publicGroupsQuery.data, myGroupsQuery.data, searchText]);
+
+  const handleOpenGroup = (group: Group) => {
+    navigation?.navigate?.('GroupDetail', { groupId: group.id });
+  };
+
+  const handlePrimaryAction = (group: Group) => {
+    const viewerState = group.viewerState;
+
+    if (viewerState?.isMember) {
+      handleOpenGroup(group);
+      return;
+    }
+
+    if (!group.isPublic && viewerState?.hasPendingRequest) {
+      Alert.alert('Pendiente', 'Ya enviaste una solicitud para este grupo.');
+      return;
+    }
+
+    joinGroupMutation.mutate({ groupId: group.id, isPublic: group.isPublic });
+  };
+
+  const renderSegmentTabs = () => (
+    <View style={styles.segmentContainer}>
+      {(
+        [
+          { key: 'discover', label: 'Descubrir' },
+          { key: 'my', label: 'Mis grupos' },
+        ] as { key: SegmentKey; label: string }[]
+      ).map(segment => {
+        const isActive = segment.key === activeSegment;
+        return (
+          <Pressable
+            key={segment.key}
+            style={[
+              styles.segmentButton,
+              {
+                backgroundColor: isActive
+                  ? BRAND_ORANGE
+                  : isDarkMode
+                    ? '#1a1a1a'
+                    : '#f4f4f4',
+              },
+            ]}
+            onPress={() => setActiveSegment(segment.key)}
+          >
+            <Text
+              style={[
+                styles.segmentLabel,
+                { color: isActive ? '#fff' : isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              {segment.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
+
+  const renderItem = ({ item }: { item: Group }) => {
+    const viewerState = item.viewerState;
+    const isMember = viewerState?.isMember;
+    const hasPendingRequest = viewerState?.hasPendingRequest;
+    const canPreview = item.isPublic || Boolean(isMember);
+    const isProcessing =
+      joinGroupMutation.isPending &&
+      joinGroupMutation.variables?.groupId === item.id;
+
+    let actionLabel = 'Unirme';
+    if (isMember) {
+      actionLabel = 'Ver grupo';
+    } else if (!item.isPublic) {
+      actionLabel = hasPendingRequest ? 'Solicitud enviada' : 'Solicitar acceso';
+    }
+
+    return (
+      <Pressable
+        style={[
+          styles.groupCard,
+          {
+            backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+            borderColor: isDarkMode ? '#333' : '#e0e0e0',
+          },
+        ]}
+        disabled={!canPreview}
+        onPress={() => (canPreview ? handleOpenGroup(item) : null)}
+      >
+        <View style={styles.groupImageContainer}>
+          <View style={styles.groupImagePlaceholder}>
+            <Icon name="groups" size={40} color={BRAND_ORANGE} />
+          </View>
+        </View>
+
+        <View style={styles.groupInfo}>
+          <Text
+            style={[
+              styles.groupName,
+              { color: isDarkMode ? '#f2f2f2' : '#333' },
+            ]}
+          >
+            {item.name}
+          </Text>
+          <Text style={styles.groupActivity}>{item.sport}</Text>
+          <View style={styles.groupMeta}>
+            <Icon name="people" size={16} color={BRAND_GRAY} />
+            <Text style={styles.groupMetaText}>
+              {item.members.length} miembros
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.groupDescription,
+              { color: isDarkMode ? '#999' : '#666' },
+            ]}
+            numberOfLines={2}
+          >
+            {item.description}
+          </Text>
+        </View>
+
+        <Pressable
+          style={[
+            styles.joinButton,
+            {
+              backgroundColor: isMember
+                ? BRAND_ORANGE
+                : isDarkMode
+                  ? '#2a2a2a'
+                  : '#f5f5f5',
+              opacity:
+                hasPendingRequest && !isMember ? 0.5 : isProcessing ? 0.7 : 1,
+            },
+          ]}
+          disabled={hasPendingRequest && !isMember}
+          onPress={() => handlePrimaryAction(item)}
+        >
+          {isProcessing ? (
+            <ActivityIndicator color={isMember ? '#fff' : BRAND_ORANGE} />
+          ) : (
+            <Text
+              style={[
+                styles.joinButtonText,
+                { color: isMember ? '#fff' : isDarkMode ? '#f2f2f2' : '#333' },
+              ]}
+            >
+              {actionLabel}
+            </Text>
+          )}
+        </Pressable>
+      </Pressable>
+    );
+  };
 
   return (
     <SafeAreaView
@@ -49,7 +257,6 @@ export default function GroupsScreen(
         { backgroundColor: isDarkMode ? '#000' : '#fff' },
       ]}
     >
-      {/* Header */}
       <View
         style={[
           styles.header,
@@ -72,7 +279,6 @@ export default function GroupsScreen(
         </Pressable>
       </View>
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <SearchInputBox
           value={searchText}
@@ -85,90 +291,33 @@ export default function GroupsScreen(
         />
       </View>
 
-      {/* Groups List */}
-      <FlatList
-        data={filteredGroups}
-        keyExtractor={item => item.id}
-        renderItem={({ item: group }) => (
-          <View
-            style={[
-              styles.groupCard,
-              {
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
-                borderColor: isDarkMode ? '#333' : '#e0e0e0',
-              },
-            ]}
-          >
-            {/* Group Image */}
-            <View style={styles.groupImageContainer}>
-              <View style={styles.groupImagePlaceholder}>
-                <Icon name="groups" size={40} color={BRAND_ORANGE} />
-              </View>
-            </View>
+      {renderSegmentTabs()}
 
-            {/* Group Info */}
-            <View style={styles.groupInfo}>
-              <Text
-                style={[
-                  styles.groupName,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
-                {group.name}
-              </Text>
-              <Text style={styles.groupActivity}>{group.sport}</Text>
-              <View style={styles.groupMeta}>
-                <Icon name="people" size={16} color={BRAND_GRAY} />
-                <Text style={styles.groupMetaText}>
-                  {group.members.length} miembros
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.groupDescription,
-                  { color: isDarkMode ? '#999' : '#666' },
-                ]}
-                numberOfLines={2}
-              >
-                {group.description}
+      {isLoading ? (
+        <View style={styles.loaderState}>
+          <ActivityIndicator color={BRAND_ORANGE} />
+        </View>
+      ) : (
+        <FlatList
+          data={groups}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Icon name="groups" size={64} color={BRAND_GRAY} />
+              <Text style={styles.emptyText}>
+                {searchText
+                  ? 'No hay coincidencias para tu búsqueda.'
+                  : activeSegment === 'discover'
+                    ? 'Aún no hay grupos públicos.'
+                    : 'Todavía no perteneces a ningún grupo.'}
               </Text>
             </View>
-
-            {/* Join Button */}
-            <Pressable
-              style={[
-                styles.joinButton,
-                {
-                  backgroundColor: true
-                    ? isDarkMode
-                      ? '#2a2a2a'
-                      : '#f5f5f5'
-                    : BRAND_ORANGE,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.joinButtonText,
-                  {
-                    color: true ? (isDarkMode ? '#f2f2f2' : '#333') : '#fff',
-                  },
-                ]}
-              >
-                {true ? 'Unirse' : 'Unido'}
-              </Text>
-            </Pressable>
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Icon name="groups" size={64} color={BRAND_GRAY} />
-            <Text style={styles.emptyText}>No se encontraron grupos</Text>
-          </View>
-        }
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+          }
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -194,6 +343,23 @@ const styles = StyleSheet.create({
   },
   inputBoxStyle: {
     height: 40,
+  },
+  segmentContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    gap: 8,
+  },
+  segmentButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+  segmentLabel: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   listContainer: {
     padding: 12,
@@ -245,7 +411,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   joinButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
     alignSelf: 'flex-start',
@@ -264,5 +430,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: BRAND_GRAY,
     marginTop: 12,
+    textAlign: 'center',
+  },
+  loaderState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

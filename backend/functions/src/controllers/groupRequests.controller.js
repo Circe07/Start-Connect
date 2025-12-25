@@ -2,6 +2,7 @@
 
 const { db, FieldValue } = require("../config/firebase");
 const GroupRequest = require("../models/groupRequest.model");
+const { fetchUserProfile } = require("../utils/userProfiles");
 
 const groupRequestsRef = () => db.collection("groupRequests");
 
@@ -89,7 +90,13 @@ exports.getGroupRequests = async (req, res) => {
       .where("groupId", "==", groupId)
       .get();
 
-    const requests = snapshot.docs.map((doc) => GroupRequest.fromFirestore(doc));
+    const requests = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const request = GroupRequest.fromFirestore(doc);
+        const requesterProfile = await fetchUserProfile(request.userId);
+        return { ...request, requesterProfile };
+      })
+    );
 
     res.status(200).json({ requests });
   } catch (error) {

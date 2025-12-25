@@ -45,6 +45,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("C:/Users/unaid/Projects/Start-Connect/frontend/android/app/.cxx/Debug/2v3j422s/x86_64/rngesturehandler_codegen_autolinked_build/cmake_install.cmake")
+  include("C:/Users/unaid/Projects/Start-Connect/frontend/android/app/.cxx/Debug/2v3j422s/x86_64/RNImagePickerSpec_autolinked_build/cmake_install.cmake")
   include("C:/Users/unaid/Projects/Start-Connect/frontend/android/app/.cxx/Debug/2v3j422s/x86_64/RNMapsSpecs_autolinked_build/cmake_install.cmake")
   include("C:/Users/unaid/Projects/Start-Connect/frontend/android/app/.cxx/Debug/2v3j422s/x86_64/safeareacontext_autolinked_build/cmake_install.cmake")
   include("C:/Users/unaid/Projects/Start-Connect/frontend/android/app/.cxx/Debug/2v3j422s/x86_64/rnscreens_autolinked_build/cmake_install.cmake")

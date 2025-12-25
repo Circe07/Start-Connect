@@ -1,12 +1,51 @@
 const Group = require("../models/group.model.js");
 const Message = require("../models/message.model.js");
 const { db, FieldValue } = require("../config/firebase.js");
+const { fetchUserProfile } = require("../utils/userProfiles");
 
 
 
 
 // Referencia a la colección
 const groupsRef = () => db.collection("groups");
+const fetchUserPendingGroupIds = async (userId) => {
+    if (!userId) return new Set();
+
+    const snapshot = await groupRequestsRef()
+        .where("userId", "==", userId)
+        .get();
+
+    return new Set(
+        snapshot.docs
+            .map(doc => doc.data()?.groupId)
+            .filter(Boolean)
+    );
+};
+
+const decorateGroupWithViewerState = (group, userId, pendingGroupIds = new Set()) => {
+    if (!group || !userId) return group;
+    const isMember = Array.isArray(group.members)
+        ? group.members.some(m => m?.userId === userId)
+        : false;
+
+    group.viewerState = {
+        isMember,
+        isOwner: group.userId === userId,
+        hasPendingRequest: pendingGroupIds.has(group.id),
+    };
+
+    return group;
+};
+
+const attachViewerState = async (groups, userId) => {
+    if (!userId || !Array.isArray(groups) || groups.length === 0) {
+        return groups;
+    }
+
+    const pendingGroupIds = await fetchUserPendingGroupIds(userId);
+    return groups.map(group => decorateGroupWithViewerState(group, userId, pendingGroupIds));
+};
+const groupRequestsRef = () => db.collection("groupRequests");
 
 
 /* ==========================================================
@@ -29,7 +68,8 @@ exports.getPublicGroups = async (req, res) => {
         }
 
         const snapshot = await query.limit(limit).get();
-        const groups = snapshot.docs.map(doc => Group.fromFirestore(doc));
+        let groups = snapshot.docs.map(doc => Group.fromFirestore(doc));
+        groups = await attachViewerState(groups, req.user?.uid);
 
         res.status(200).json({
             groups,
@@ -53,9 +93,11 @@ exports.getMyGroups = async (req, res) => {
 
         // FIX: no funciona array-contains con objetos
         const allGroups = await groupsRef().get();
-        const groups = allGroups.docs
+        let groups = allGroups.docs
             .map(doc => Group.fromFirestore(doc))
             .filter(g => g.members.some(m => m.userId === userId));
+
+        groups = await attachViewerState(groups, userId);
 
         res.status(200).json({ groups });
     } catch (error) {
@@ -83,6 +125,9 @@ exports.getGroupById = async (req, res) => {
 
         if (!isMember && !group.isPublic)
             return res.status(403).json({ message: "No eres miembro de este grupo." });
+
+        const pendingGroupIds = await fetchUserPendingGroupIds(userId);
+        decorateGroupWithViewerState(group, userId, pendingGroupIds);
 
         res.status(200).json({ group });
 
@@ -152,6 +197,9 @@ exports.joinGroup = async (req, res) => {
             if (group.members.some(m => m.userId === userId))
                 throw new Error("already_member");
 
+            if (!group.isPublic)
+                throw new Error("requires_request");
+
             const newMember = {
                 userId,
                 role: "member",
@@ -168,7 +216,8 @@ exports.joinGroup = async (req, res) => {
     } catch (error) {
         const codes = {
             not_found: [404, "El grupo no existe"],
-            already_member: [409, "Ya eres miembro del grupo"]
+            already_member: [409, "Ya eres miembro del grupo"],
+            requires_request: [403, "Este grupo requiere una solicitud previa"],
         };
         const [code, msg] = codes[error.message] || [500, "Error interno"];
         res.status(code).json({ message: msg });
@@ -476,11 +525,14 @@ exports.sendMessage = async (req, res) => {
             return res.status(403).json({ message: "No eres miembro de este grupo." });
         }
 
+        const authorProfile = await fetchUserProfile(userId);
+
         const newMessage = new Message(null, {
             groupId: id,
             userId: userId,
             content: content.trim(),
             createdAt: FieldValue.serverTimestamp(),
+            authorProfile,
         });
 
         const messageRef = await groupRef.collection("messages").add(newMessage.toFirestore());

@@ -1,6 +1,12 @@
 import { EdAt } from './created';
 import { Member } from './member';
 
+export interface GroupViewerState {
+  isMember: boolean;
+  isOwner: boolean;
+  hasPendingRequest: boolean;
+}
+
 export interface Group {
   id: string;
   userId: string;
@@ -16,4 +22,5 @@ export interface Group {
   createdAt: EdAt;
   updatedAt: null;
   postCount: number;
+  viewerState?: GroupViewerState;
 }

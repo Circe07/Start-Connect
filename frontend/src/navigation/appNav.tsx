@@ -9,6 +9,9 @@ import HomeScreen from '@/screens/HomeScreen';
 import ProfileScreen from '@/screens/ProfileScreen';
 import ChatScreen from '@/screens/chat/ChatScreen';
 import GroupsScreen from '@/screens/groups/GroupsScreen';
+import GroupDetailScreen from '@/screens/groups/GroupDetailScreen';
+import GroupChatScreen from '@/screens/groups/GroupChatScreen';
+import GroupRequestsScreen from '@/screens/groups/GroupRequestsScreen';
 import CentersScreen from '@/screens/centers/CentersScreen';
 import CenterDetailScreen from '@/screens/centers/CenterDetailScreen';
 import MyReservationsScreen from '@/screens/centers/MyReservationsScreen';
@@ -42,6 +45,9 @@ export default function AppNavigation() {
         <Stack.Screen name="SearchUser" component={SearchUser} />
         <Stack.Screen name="Friends" component={FriendsScreen} />
         <Stack.Screen name="Groups" component={GroupsScreen} />
+        <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+        <Stack.Screen name="GroupChat" component={GroupChatScreen} />
+        <Stack.Screen name="GroupRequests" component={GroupRequestsScreen} />
         <Stack.Screen name="Centers" component={CentersScreen} />
         <Stack.Screen name="CenterDetail" component={CenterDetailScreen} />
         <Stack.Screen name="MyReservations" component={MyReservationsScreen} />

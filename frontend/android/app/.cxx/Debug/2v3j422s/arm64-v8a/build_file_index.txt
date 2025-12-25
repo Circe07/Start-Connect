@@ -1,4 +1,5 @@
 C:\Users\unaid\Projects\Start-Connect\frontend\node_modules\react-native-gesture-handler\android\build\generated\source\codegen\jni\CMakeLists.txt
+C:\Users\unaid\Projects\Start-Connect\frontend\node_modules\react-native-image-picker\android\build\generated\source\codegen\jni\CMakeLists.txt
 C:\Users\unaid\Projects\Start-Connect\frontend\node_modules\react-native-maps\android\src\main\jni\CMakeLists.txt
 C:\Users\unaid\Projects\Start-Connect\frontend\node_modules\react-native-safe-area-context\android\src\main\jni\CMakeLists.txt
 C:\Users\unaid\Projects\Start-Connect\frontend\node_modules\react-native-screens\android\src\main\jni\CMakeLists.txt

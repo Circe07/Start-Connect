@@ -11,6 +11,7 @@ interface ApiResponse<T = any> {
   status: number;
   rawResponse?: any;
   url?: string;
+  headers?: Headers;
 }
 
 /**
@@ -38,6 +39,8 @@ export const apiRequest = async (
       ...options,
       headers,
     } as any);
+
+    const responseHeaders = response.headers;
 
     const responseText = await response.text();
     const status = response.status;
@@ -80,6 +83,7 @@ export const apiRequest = async (
           data.message || data.error || `Request failed with status ${status}`,
         status: status,
         data: data,
+        headers: responseHeaders,
       };
     }
 
@@ -88,6 +92,7 @@ export const apiRequest = async (
       success: true,
       data: data,
       status: status,
+      headers: responseHeaders,
     };
   } catch (error: any) {
     return {
