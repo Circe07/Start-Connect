@@ -1,8 +1,20 @@
+/**
+ * Controller Friends
+ * This controller manages friendship relationships between users
+ * Features: List friends, add friends, remove friends
+ */
+
 const { db, FieldValue } = require("../config/firebase");
 
 const friendsCollection = () => db.collection("friends");
 const usersCollection = () => db.collection("users");
 
+/**
+ * Helper function to build participant profile information
+ * Fetches user data and creates a summary for display
+ * @param {Array<string>} participantIds - Array of user IDs
+ * @returns {Object} Map of userId to user profile data
+ */
 const buildParticipantProfiles = async (participantIds = []) => {
   const entries = await Promise.all(
     participantIds.map(async (uid) => {
@@ -43,6 +55,12 @@ const buildParticipantProfiles = async (participantIds = []) => {
 
 const makeFriendshipId = (ids = []) => ids.slice().sort().join("__");
 
+/**
+ * Helper function to convert Firestore timestamps to milliseconds
+ * Handles various timestamp formats (Firestore, Date, milliseconds)
+ * @param {*} value - Timestamp value in any format
+ * @returns {number} Timestamp in milliseconds
+ */
 const timestampToMillis = (value) => {
   if (!value) return 0;
   if (typeof value.toMillis === "function") {
@@ -67,6 +85,12 @@ const timestampToMillis = (value) => {
   return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
 };
 
+/**
+ * Helper function to format friendship document data
+ * @param {string} userId - The authenticated user's ID
+ * @param {DocumentSnapshot} doc - Firestore document snapshot
+ * @returns {Object} Formatted friendship object with profile information
+ */
 const buildFriendSummary = (userId, doc) => {
   const data = doc.data() || {};
   const participantIds = data.participantIds || [];
@@ -82,6 +106,13 @@ const buildFriendSummary = (userId, doc) => {
   };
 };
 
+/**
+ * GET - Retrieve all friends for the authenticated user
+ * Returns friends sorted by most recent friendship
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of friends with profile information
+ */
 exports.listFriends = async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -100,6 +131,15 @@ exports.listFriends = async (req, res) => {
   }
 };
 
+/**
+ * POST - Add a user as a friend
+ * Creates a bidirectional friendship relationship
+ * Validates user exists and prevents self-friendship
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.friendId - ID of user to add as friend
+ * @param {Response} res - Express response object
+ * @returns {Object} Newly created friendship with profile data
+ */
 exports.addFriend = async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -154,6 +194,14 @@ exports.addFriend = async (req, res) => {
   }
 };
 
+/**
+ * DELETE - Remove a friend
+ * Deletes the friendship relationship between two users
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.friendId - ID of friend to remove
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ */
 exports.removeFriend = async (req, res) => {
   try {
     const userId = req.user.uid;

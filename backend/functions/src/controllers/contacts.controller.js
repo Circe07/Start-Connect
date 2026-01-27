@@ -1,16 +1,31 @@
-// functions/src/routes/users.js
+/**
+ * Controller Contacts
+ * This controller is responsible for managing user contacts (addresses, phones, etc.)
+ * Features: Create, Read, Update, Delete (CRUD) operations on contacts
+ */
+
 const { db, admin } = require("../config/firebase");
 const Contact = require("../models/contact.model");
 
-// Referencia a la subcolección de contactos de un usuario
+/**
+ * Helper function to get a user's contacts subcollection reference
+ * @param {string} userId - The user ID
+ * @returns {CollectionReference} Reference to user's contacts collection
+ */
 const getContactsCollectionRef = (userId) =>
     db.collection("users").doc(userId).collection("contacts");
 
-// Log de conexión del proyecto (solo en local)
+// Log connection status (local development only)
 if (process.env.NODE_ENV !== "production") {
     console.log("🔥 Proyecto conectado:", admin.app().options.projectId);
 }
 
+/**
+ * GET - Retrieve all contacts for the authenticated user
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} List of contacts with success status
+ */
 exports.getAllContacts = async (req, res) => {
     try {
         const userId = req.user.uid;
@@ -29,15 +44,26 @@ exports.getAllContacts = async (req, res) => {
     }
 };
 
+/**
+ * POST - Create a new contact for the authenticated user
+ * @param {Request} req - Express request object with contact data in body
+ * @param {Request} req.body.name - Contact name
+ * @param {Request} req.body.email - Contact email
+ * @param {Request} req.body.phone - Contact phone number
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message with newly created contact ID
+ */
 exports.createContact = async (req, res) => {
     try {
         const userId = req.user.uid;
         const contactData = req.body;
 
+        // Validate input is not empty
         if (!contactData || typeof contactData !== "object" || Array.isArray(contactData)) {
             return res.status(400).json({ success: false, message: "Datos vacíos o inválidos" });
         }
 
+        // Ensure user document exists
         const userRef = db.collection("users").doc(userId);
         const userDoc = await userRef.get();
 
@@ -45,7 +71,7 @@ exports.createContact = async (req, res) => {
             await userRef.set({ createdAt: new Date(), email: req.user.email || null });
         }
 
-        // Uso del modelo Contact para crear el contacto
+        // Use Contact model to create and validate contact
         const newContact = new Contact(null, userId, contactData);
         const contactRef = await userRef.collection("contacts").add(newContact.toFirestore());
 
@@ -60,12 +86,21 @@ exports.createContact = async (req, res) => {
     }
 };
 
+/**
+ * PATCH - Update an existing contact
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.id - Contact ID to update
+ * @param {Request} req.body - Fields to update (name, email, phone, etc.)
+ * @param {Response} res - Express response object
+ * @returns {Object} Updated contact data
+ */
 exports.updateContact = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
         const userId = req.user.uid;
 
+        // Validate that update data is provided
         if (!Object.keys(updates).length) {
             return res.status(400).json({ success: false, message: "No hay datos para actualizar" });
         }
@@ -73,14 +108,17 @@ exports.updateContact = async (req, res) => {
         const contactRef = getContactsCollectionRef(userId).doc(id);
         const contactDoc = await contactRef.get();
 
+        // Check if contact exists
         if (!contactDoc.exists) {
             return res.status(404).json({ success: false, message: "Contacto no encontrado" });
         }
 
+        // Verify ownership - only contact owner can update
         if (contactDoc.data().userId !== userId) {
             return res.status(403).json({ success: false, message: "No autorizado" });
         }
 
+        // Add updated timestamp
         updates.updatedAt = new Date();
         await contactRef.update(updates);
 
@@ -100,6 +138,13 @@ exports.updateContact = async (req, res) => {
     }
 };
 
+/**
+ * DELETE - Remove a contact
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.id - Contact ID to delete
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ */
 exports.deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
@@ -108,10 +153,12 @@ exports.deleteContact = async (req, res) => {
         const contactRef = getContactsCollectionRef(userId).doc(id);
         const contactDoc = await contactRef.get();
 
+        // Check if contact exists
         if (!contactDoc.exists) {
             return res.status(404).json({ success: false, message: "Contacto no encontrado" });
         }
 
+        // Verify ownership - only contact owner can delete
         if (contactDoc.data().userId !== userId) {
             return res.status(403).json({ success: false, message: "No autorizado" });
         }

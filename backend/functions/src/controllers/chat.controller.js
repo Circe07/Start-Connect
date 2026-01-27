@@ -1,3 +1,9 @@
+/**
+ * Controller Chat
+ * This controller manages one-to-one and group chat functionality
+ * Features: Create chats, send messages, retrieve chat history, mark as read
+ */
+
 const Chat = require("../models/chat.model");
 const ChatMessage = require("../models/chatMessage.model");
 const { db, FieldValue } = require("../config/firebase");
@@ -5,6 +11,11 @@ const { db, FieldValue } = require("../config/firebase");
 const chatsCollection = () => db.collection("chats");
 const usersCollection = () => db.collection("users");
 
+/**
+ * Helper function to fetch and build user profile information for chat participants
+ * @param {Array<string>} participantIds - Array of user IDs
+ * @returns {Object} Map of userId to user profile summary
+ */
 const buildParticipantProfiles = async (participantIds = []) => {
     const entries = await Promise.all(
         participantIds.map(async (uid) => {
@@ -42,6 +53,12 @@ const buildParticipantProfiles = async (participantIds = []) => {
     }, {});
 };
 
+/**
+ * Helper function to convert Firestore timestamps to milliseconds
+ * Handles multiple timestamp formats for compatibility
+ * @param {*} value - Timestamp in any format (Firestore, Date, milliseconds)
+ * @returns {number} Milliseconds since epoch
+ */
 const timestampToMillis = (value) => {
     if (!value) return 0;
     if (typeof value.toMillis === "function") {
@@ -66,6 +83,13 @@ const timestampToMillis = (value) => {
     return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
 };
 
+/**
+ * Helper function to verify user is a chat participant
+ * Throws error if user is not part of the chat
+ * @param {string} chatId - Chat document ID
+ * @param {string} userId - User ID to verify
+ * @returns {Object} Chat reference, document, and parsed chat data
+ */
 const ensureChatParticipant = async (chatId, userId) => {
     const chatRef = chatsCollection().doc(chatId);
     const chatDoc = await chatRef.get();
@@ -87,8 +111,20 @@ const ensureChatParticipant = async (chatId, userId) => {
     return { chatRef, chatDoc, chat };
 };
 
+/**
+ * Helper function to convert Firestore document to client message format
+ * @param {DocumentSnapshot} doc - Firestore message document
+ * @returns {Object} Formatted message with ID and data
+ */
 const toClientMessage = (doc) => ({ id: doc.id, ...doc.data() });
 
+/**
+ * GET - Retrieve all chats for authenticated user
+ * Returns user's chats sorted by most recent activity
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of chats with participants and last message
+ */
 exports.getMyChats = async (req, res) => {
     try {
         const userId = req.user.uid;
@@ -112,6 +148,16 @@ exports.getMyChats = async (req, res) => {
     }
 };
 
+/**
+ * POST - Create a new chat between participants
+ * Creates a 2-person or group chat with participant profiles
+ * Returns existing chat if participants already have a conversation
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.participants - Array of user IDs (excluding current user)
+ * @param {Request} req.body.metadata - Optional metadata for the chat
+ * @param {Response} res - Express response object
+ * @returns {Object} Chat ID and complete chat data
+ */
 exports.createChat = async (req, res) => {
     try {
         const userId = req.user.uid;
@@ -180,6 +226,17 @@ exports.createChat = async (req, res) => {
     }
 };
 
+/**
+ * GET - Retrieve messages for a specific chat
+ * Pagination support using cursor-based navigation
+ * Requires user to be a chat participant
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.chatId - Chat ID
+ * @param {Request} req.query.limit - Number of messages to fetch (default 50, max 100)
+ * @param {Request} req.query.cursor - Message ID to start pagination from
+ * @param {Response} res - Express response object
+ * @returns {Object} Chat data, messages array, and next cursor for pagination
+ */
 exports.getChatMessages = async (req, res) => {
     try {
         const userId = req.user.uid;
@@ -226,6 +283,17 @@ exports.getChatMessages = async (req, res) => {
     }
 };
 
+/**
+ * POST - Send a message to a chat
+ * Creates new message, updates unread counts for other participants
+ * User must be a chat participant
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.chatId - Chat ID
+ * @param {Request} req.body.text - Message text content (required)
+ * @param {Request} req.body.attachments - Optional array of file attachments
+ * @param {Response} res - Express response object
+ * @returns {Object} Created message data with ID
+ */
 exports.sendMessage = async (req, res) => {
     try {
         const userId = req.user.uid;
@@ -286,6 +354,14 @@ exports.sendMessage = async (req, res) => {
     }
 };
 
+/**
+ * POST - Mark a chat as read for the current user
+ * Resets unread message count to zero
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.chatId - Chat ID to mark as read
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ */
 exports.markChatAsRead = async (req, res) => {
     try {
         const userId = req.user.uid;

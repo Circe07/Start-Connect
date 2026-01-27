@@ -10,10 +10,21 @@ const { admin, db } = require("../config/firebase");
 const fetch = require('node-fetch');
 
 /**
- * POST --> REGISTER USER
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * POST - Register a new user
+ * Creates a Firebase Authentication account and stores user profile in Firestore
+ * Validates password strength (min 8 chars, letter, number, special character)
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.email - User email (required, unique)
+ * @param {Request} req.body.password - User password (required)
+ * @param {Request} req.body.name - User full name (required)
+ * @param {Request} req.body.username - Unique username (required)
+ * @param {Request} req.body.bio - Optional user biography
+ * @param {Request} req.body.photo - Optional profile photo URL
+ * @param {Request} req.body.sports - Optional array of sports interests
+ * @param {Request} req.body.phoneNumber - Optional phone number
+ * @param {Request} req.body.location - Optional location
+ * @param {Response} res - Express response object
+ * @returns {Object} Created user with Firebase UID
  */
 exports.register = async (req, res) => {
   try {
@@ -30,9 +41,10 @@ exports.register = async (req, res) => {
     } = req.body;
 
     /**
-     * Email, password, name and usermame are required
-     * Password must be at least 8 characters
-     * Password must contain at least one letter, one number and one special character
+     * Email, password, name and username are required
+     * Password validation:
+     * - Minimum 8 characters
+     * - Must contain at least one letter, one number, and one special character
      */
     if (!email || !password || !name || !username) {
       return res.status(400).json({
@@ -96,10 +108,14 @@ exports.register = async (req, res) => {
 };
 
 /**
- * POST --> LOGIN USER
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * POST - Login user with email and password
+ * Authenticates user via Firebase Authentication API
+ * Returns ID token and refresh token for session management
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.email - User email (required)
+ * @param {Request} req.body.password - User password (required)
+ * @param {Response} res - Express response object
+ * @returns {Object} ID token, refresh token, and user UID
  */
 exports.login = async (req, res) => {
   try {
@@ -114,15 +130,15 @@ exports.login = async (req, res) => {
 
     /**
      * Get API key from environment variable
-     * API key is used to authenticate requests
-     * API key is generated in Firebase Console > Authentication > API keys
+     * API key authenticates requests to Firebase Authentication API
+     * Generated in Firebase Console > Authentication > API keys
+     * Used to sign in users without Firebase SDK
      */
     const apiKey = process.env.AUTH_API_KEY;
 
     /**
-     * Call Firebase Authentication API to login user
-     * API key is used to authenticate requests
-     * This is used for authentication and authorization
+     * Call Firebase Authentication API for user login
+     * Returns tokens for authenticated session
      */
     const response = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
@@ -158,9 +174,12 @@ exports.login = async (req, res) => {
 
 
 /**
- * Post --> LOGOUT
- * @param {*} req 
- * @param {*} res 
+ * POST - Logout user
+ * Revokes all refresh tokens to invalidate all sessions
+ * Requires authentication
+ * @param {Request} req - Express request object (authenticated)
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
  */
 exports.logout = async (req, res) => {
   try {

@@ -1,14 +1,17 @@
 /**
  * Controller Hobbies
- * This controller is responsible for creating and managing hobbies.
+ * This controller manages user hobbies and interests
+ * Features: List all hobbies, manage user hobbies, find users by hobby
  */
 
 const { db } = require("../config/firebase");
 
 /**
- * GET -> Get all hobbies
- * @param {*} req 
- * @param {*} res 
+ * GET - Retrieve all available hobbies from global collection
+ * Returns complete hobby catalog for users to select from
+ * @param {Request} req - Express request object (unused)
+ * @param {Response} res - Express response object
+ * @returns {Array} List of all available hobbies with IDs
  */
 exports.getAllHobbies = async (_, res) => {
 
@@ -22,17 +25,20 @@ exports.getAllHobbies = async (_, res) => {
 };
 
 /**
- * GET -> Get my hobbies
- * @param {*} req 
- * @param {*} res 
+ * GET - Retrieve current user's hobbies
+ * Returns only hobby IDs that the user has selected
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} Array of hobby IDs the user follows
  */
 exports.getMyHobbies = async (req, res) => {
     try {
         const uid = req.user.uid;
 
         /**
-         * snap -> contain the query for getting the hobbies
-         * hobbies -> contain the array of hobbies
+         * Query the user's hobbies subcollection
+         * snap - contains the query result
+         * hobbies - array of hobby IDs extracted from document IDs
          */
         const snap = await db
             .collection("users")
@@ -48,10 +54,12 @@ exports.getMyHobbies = async (req, res) => {
 };
 
 /**
- * POST -> Add hobbies to user
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * POST - Add hobbies to the current user
+ * Accepts array of hobby IDs and adds them to user's profile
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.hobbies - Array of hobby IDs to add
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
  */
 exports.addHobbiesToUser = async (req, res) => {
     try {
@@ -84,9 +92,12 @@ exports.addHobbiesToUser = async (req, res) => {
 };
 
 /**
- * GET -> Get all users for a specific hobby
- * @param {*} req 
- * @param {*} res 
+ * GET - Find all users who follow a specific hobby
+ * Searches across all users' hobby collections for a given hobby ID
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.hobbyId - The hobby ID to search for
+ * @param {Response} res - Express response object
+ * @returns {Array} List of user IDs who follow this hobby
  */
 exports.getUsersByHobby = async (req, res) => {
     try {
@@ -111,10 +122,12 @@ exports.getUsersByHobby = async (req, res) => {
 };
 
 /**
- * DELETE -> Delete hobbies from user
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * DELETE - Remove hobbies from current user
+ * Accepts array of hobby IDs and removes them from user's profile
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.hobbies - Array of hobby IDs to remove
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
  */
 exports.removeHobbiesFromUser = async (req, res) => {
     try {
@@ -130,7 +143,7 @@ exports.removeHobbiesFromUser = async (req, res) => {
         const batch = db.batch();
         const rootRef = db.collection("users").doc(uid).collection("hobbies");
 
-        // hobbyId -> references to each hobby
+        // For each hobby ID, delete the corresponding document
         hobbies.forEach((hobbyId) => {
             const ref = rootRef.doc(hobbyId);
             batch.delete(ref);

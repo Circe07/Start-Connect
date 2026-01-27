@@ -1,7 +1,27 @@
+/**
+ * Controller Centers
+ * This controller manages sports centers/venues and their facilities
+ * Admin-only operations for creating/updating centers
+ * Public operations for listing and searching
+ */
+
 const { db, FieldValue } = require("../config/firebase");
 const Center = require("../models/center.model");
 
-// POST /centers (Admin Only)
+/**
+ * POST - Create a new sports center (Admin only)
+ * Requires admin authentication
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.name - Center name (required)
+ * @param {Request} req.body.address - Center address (required)
+ * @param {Request} req.body.location - Location object with lat/lng (required)
+ * @param {Request} req.body.description - Optional description
+ * @param {Request} req.body.services - Array of services offered
+ * @param {Request} req.body.prices - Pricing information
+ * @param {Request} req.body.socialMedia - Social media links
+ * @param {Response} res - Express response object
+ * @returns {Object} Created center with generated ID
+ */
 exports.createCenter = async (req, res) => {
     try {
         const { name, description, address, location, services, prices, socialMedia } = req.body;
@@ -35,7 +55,14 @@ exports.createCenter = async (req, res) => {
     }
 };
 
-// DELETE /centers/:id (Admin Only)
+/**
+ * DELETE - Delete a sports center (Admin only)
+ * Removes center and all associated data
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.id - Center ID to delete
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ */
 exports.deleteCenter = async (req, res) => {
     try {
         const { id } = req.params;
@@ -55,7 +82,16 @@ exports.deleteCenter = async (req, res) => {
     }
 };
 
-// PATCH /centers/:id (Admin Only)
+/**
+ * PATCH - Update an existing sports center (Admin only)
+ * Allows updating center details (name, description, services, pricing, etc.)
+ * Preserves createdAt and automatically updates updatedAt timestamp
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.id - Center ID to update
+ * @param {Request} req.body - Fields to update (any Center fields)
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ */
 exports.updateCenter = async (req, res) => {
     try {
         const { id } = req.params;
@@ -84,7 +120,14 @@ exports.updateCenter = async (req, res) => {
     }
 };
 
-// GET /centers (Public)
+/**
+ * GET - List all sports centers (Public)
+ * Returns complete list of all available centers
+ * No authentication required
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of all centers with complete information
+ */
 exports.getCenters = async (req, res) => {
     try {
         const snapshot = await db.collection("centers").get();
@@ -102,7 +145,18 @@ exports.getCenters = async (req, res) => {
     }
 };
 
-// GET /centers/search (Public) - Búsqueda por nombre o cercanía
+/**
+ * GET - Search for sports centers (Public)
+ * Supports filtering by name, description and location-based distance
+ * Uses Haversine formula for accurate distance calculation
+ * @param {Request} req - Express request object
+ * @param {Request} req.query.q - Text search query (name/description)
+ * @param {Request} req.query.lat - Latitude for distance-based search
+ * @param {Request} req.query.lng - Longitude for distance-based search
+ * @param {Request} req.query.radius - Search radius in meters (default 10000)
+ * @param {Response} res - Express response object
+ * @returns {Array} Matching centers sorted by relevance or distance
+ */
 exports.searchCenters = async (req, res) => {
     try {
         const { q, lat, lng, radius } = req.query;
@@ -147,7 +201,16 @@ exports.searchCenters = async (req, res) => {
     }
 };
 
-// Helper Haversine
+/**
+ * Helper function - Calculate distance between two geographic points
+ * Uses Haversine formula for accurate great-circle distance
+ * Earth radius: 6371 km
+ * @param {number} lat1 - Latitude of first point
+ * @param {number} lon1 - Longitude of first point
+ * @param {number} lat2 - Latitude of second point
+ * @param {number} lon2 - Longitude of second point
+ * @returns {number} Distance in kilometers
+ */
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
@@ -160,6 +223,11 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+/**
+ * Helper function - Convert degrees to radians
+ * @param {number} deg - Angle in degrees
+ * @returns {number} Angle in radians
+ */
 function deg2rad(deg) {
     return deg * (Math.PI / 180);
 }

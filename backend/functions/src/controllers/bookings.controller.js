@@ -1,6 +1,7 @@
 /**
  * Controller Bookings
- * This controller is responsible for createing and managing bookings.
+ * This controller manages venue/facility bookings and reservations
+ * Features: Create bookings, retrieve user bookings, check availability
  * Author: Unai Villar
  */
 
@@ -8,10 +9,16 @@ const { db, admin, FieldValue } = require("../config/firebase");
 const Booking = require("../models/booking.model");
 
 /**
- * POST --> CREATE BOOKING
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * POST - Create a new booking for a venue facility
+ * Validates availability and prevents double-booking
+ * @param {Request} req - Express request object
+ * @param {Request} req.body.venueId - Venue/center ID
+ * @param {Request} req.body.facilityId - Facility ID (e.g., pool, gym)
+ * @param {Request} req.body.date - Booking date (YYYY-MM-DD)
+ * @param {Request} req.body.startTime - Start time (HH:MM)
+ * @param {Request} req.body.endTime - End time (HH:MM)
+ * @param {Response} res - Express response object
+ * @returns {Object} Created booking with ID and details
  */
 exports.createBooking = async (req, res) => {
   try {
@@ -28,8 +35,8 @@ exports.createBooking = async (req, res) => {
     };
 
     /**
-     * Validate data
-     * If data is not valid, return error
+     * Validate booking data using Booking model
+     * Checks: required fields, time format, data consistency
      */
     const validationError = Booking.validate(data);
     if (validationError) {
@@ -37,8 +44,9 @@ exports.createBooking = async (req, res) => {
     }
 
     /**
-     * Check if there is an overlap with other bookings
-     * If there is an overlap, return error
+     * Check for booking conflicts
+     * Query existing bookings for same venue/facility/date
+     * to ensure no overlapping time slots
      */
     const overlap = await db
       .collection("bookings")
@@ -54,13 +62,13 @@ exports.createBooking = async (req, res) => {
     }
 
     /**
-     * Create bokking in Firestore
-     * Collection "bookings"
+     * Create booking document in Firestore
+     * Uses Booking model for data consistency
      */
     const booking = new Booking(data);
     const ref = db.collection("bookings").doc();
 
-    // Set id
+    // Set generated document ID
     booking.id = ref.id;
 
     await ref.set(booking.toFirestore(FieldValue));
@@ -78,10 +86,11 @@ exports.createBooking = async (req, res) => {
 };
 
 /**
- * GET --> GET MY BOOKINGS
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * GET - Retrieve all bookings for the authenticated user
+ * Returns user's bookings sorted by date (newest first)
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of user's bookings
  */
 exports.getMyBookings = async (req, res) => {
   try {
@@ -107,9 +116,15 @@ exports.getMyBookings = async (req, res) => {
 };
 
 /**
- * GET --> GET AVAILABILITY
- * @param {*} req 
- * @param {*} res 
+ * GET - Get available time slots for a facility on a specific date
+ * Returns all booked time slots so client can show availability
+ * No authentication required (public availability check)
+ * @param {Request} req - Express request object
+ * @param {Request} req.params.venueId - Venue ID
+ * @param {Request} req.params.facilityId - Facility ID  
+ * @param {Request} req.params.date - Date to check (YYYY-MM-DD)
+ * @param {Response} res - Express response object
+ * @returns {Array} Array of booked time slots with start and end times
  */
 exports.getAvailability = async (req, res) => {
   try {
