@@ -25,12 +25,18 @@ const bookingsRoutes = require("./routes/bookings");
 const chatRoutes = require("./routes/chat");
 const friendsRoutes = require("./routes/friends");
 const postsRoutes = require("./routes/posts");
+const paymentRoutes = require("./routes/payment");
 
 /**
  * Global middleware here
  */
 app.use(cors({ origin: true }));
-app.use(express.json({ limit: "15mb" }));
+app.use(express.json({
+  limit: "15mb",
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
 /**
@@ -55,6 +61,7 @@ app.use("/bookings", bookingsRoutes);
 app.use("/chats", chatRoutes);
 app.use("/friends", friendsRoutes);
 app.use("/posts", postsRoutes);
+app.use("/payment", paymentRoutes);
 
 /**
  * Default route to check if API is working
