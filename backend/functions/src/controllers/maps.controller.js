@@ -147,26 +147,6 @@ exports.searchPlaces = async (req, res) => {
             });
         }
 
-        // Fetch all centers
-        const snapshot = await db.collection("centers").get();
-
-        if (snapshot.empty) {
-            return res.status(200).json({ success: true, count: 0, places: [] });
-        }
-
-        // Parse location coordinates if provided
-        const userLat = hasCoordinates ? parseFloat(lat) : null;
-        const userLng = hasCoordinates ? parseFloat(lng) : null;
-        const searchRadius = hasCoordinates ? parseFloat(radius) || 5000 : null;
-
-        // Validate coordinates format
-        if (hasCoordinates && (Number.isNaN(userLat) || Number.isNaN(userLng))) {
-            return res.status(400).json({
-                success: false,
-                message: "Las coordenadas proporcionadas no son válidas.",
-            });
-        }
-
         // Convert Firestore documents to Center models
         const centers = snapshot.docs.map(doc => Center.fromFirestore(doc));
 
