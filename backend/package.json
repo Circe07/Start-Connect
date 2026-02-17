@@ -22,9 +22,13 @@
     "firebase-admin": "^13.5.0",
     "firebase-functions": "^6.6.0",
     "morgan": "^1.10.1",
+<<<<<<< HEAD
     "stripe": "^19.1.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+=======
+    "stripe": "^19.3.1"
+>>>>>>> 08b3178b324e82694f3ccf3449a68caa78d662be
   },
   "devDependencies": {
     "jest": "^30.2.0",
