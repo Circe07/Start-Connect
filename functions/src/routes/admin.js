@@ -1,6 +1,7 @@
 // ! NO EJECTUAR A MENOS QUE SE AGREGEN MAS HOBBIES
 
 const router = require("express").Router();
+const adminMiddleware = require("../middleware/admin");
 const hobbiesSeed = require("../../scripts/hobbiesSeed");
 const venuesSeed = require("../../scripts/venuesSeed");
 const { db } = require("../config/firebase");
@@ -8,6 +9,9 @@ const { db } = require("../config/firebase");
 router.get('/check', (req, res) => {
     res.status(200).json({ message: 'Rutas de admin funcionando correctamente' })
 })
+
+// Everything below requires admin
+router.use(adminMiddleware);
 
 router.post("/seed-hobbies", async (req, res) => {
     try {
@@ -57,7 +61,7 @@ router.post("/make-admin", async (req, res) => {
 
         res.json({ success: true, message: `Usuario ${uid} es ahora Administrador.` });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: "Error interno." });
     }
 });
 

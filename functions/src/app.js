@@ -30,7 +30,24 @@ const bookingsRoutes = require("./routes/bookings");
 /**
  * Global middleware here
  */
-app.use(cors({ origin: true }));
+const corsOriginsRaw = process.env.CORS_ORIGINS || "";
+const corsOrigins = corsOriginsRaw
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Server-to-server / curl / postman without Origin header
+    if (!origin) return callback(null, true);
+
+    // If no allowlist configured, allow (dev-friendly default)
+    if (corsOrigins.length === 0) return callback(null, true);
+
+    if (corsOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("CORS: origin not allowed"));
+  }
+}));
 app.use(express.json());
 
 /**

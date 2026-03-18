@@ -270,7 +270,7 @@ exports.newPost = async (req, res) => {
 
     } catch (error) {
         console.error("Error newPost:", error);
-        res.status(500).json({ message: "Error interno", error: error.message });
+        res.status(500).json({ message: "Error interno" });
     }
 };
 
@@ -443,7 +443,7 @@ exports.deletePost = async (req, res) => {
 
     } catch (error) {
         console.error("Error deletePost:", error);
-        res.status(500).json({ message: "Error interno", error: error.message });
+        res.status(500).json({ message: "Error interno" });
     }
 };
 

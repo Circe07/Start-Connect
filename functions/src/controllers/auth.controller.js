@@ -89,8 +89,7 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.error("Error al crear el usuario:", error);
     res.status(500).json({
-      message: "Error al crear el usuario",
-      error: error.message
+      message: "Error al crear el usuario"
     });
   }
 };
@@ -151,7 +150,55 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
-    res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+    res.status(500).json({ message: "Error al iniciar sesión" });
+  }
+};
+
+/**
+ * POST --> REFRESH TOKEN
+ * @param {*} req
+ * @param {*} res
+ */
+exports.refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.body || {};
+
+    if (!refreshToken || typeof refreshToken !== "string") {
+      return res.status(400).json({ message: "refreshToken es requerido" });
+    }
+
+    const apiKey = process.env.AUTH_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ message: "Configuración incompleta del servidor." });
+    }
+
+    const response = await fetch(
+      `https://securetoken.googleapis.com/v1/token?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+        }).toString(),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(401).json({ message: "Refresh token inválido o expirado." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      token: data.id_token,
+      refreshToken: data.refresh_token,
+      uid: data.user_id,
+    });
+  } catch (error) {
+    console.error("Error al refrescar token:", error);
+    return res.status(500).json({ message: "Error al refrescar token" });
   }
 };
 
@@ -172,7 +219,7 @@ exports.logut = async (req, res) => {
     res.status(200).json({ message: 'Sesión cerrada correctamente' });
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
-    res.status(500).json({ message: 'Error al cerrar sesión', error: error.message });
+    res.status(500).json({ message: 'Error al cerrar sesión' });
   }
 };
 
@@ -192,7 +239,7 @@ exports.me = async (req, res) => {
     });
   } catch (error) {
     console.error('Error al obtener información del usuario:', error);
-    res.status(500).json({ message: 'Error al obtener información del usuario', error: error.message });
+    res.status(500).json({ message: 'Error al obtener información del usuario' });
   }
 };
 
@@ -214,6 +261,6 @@ exports.changePassword = async (req, res) => {
     res.status(200).json({ message: 'Enlace generado correctamente', resetLink });
   } catch (error) {
     console.error('Error al enviar el correo de restablecimiento de contraseña:', error);
-    res.status(500).json({ message: 'Error al enviar el correo de restablecimiento de contraseña', error: error.message });
+    res.status(500).json({ message: 'Error al enviar el correo de restablecimiento de contraseña' });
   }
 };
