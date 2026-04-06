@@ -10,6 +10,10 @@ const logger = require("firebase-functions/logger");
 const app = express();
 const errorHandler = require("./middleware/errorHandler");
 
+// Required behind Firebase/Google proxy for correct client IP detection
+// (e.g. express-rate-limit + X-Forwarded-For).
+app.set("trust proxy", 1);
+
 
 
 /**
