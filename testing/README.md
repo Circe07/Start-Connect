@@ -18,6 +18,8 @@ This folder contains the automation-first testing implementation for backend pro
   - `npm run test:all-backend`
 - Release gate document validation:
   - `npm run test:release-gate`
+- Postman/newman smoke:
+  - `npm run postman:smoke`
 
 ## Structure
 
@@ -28,6 +30,6 @@ This folder contains the automation-first testing implementation for backend pro
 - `frontend/`
   - `api-integration-matrix.md`: contract matrix for frontend QA.
   - `StartAndConnect.postman_collection.json`: smoke collection.
+  - `health-smoke.postman_collection.json`: minimal health smoke for CI.
 - `release/`
   - `release-gates.md`: production checklist and sign-off gates.
-

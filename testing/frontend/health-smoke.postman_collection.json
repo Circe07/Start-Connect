@@ -1,0 +1,40 @@
+{
+  "info": {
+    "name": "StartAndConnect Health Smoke",
+    "_postman_id": "91dc3250-cd73-457f-82f5-4b457cc4f2e7",
+    "description": "Minimal API availability smoke.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('status payload ok', function () {",
+              "  var body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5001/startandconnect-c44b2/europe-west1/api"
+    }
+  ]
+}

@@ -65,7 +65,15 @@ npm run test:perf-smoke
 npm run test:all-backend
 ```
 
+### Automation tooling
+
+- Pre-commit hook (Husky + lint-staged): formats staged files with Prettier.
+- Dependabot config: `.github/dependabot.yml` (npm + GitHub Actions updates).
+- Security scanning: `.github/workflows/codeql.yml`.
+- API availability smoke in CI: `.github/workflows/newman-smoke.yml`.
+
 Testing artifacts:
+
 - `testing/README.md`
 - `testing/frontend/api-integration-matrix.md`
 - `testing/frontend/StartAndConnect.postman_collection.json`

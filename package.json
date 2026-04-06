@@ -6,6 +6,10 @@
   "scripts": {
     "test": "jest",
     "build": "node -e \"console.log('No build step required for this repository')\"",
+    "prepare": "husky install",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "postman:smoke": "newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=http://127.0.0.1:5001/startandconnect-c44b2/europe-west1/api",
     "test:smoke-env": "node testing/scripts/smoke-env.mjs",
     "test:smoke-api": "node testing/scripts/smoke-api.mjs",
     "test:phase1": "npm run test:smoke-env && npm run test:smoke-api && npm test",
@@ -36,8 +40,17 @@
     "stripe": "^19.1.0"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "jest": "^30.2.0",
+    "lint-staged": "^15.5.2",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "newman": "^6.2.1",
     "supertest": "^7.1.4"
+  },
+  "lint-staged": {
+    "*.{js,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
