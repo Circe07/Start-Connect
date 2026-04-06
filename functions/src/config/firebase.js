@@ -17,8 +17,8 @@ const {
  * PROJECT_ID: Project ID from Firebase
  * DATABASE_ID: Database ID from Firebase
  */
-const PROJECT_ID = "startandconnect-c44b2";
-const DATABASE_ID = "startandconnect-eur3";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "startandconnect-c44b2";
+const DATABASE_ID = process.env.FIREBASE_DATABASE_ID || "startandconnect-eur3";
 
 // Initialize Firebase in production
 if (!admin.apps.length) {

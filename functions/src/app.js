@@ -8,6 +8,7 @@ const express = require("express");
 const cors = require("cors");
 const logger = require("firebase-functions/logger");
 const app = express();
+const errorHandler = require("./middleware/errorHandler");
 
 
 
@@ -25,6 +26,9 @@ const usersRoutes = require("./routes/users");
 const mapsRoutes = require("./routes/maps");
 const centersRoutes = require("./routes/centers");
 const bookingsRoutes = require("./routes/bookings");
+const activitiesRoutes = require("./routes/activities");
+const swipesRoutes = require("./routes/swipes");
+const matchesRoutes = require("./routes/matches");
 
 
 /**
@@ -69,6 +73,9 @@ app.use("/groupsRequests", groupsRequestsRoutes);
 app.use("/maps", mapsRoutes);
 app.use("/centers", centersRoutes);
 app.use("/bookings", bookingsRoutes);
+app.use("/activities", activitiesRoutes);
+app.use("/swipes", swipesRoutes);
+app.use("/matches", matchesRoutes);
 
 
 
@@ -83,5 +90,17 @@ app.get("/", (_, res) => {
     message: "Start&Connect API (Firebase Functions v2) in execution",
   });
 });
+
+/**
+ * Healthcheck endpoint
+ */
+app.get("/health", (_, res) => {
+  res.status(200).json({
+    status: "ok",
+  });
+});
+
+// Error handler (must be last)
+app.use(errorHandler);
 
 module.exports = app;

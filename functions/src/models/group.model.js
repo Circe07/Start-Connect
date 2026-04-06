@@ -20,7 +20,12 @@ class Group {
         this.isPublic = data.isPublic ?? true; // Si el grupo es público o privado
 
         // Miembros del grupo y límites
-        this.members = Array.isArray(data.members) ? data.members : []; // Lista de UIDs de miembros
+        // `members` es array de objetos { userId, role, joinedAt }. Para reglas/queries eficientes,
+        // mantenemos también `memberIds` como array de strings.
+        this.members = Array.isArray(data.members) ? data.members : [];
+        this.memberIds = Array.isArray(data.memberIds)
+            ? data.memberIds
+            : this.members.map(m => m?.userId).filter(Boolean);
         this.maxMembers = data.maxMembers || 10; // Número máximo de miembros permitidos
 
         // Metadatos
@@ -45,6 +50,7 @@ class Group {
             location: this.location,
             isPublic: this.isPublic,
             members: this.members,
+            memberIds: this.memberIds,
             maxMembers: this.maxMembers,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,

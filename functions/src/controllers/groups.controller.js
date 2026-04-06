@@ -1,4 +1,5 @@
 const Group = require("../models/group.model.js");
+const Message = require("../models/message.model.js");
 const { db, FieldValue } = require("../config/firebase.js");
 
 
@@ -50,11 +51,12 @@ exports.getMyGroups = async (req, res) => {
     try {
         const userId = req.user.uid;
 
-        // FIX: no funciona array-contains con objetos
-        const allGroups = await groupsRef().get();
-        const groups = allGroups.docs
-            .map(doc => Group.fromFirestore(doc))
-            .filter(g => g.members.some(m => m.userId === userId));
+        // Prefer `memberIds` array for efficient query.
+        // Fallback: if legacy docs don't have memberIds yet, they won't show here until updated.
+        const snapshot = await groupsRef()
+            .where("memberIds", "array-contains", userId)
+            .get();
+        const groups = snapshot.docs.map(doc => Group.fromFirestore(doc));
 
         res.status(200).json({ groups });
     } catch (error) {
@@ -114,6 +116,7 @@ exports.createGroup = async (req, res) => {
             location: data.location,
             isPublic: data.isPublic ?? true,
             members: [{ userId, role: "admin", joinedAt: new Date() }],
+            memberIds: [userId],
             maxMembers: data.maxMembers || 10,
         });
 
@@ -151,6 +154,9 @@ exports.joinGroup = async (req, res) => {
             if (group.members.some(m => m.userId === userId))
                 throw new Error("already_member");
 
+            if (group.members.length >= (group.maxMembers || 10))
+                throw new Error("full");
+
             const newMember = {
                 userId,
                 role: "member",
@@ -158,7 +164,8 @@ exports.joinGroup = async (req, res) => {
             };
 
             t.update(groupsRef().doc(id), {
-                members: [...group.members, newMember]
+                members: [...group.members, newMember],
+                memberIds: [...(group.memberIds || group.members.map(m => m.userId).filter(Boolean)), userId]
             });
         });
 
@@ -167,7 +174,8 @@ exports.joinGroup = async (req, res) => {
     } catch (error) {
         const codes = {
             not_found: [404, "El grupo no existe"],
-            already_member: [409, "Ya eres miembro del grupo"]
+            already_member: [409, "Ya eres miembro del grupo"],
+            full: [409, "El grupo está completo"]
         };
         const [code, msg] = codes[error.message] || [500, "Error interno"];
         res.status(code).json({ message: msg });
@@ -204,7 +212,10 @@ exports.leaveGroup = async (req, res) => {
 
             const updated = group.members.filter(m => m.userId !== userId);
 
-            t.update(groupsRef().doc(id), { members: updated });
+            t.update(groupsRef().doc(id), {
+                members: updated,
+                memberIds: updated.map(m => m.userId).filter(Boolean)
+            });
         });
 
         res.status(200).json({ message: "Has salido del grupo correctamente." });
@@ -371,7 +382,8 @@ exports.removeMember = async (req, res) => {
         const updated = group.members.filter(m => m.userId !== memberId);
 
         await groupsRef().doc(id).update({
-            members: updated
+            members: updated,
+            memberIds: updated.map(m => m.userId).filter(Boolean)
         });
 
         res.status(200).json({ message: "Miembro eliminado" });
