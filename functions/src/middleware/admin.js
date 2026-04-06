@@ -1,6 +1,11 @@
+/**
+ * Middleware for verifying admin role
+ * Author: Unai Villar & Alejandro Perez 
+ */
+
+
 const { admin } = require("../config/firebase");
 
-// Middleware para verificar rol de Administrador
 const adminMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -13,7 +18,9 @@ const adminMiddleware = async (req, res, next) => {
     try {
         const decodedToken = await admin.auth().verifyIdToken(token);
 
-        // Verificar Custom Claim 'role'
+        /**
+         * Verify Custom Claim 'role'
+         */
         if (decodedToken.role !== 'admin') {
             return res.status(403).json({ message: "Acceso denegado. Se requieren privilegios de administrador." });
         }

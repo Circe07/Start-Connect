@@ -1,3 +1,8 @@
+/**
+ * Module to seed provisional venues in the database
+ * Author: Unai Villar
+ */
+
 const venues = [
     {
         id: "barcelona-padel-club",

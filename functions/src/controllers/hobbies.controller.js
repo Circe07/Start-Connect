@@ -1,7 +1,17 @@
+/**
+ * Controller Hobbies
+ * This controller is responsible for creating and managing hobbies.
+ */
+
 const { db } = require("../config/firebase");
 
-// GET -> Obtiene todos los hobbies
-exports.getAllHobbies = async (req, res) => {
+/**
+ * GET -> Get all hobbies
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getAllHobbies = async (_, res) => {
+
     try {
         const snap = await db.collection("globalHobbies").get();
         const hobbies = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -11,10 +21,19 @@ exports.getAllHobbies = async (req, res) => {
     }
 };
 
-// GET -> Obtiene los hobbies de un usuario
+/**
+ * GET -> Get my hobbies
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.getMyHobbies = async (req, res) => {
     try {
         const uid = req.user.uid;
+
+        /**
+         * snap -> contain the query for getting the hobbies
+         * hobbies -> contain the array of hobbies
+         */
         const snap = await db
             .collection("users")
             .doc(uid)
@@ -28,7 +47,12 @@ exports.getMyHobbies = async (req, res) => {
     }
 };
 
-// POST -> Agrega hobbies a un usuario
+/**
+ * POST -> Add hobbies to user
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.addHobbiesToUser = async (req, res) => {
     try {
         const uid = req.user.uid;
@@ -41,6 +65,7 @@ exports.addHobbiesToUser = async (req, res) => {
         }
 
         const batch = db.batch();
+
         hobbies.forEach((hobbyId) => {
             const ref = db
                 .collection("users")
@@ -58,17 +83,21 @@ exports.addHobbiesToUser = async (req, res) => {
     }
 };
 
-// GET -> Obtiene los usuarios que tienen un hobby
+/**
+ * GET -> Get all users for a specific hobby
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.getUsersByHobby = async (req, res) => {
     try {
         const { hobbyId } = req.params;
 
-        console.log("=== getUsersByHobby ===");
-        console.log("hobbyId recibido:", hobbyId);
+        if (!hobbyId) {
+            res.status(400).json({ message: 'Debe proporcionar un id de hobby' });
+        }
 
         const snap = await db.collectionGroup("hobbies").get();
 
-        console.log("Total docs encontrados en collectionGroup:", snap.size);
 
         const users = snap.docs
             .filter((doc) => doc.id === hobbyId)
@@ -81,7 +110,12 @@ exports.getUsersByHobby = async (req, res) => {
     }
 };
 
-// DELETE -> Elimina hobbies de un usuario
+/**
+ * DELETE -> Delete hobbies from user
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 exports.removeHobbiesFromUser = async (req, res) => {
     try {
         const uid = req.user.uid;
@@ -96,8 +130,7 @@ exports.removeHobbiesFromUser = async (req, res) => {
         const batch = db.batch();
         const rootRef = db.collection("users").doc(uid).collection("hobbies");
 
-        // hobbyId hace referencia al id de cada hobby
-        // ! no utilizar fuera de este scope por el hecho que hobbyId no esta definido
+        // hobbyId -> references to each hobby
         hobbies.forEach((hobbyId) => {
             const ref = rootRef.doc(hobbyId);
             batch.delete(ref);

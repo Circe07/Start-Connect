@@ -7,7 +7,9 @@ service cloud.firestore {
       
       // Permitir leer si el grupo es público o si el usuario pertenece
       allow read: if resource.data.isPublic == true
-        || (request.auth != null && request.auth.uid in resource.data.members);
+        || (request.auth != null
+            && (resource.data.memberIds is list)
+            && (request.auth.uid in resource.data.memberIds));
 
       // Bloquear escritura directa (solo backend con Admin SDK puede modificar)
       allow write: if false;
@@ -16,7 +18,9 @@ service cloud.firestore {
       match /posts/{postId} {
         // Permitir leer posts si el grupo es público o el usuario pertenece
         allow read: if get(/databases/$(database)/documents/groups/$(groupId)).data.isPublic == true
-          || (request.auth != null && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members);
+          || (request.auth != null
+              && (get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds is list)
+              && (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds));
 
         // Bloquear escrituras directas en posts (solo backend)
         allow write: if false;

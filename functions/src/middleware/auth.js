@@ -1,32 +1,34 @@
+/**
+ * Authentication Middleware
+ * This middleware is responsible for verifying user authentication with Firebase.
+ * Author: Unai Villar
+ */
+
 const { admin } = require("../config/firebase");
 
-// Middleware de autenticación con Firebase
 const authMiddleware = async (req, res, next) => {
+  let errorMessage = "No autorizado: El token es inválido.";
   const authHeader = req.headers.authorization;
 
-  // 1️⃣ Verificar formato del token
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       message: "Token no proporcionado o formato incorrecto (esperado: Bearer <token>)",
     });
   }
 
-  // 2️⃣ Extraer el token
+  // Extract the token from the header
   const token = authHeader.split(" ")[1];
 
   try {
-    // 3️⃣ Verificar el token con Firebase
+    // Verify the token with Firebase
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // 4️⃣ Guardar los datos del usuario autenticado
     req.user = decodedToken;
 
-    // 5️⃣ Continuar con la siguiente función middleware
     next();
   } catch (error) {
     console.error("Error al verificar el token de Firebase:", error);
 
-    let errorMessage = "No autorizado: El token es inválido.";
     if (error.code === "auth/id-token-expired") {
       errorMessage = "No autorizado: El token ha expirado.";
     } else if (error.code === "app/no-app") {

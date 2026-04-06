@@ -1,9 +1,19 @@
 // ! NO EJECTUAR A MENOS QUE SE AGREGEN MAS HOBBIES
 
 const router = require("express").Router();
+const adminMiddleware = require("../middleware/admin");
 const hobbiesSeed = require("../../scripts/hobbiesSeed");
 const venuesSeed = require("../../scripts/venuesSeed");
+const activitiesSeed = require("../../scripts/activitiesSeed");
+const groupsSeed = require("../../scripts/groupsSeed");
 const { db } = require("../config/firebase");
+
+router.get('/check', (req, res) => {
+    res.status(200).json({ message: 'Rutas de admin funcionando correctamente' })
+})
+
+// Everything below requires admin
+router.use(adminMiddleware);
 
 router.post("/seed-hobbies", async (req, res) => {
     try {
@@ -18,7 +28,7 @@ router.post("/seed-hobbies", async (req, res) => {
 
         res.json({ success: true, message: "Hobbies cargados" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: "Error interno." });
     }
 });
 
@@ -39,7 +49,38 @@ router.post("/seed-venues", async (req, res) => {
 
         res.json({ success: true, message: "Venues y facilities cargados" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: "Error interno." });
+    }
+});
+
+router.post("/seed-activities", async (req, res) => {
+    try {
+        const batch = db.batch();
+        activitiesSeed.forEach((activity) => {
+            const ref = db.collection("activities").doc(activity.id);
+            batch.set(ref, {
+                ...activity.data,
+                createdAt: new Date(),
+            }, { merge: true });
+        });
+        await batch.commit();
+        res.json({ success: true, message: "Activities cargadas" });
+    } catch (err) {
+        res.status(500).json({ message: "Error interno." });
+    }
+});
+
+router.post("/seed-groups", async (req, res) => {
+    try {
+        const batch = db.batch();
+        groupsSeed.forEach((group) => {
+            const ref = db.collection("groups").doc(group.id);
+            batch.set(ref, group.data, { merge: true });
+        });
+        await batch.commit();
+        res.json({ success: true, message: "Groups cargados" });
+    } catch (err) {
+        res.status(500).json({ message: "Error interno." });
     }
 });
 const { admin } = require("../config/firebase");
@@ -53,7 +94,7 @@ router.post("/make-admin", async (req, res) => {
 
         res.json({ success: true, message: `Usuario ${uid} es ahora Administrador.` });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: "Error interno." });
     }
 });
 

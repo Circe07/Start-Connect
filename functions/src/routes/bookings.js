@@ -6,7 +6,7 @@ const {
   getAvailability,
 } = require("../controllers/bookings.controller");
 
-router.get("/check", async (req, res) => {
+router.get("/check", (req, res) => {
   return res
     .status(200)
     .json({
