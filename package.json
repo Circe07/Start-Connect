@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
+    "build": "node -e \"console.log('No build step required for this repository')\"",
     "test:smoke-env": "node testing/scripts/smoke-env.mjs",
     "test:smoke-api": "node testing/scripts/smoke-api.mjs",
     "test:phase1": "npm run test:smoke-env && npm run test:smoke-api && npm test",
