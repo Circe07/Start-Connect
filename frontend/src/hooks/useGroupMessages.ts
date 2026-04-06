@@ -23,7 +23,18 @@ export interface UseGroupMessagesResult {
   messages: (GroupMessage & { createdAtDate?: Date | null })[];
 }
 
-export default function useGroupMessages(groupId?: string) {
+const EMPTY_GROUP_MESSAGES: (GroupMessage & { createdAtDate?: Date | null })[] = [];
+
+interface UseGroupMessagesOptions {
+  enabledPolling?: boolean;
+}
+
+export default function useGroupMessages(
+  groupId?: string,
+  options: UseGroupMessagesOptions = {},
+) {
+  const { enabledPolling = true } = options;
+
   return useQuery<UseGroupMessagesResult>({
     queryKey: ['groupMessages', groupId],
     enabled: Boolean(groupId),
@@ -33,12 +44,15 @@ export default function useGroupMessages(groupId?: string) {
       }
       const response = await getGroupMessages(groupId, { limit: 100 });
       return {
-        messages: response.messages.map(message => ({
-          ...message,
-          createdAtDate: toDate(message.createdAt) || undefined,
-        })),
+        messages: response.messages.length
+          ? response.messages.map(message => ({
+              ...message,
+              createdAtDate: toDate(message.createdAt) || undefined,
+            }))
+          : EMPTY_GROUP_MESSAGES,
       };
     },
-    refetchInterval: 5000,
+    refetchInterval: enabledPolling ? 5000 : false,
+    refetchIntervalInBackground: false,
   });
 }

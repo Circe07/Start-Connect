@@ -11,5 +11,8 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-unused-vars': 'off',
     'react-hooks/exhaustive-deps': 'warn',
+    // React Native app uses runtime-themed styles heavily; this rule creates
+    // high-noise warnings with low signal for this codebase.
+    'react-native/no-inline-styles': 'off',
   },
 };

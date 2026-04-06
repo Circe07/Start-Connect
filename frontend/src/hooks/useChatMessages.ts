@@ -31,7 +31,18 @@ export interface UseChatMessagesResult {
   messages: (ChatMessage & { createdAt?: Date | null })[];
 }
 
-export default function useChatMessages(chatId?: string) {
+const EMPTY_CHAT_MESSAGES: (ChatMessage & { createdAt?: Date | null })[] = [];
+
+interface UseChatMessagesOptions {
+  enabledPolling?: boolean;
+}
+
+export default function useChatMessages(
+  chatId?: string,
+  options: UseChatMessagesOptions = {},
+) {
+  const { enabledPolling = true } = options;
+
   return useQuery<UseChatMessagesResult>({
     queryKey: ['chatMessages', chatId],
     queryFn: async () => {
@@ -50,13 +61,16 @@ export default function useChatMessages(chatId?: string) {
 
       return {
         chat,
-        messages: messages.map(message => ({
-          ...message,
-          createdAt: toDate(message.createdAt) || undefined,
-        })),
+        messages: messages.length
+          ? messages.map(message => ({
+              ...message,
+              createdAt: toDate(message.createdAt) || undefined,
+            }))
+          : EMPTY_CHAT_MESSAGES,
       };
     },
     enabled: Boolean(chatId),
-    refetchInterval: 5000,
+    refetchInterval: enabledPolling ? 5000 : false,
+    refetchIntervalInBackground: false,
   });
 }

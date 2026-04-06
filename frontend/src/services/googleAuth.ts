@@ -61,8 +61,8 @@ export const signOutFromGoogle = async () => {
 // Check if user is already signed in
 export const isSignedIn = async () => {
   try {
-    const isSignedIn = await GoogleSignin.isSignedIn();
-    if (isSignedIn) {
+    const hasSession = await GoogleSignin.isSignedIn();
+    if (hasSession) {
       const userInfo = await GoogleSignin.signInSilently();
       return {
         success: true,

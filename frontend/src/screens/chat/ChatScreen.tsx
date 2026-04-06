@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsFocused } from '@react-navigation/native';
 import MessageBubble from '@/components/chat/MessageBubble';
 import useChatMessages, {
   UseChatMessagesResult,
@@ -24,6 +25,7 @@ import useCurrentUserProfile from '@/hooks/useCurrentUserProfile';
 import { markChatAsRead, sendChatMessage } from '@/services/chat/chatService';
 
 const BRAND_ORANGE = '#FF7F3F';
+const EMPTY_MESSAGES: UseChatMessagesResult['messages'] = [];
 
 interface ChatScreenProps {
   route?: {
@@ -54,11 +56,12 @@ export default function ChatScreen(
   const currentUserId = currentUser?.uid || currentUser?.id;
 
   const queryClient = useQueryClient();
+  const isFocused = useIsFocused();
   const { data, isLoading, isFetching, refetch, error } =
-    useChatMessages(chatId);
+    useChatMessages(chatId, { enabledPolling: isFocused });
 
   const chatSummary = data?.chat;
-  const messages = data?.messages || [];
+  const messages = data?.messages ?? EMPTY_MESSAGES;
   const showLoaderOverlay = isLoading && messages.length === 0;
 
   const sortedMessages = useMemo(() => {
@@ -203,7 +206,34 @@ export default function ChatScreen(
   const isSendDisabled =
     !messageText.trim() || sendMessageMutation.isPending || !chatId;
 
-  const computeIsRead = (
+  const themedStyles = useMemo(
+    () => ({
+      screenBg: { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      header: {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+        borderBottomColor: isDarkMode ? '#333' : '#e0e0e0',
+      },
+      iconText: { color: isDarkMode ? '#f2f2f2' : '#333' },
+      loadingOverlay: {
+        backgroundColor: isDarkMode
+          ? 'rgba(0, 0, 0, 0.7)'
+          : 'rgba(255, 255, 255, 0.85)',
+      },
+      inputContainer: {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+        borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
+      },
+      textInput: {
+        color: isDarkMode ? '#f2f2f2' : '#333',
+        backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
+      },
+      placeholder: isDarkMode ? '#666' : '#999',
+      sendOpacity: { opacity: isSendDisabled ? 0.5 : 1 },
+    }),
+    [isDarkMode, isSendDisabled],
+  );
+
+  const computeIsRead = useCallback((
     senderId?: string,
     isReadBy?: Record<string, boolean>,
   ) => {
@@ -211,25 +241,26 @@ export default function ChatScreen(
     const others = chatSummary.participantIds.filter(id => id !== senderId);
     if (!others.length) return false;
     return others.every(id => Boolean(isReadBy?.[id]));
-  };
+  }, [chatSummary?.participantIds]);
+
+  const renderMessage = useCallback(
+    ({ item }: { item: UseChatMessagesResult['messages'][number] }) => (
+      <MessageBubble
+        text={item.text}
+        timestamp={item.createdAt || new Date()}
+        isSent={item.senderId === currentUserId}
+        isRead={computeIsRead(item.senderId, item.isReadBy)}
+      />
+    ),
+    [computeIsRead, currentUserId],
+  );
 
   return (
     <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: isDarkMode ? '#000' : '#fff' },
-      ]}
+      style={[styles.container, themedStyles.screenBg]}
       edges={['top']}
     >
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
-            borderBottomColor: isDarkMode ? '#333' : '#e0e0e0',
-          },
-        ]}
-      >
+      <View style={[styles.header, themedStyles.header]}>
         <Pressable
           onPress={() => navigation?.goBack()}
           hitSlop={10}
@@ -238,7 +269,7 @@ export default function ChatScreen(
           <Icon
             name="arrow-back"
             size={24}
-            color={isDarkMode ? '#f2f2f2' : '#333'}
+            color={themedStyles.iconText.color}
           />
         </Pressable>
 
@@ -252,10 +283,7 @@ export default function ChatScreen(
           </View>
           <View style={styles.headerTextContainer}>
             <Text
-              style={[
-                styles.headerName,
-                { color: isDarkMode ? '#f2f2f2' : '#333' },
-              ]}
+              style={[styles.headerName, themedStyles.iconText]}
             >
               {chatDisplayName}
             </Text>
@@ -267,7 +295,7 @@ export default function ChatScreen(
           <Icon
             name="more-vert"
             size={24}
-            color={isDarkMode ? '#f2f2f2' : '#333'}
+            color={themedStyles.iconText.color}
           />
         </Pressable>
       </View>
@@ -281,14 +309,7 @@ export default function ChatScreen(
           ref={flatListRef}
           data={sortedMessages}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <MessageBubble
-              text={item.text}
-              timestamp={item.createdAt || new Date()}
-              isSent={item.senderId === currentUserId}
-              isRead={computeIsRead(item.senderId, item.isReadBy)}
-            />
-          )}
+          renderItem={renderMessage}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>
@@ -311,44 +332,21 @@ export default function ChatScreen(
         />
 
         {showLoaderOverlay && (
-          <View
-            style={[
-              styles.loadingOverlay,
-              {
-                backgroundColor: isDarkMode
-                  ? 'rgba(0, 0, 0, 0.7)'
-                  : 'rgba(255, 255, 255, 0.85)',
-              },
-            ]}
-          >
+          <View style={[styles.loadingOverlay, themedStyles.loadingOverlay]}>
             <ActivityIndicator size="large" color={BRAND_ORANGE} />
             <Text style={styles.loadingText}>Cargando mensajes...</Text>
           </View>
         )}
 
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
-              borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
-            },
-          ]}
-        >
+        <View style={[styles.inputContainer, themedStyles.inputContainer]}>
           <Pressable style={styles.attachButton} hitSlop={10}>
             <Icon name="add-circle-outline" size={28} color={BRAND_ORANGE} />
           </Pressable>
 
           <TextInput
-            style={[
-              styles.textInput,
-              {
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
-              },
-            ]}
+            style={[styles.textInput, themedStyles.textInput]}
             placeholder="Escribe un mensaje..."
-            placeholderTextColor={isDarkMode ? '#666' : '#999'}
+            placeholderTextColor={themedStyles.placeholder}
             value={messageText}
             onChangeText={setMessageText}
             editable={Boolean(chatId)}
@@ -357,12 +355,7 @@ export default function ChatScreen(
           />
 
           <Pressable
-            style={[
-              styles.sendButton,
-              {
-                opacity: isSendDisabled ? 0.5 : 1,
-              },
-            ]}
+            style={[styles.sendButton, themedStyles.sendOpacity]}
             onPress={handleSend}
             disabled={isSendDisabled}
             hitSlop={10}

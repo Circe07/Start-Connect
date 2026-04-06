@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -200,6 +200,8 @@ export default function FriendsScreen() {
     </View>
   );
 
+  const separator = useCallback(() => <View style={styles.separator} />, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
@@ -250,7 +252,7 @@ export default function FriendsScreen() {
               ? styles.emptyContainer
               : styles.listContainer
           }
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={separator}
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl

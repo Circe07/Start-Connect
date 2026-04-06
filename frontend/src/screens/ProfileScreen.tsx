@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -52,11 +52,40 @@ export default function ProfileScreen({ navigation }: any) {
   const [photo, setPhoto] = useState('');
   const [sports, setSports] = useState<string[]>([]);
 
-  useEffect(() => {
-    loadUserData();
+  const themedStyles = useMemo(
+    () => ({
+      screenBg: { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      cardBg: { backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8' },
+      textPrimary: { color: isDarkMode ? '#f2f2f2' : '#333' },
+      textSecondary: { color: isDarkMode ? '#bdbdbd' : '#666' },
+      textMuted: { color: isDarkMode ? '#888' : '#999' },
+      subtitle: { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
+      input: {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
+        color: isDarkMode ? '#f2f2f2' : '#333',
+        borderColor: isDarkMode ? '#333' : '#ddd',
+      },
+      savingOpacity: { opacity: isSaving ? 0.7 : 1 },
+      brandOrangeText: { color: BRAND_ORANGE },
+      brandGrayText: { color: BRAND_GRAY },
+      imageBorder: { borderColor: BRAND_ORANGE },
+      profileEmailSpacing: { marginTop: 4 },
+    }),
+    [isDarkMode, isSaving],
+  );
+
+  const populateForm = useCallback((user: any) => {
+    setName(user.name || '');
+    setUsername(user.username || '');
+    setEmail(user.email || '');
+    setLocation(user.location || '');
+    setBio(user.bio || '');
+    setPhoneNumber(user.phoneNumber || user.phone_number || '');
+    setPhoto(user.photo || user.profile_img_path || user.profileImage || '');
+    setSports(user.sports || []);
   }, []);
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -125,18 +154,11 @@ export default function ProfileScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigation, populateForm]);
 
-  const populateForm = (user: any) => {
-    setName(user.name || '');
-    setUsername(user.username || '');
-    setEmail(user.email || '');
-    setLocation(user.location || '');
-    setBio(user.bio || '');
-    setPhoneNumber(user.phoneNumber || user.phone_number || '');
-    setPhoto(user.photo || user.profile_img_path || user.profileImage || '');
-    setSports(user.sports || []);
-  };
+  useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   const handleSave = async () => {
     if (!userData) return;
@@ -230,18 +252,12 @@ export default function ProfileScreen({ navigation }: any) {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={[
-          styles.safeArea,
-          { backgroundColor: isDarkMode ? '#000' : '#fff' },
-        ]}
+        style={[styles.safeArea, themedStyles.screenBg]}
       >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={BRAND_ORANGE} />
           <Text
-            style={[
-              styles.loadingText,
-              { color: isDarkMode ? '#f2f2f2' : '#333' },
-            ]}
+            style={[styles.loadingText, themedStyles.textPrimary]}
           >
             Loading profile...
           </Text>
@@ -253,17 +269,11 @@ export default function ProfileScreen({ navigation }: any) {
   if (!userData) {
     return (
       <SafeAreaView
-        style={[
-          styles.safeArea,
-          { backgroundColor: isDarkMode ? '#000' : '#fff' },
-        ]}
+        style={[styles.safeArea, themedStyles.screenBg]}
       >
         <View style={styles.errorContainer}>
           <Text
-            style={[
-              styles.errorText,
-              { color: isDarkMode ? '#f2f2f2' : '#333' },
-            ]}
+            style={[styles.errorText, themedStyles.textPrimary]}
           >
             User data not found
           </Text>
@@ -277,10 +287,7 @@ export default function ProfileScreen({ navigation }: any) {
 
   return (
     <SafeAreaView
-      style={[
-        styles.safeArea,
-        { backgroundColor: isDarkMode ? '#000' : '#fff' },
-      ]}
+      style={[styles.safeArea, themedStyles.screenBg]}
     >
       <View style={styles.mainContainer}>
         <ScrollView
@@ -290,18 +297,15 @@ export default function ProfileScreen({ navigation }: any) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerTitleContainer}>
-              <Text style={[styles.headerTitleStart, { color: BRAND_ORANGE }]}>
+              <Text style={[styles.headerTitleStart, themedStyles.brandOrangeText]}>
                 MY
               </Text>
-              <Text style={[styles.headerTitleConnect, { color: BRAND_GRAY }]}>
+              <Text style={[styles.headerTitleConnect, themedStyles.brandGrayText]}>
                 PROFILE
               </Text>
             </View>
             <Text
-              style={[
-                styles.subtitle,
-                { color: isDarkMode ? '#bdbdbd' : '#9E9E9E' },
-              ]}
+              style={[styles.subtitle, themedStyles.subtitle]}
             >
               {isEditing
                 ? 'Edit your information'
@@ -310,15 +314,8 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
 
           {/* Profile Picture Section */}
-          <View
-            style={[
-              styles.profilePictureCard,
-              { backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8' },
-            ]}
-          >
-            <View
-              style={[styles.imageContainer, { borderColor: BRAND_ORANGE }]}
-            >
+          <View style={[styles.profilePictureCard, themedStyles.cardBg]}>
+            <View style={[styles.imageContainer, themedStyles.imageBorder]}>
               {userData.profile_img_path ? (
                 <Image
                   source={{ uri: userData.profile_img_path }}
@@ -331,27 +328,18 @@ export default function ProfileScreen({ navigation }: any) {
               )}
             </View>
             <View style={styles.profileNameContainer}>
-              <Text
-                style={[
-                  styles.profileNameText,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
+              <Text style={[styles.profileNameText, themedStyles.textPrimary]}>
                 {userData.name}
               </Text>
-              <Text
-                style={[
-                  styles.profileEmailText,
-                  { color: isDarkMode ? '#bdbdbd' : '#666' },
-                ]}
-              >
+              <Text style={[styles.profileEmailText, themedStyles.textSecondary]}>
                 @{userData.username}
               </Text>
               {userData.email && (
                 <Text
                   style={[
                     styles.profileEmailText,
-                    { color: isDarkMode ? '#bdbdbd' : '#666', marginTop: 4 },
+                    themedStyles.textSecondary,
+                    themedStyles.profileEmailSpacing,
                   ]}
                 >
                   {userData.email}
@@ -363,35 +351,18 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.form}>
             {/* Name */}
             <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
+              <Text style={[styles.inputLabel, themedStyles.textPrimary]}>
                 Name
               </Text>
               {isEditing ? (
                 <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                      color: isDarkMode ? '#f2f2f2' : '#333',
-                      borderColor: isDarkMode ? '#333' : '#ddd',
-                    },
-                  ]}
+                  style={[styles.input, themedStyles.input]}
                   value={name}
                   onChangeText={setName}
                   placeholder="Your name"
                 />
               ) : (
-                <Text
-                  style={[
-                    styles.displayValue,
-                    { color: isDarkMode ? '#f2f2f2' : '#333' },
-                  ]}
-                >
+                <Text style={[styles.displayValue, themedStyles.textPrimary]}>
                   {userData.name || 'Not set'}
                 </Text>
               )}
@@ -399,35 +370,18 @@ export default function ProfileScreen({ navigation }: any) {
 
             {/* Username */}
             <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
+              <Text style={[styles.inputLabel, themedStyles.textPrimary]}>
                 Username
               </Text>
               {isEditing ? (
                 <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                      color: isDarkMode ? '#f2f2f2' : '#333',
-                      borderColor: isDarkMode ? '#333' : '#ddd',
-                    },
-                  ]}
+                  style={[styles.input, themedStyles.input]}
                   value={username}
                   onChangeText={setUsername}
                   placeholder="Your username"
                 />
               ) : (
-                <Text
-                  style={[
-                    styles.displayValue,
-                    { color: isDarkMode ? '#f2f2f2' : '#333' },
-                  ]}
-                >
+                <Text style={[styles.displayValue, themedStyles.textPrimary]}>
                   @{userData.username || 'Not set'}
                 </Text>
               )}
@@ -435,36 +389,19 @@ export default function ProfileScreen({ navigation }: any) {
 
             {/* Email */}
             <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: isDarkMode ? '#f2f2f2' : '#333' },
-                ]}
-              >
+              <Text style={[styles.inputLabel, themedStyles.textPrimary]}>
                 Email
               </Text>
               {isEditing ? (
                 <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
-                      color: isDarkMode ? '#f2f2f2' : '#333',
-                      borderColor: isDarkMode ? '#333' : '#ddd',
-                    },
-                  ]}
+                  style={[styles.input, themedStyles.input]}
                   value={email}
                   onChangeText={setEmail}
                   placeholder="your@email.com"
                   editable={false}
                 />
               ) : (
-                <Text
-                  style={[
-                    styles.displayValue,
-                    { color: isDarkMode ? '#888' : '#999' },
-                  ]}
-                >
+                <Text style={[styles.displayValue, themedStyles.textMuted]}>
                   {userData.email || 'Not set'}
                 </Text>
               )}
@@ -731,7 +668,7 @@ export default function ProfileScreen({ navigation }: any) {
               {isEditing ? (
                 <>
                   <Pressable
-                    style={[styles.saveButton, { opacity: isSaving ? 0.7 : 1 }]}
+                    style={[styles.saveButton, themedStyles.savingOpacity]}
                     onPress={handleSave}
                     disabled={isSaving}
                   >

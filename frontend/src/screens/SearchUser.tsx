@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -31,6 +31,10 @@ export default function SearchScreen() {
 
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [pendingFriendId, setPendingFriendId] = useState<string | null>(null);
+  const emptyContentStyle = useMemo(
+    () => (filteredResults.length === 0 ? styles.emptyContainer : undefined),
+    [filteredResults.length],
+  );
 
   const filteredResults = useMemo(() => {
     if (!currentUserId) return results;
@@ -98,25 +102,25 @@ export default function SearchScreen() {
     onSettled: () => setPendingFriendId(null),
   });
 
-  const handleUserPress = (user: PublicUserSummary) => {
+  const handleUserPress = useCallback((user: PublicUserSummary) => {
     if (!user?.id || startChatMutation.isPending) {
       return;
     }
 
     setPendingUserId(user.id);
     startChatMutation.mutate(user);
-  };
+  }, [startChatMutation]);
 
-  const handleAddFriend = (user: PublicUserSummary) => {
+  const handleAddFriend = useCallback((user: PublicUserSummary) => {
     if (!user?.id || addFriendMutation.isPending) {
       return;
     }
 
     setPendingFriendId(user.id);
     addFriendMutation.mutate(user);
-  };
+  }, [addFriendMutation]);
 
-  const renderItem = ({ item }: { item: PublicUserSummary }) => {
+  const renderItem = useCallback(({ item }: { item: PublicUserSummary }) => {
     const avatarUri = item.photo
       ? { uri: item.photo }
       : {
@@ -176,9 +180,16 @@ export default function SearchScreen() {
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [
+    addFriendMutation.isPending,
+    handleAddFriend,
+    handleUserPress,
+    pendingFriendId,
+    pendingUserId,
+    startChatMutation.isPending,
+  ]);
 
-  const emptyMessage = () => {
+  const emptyMessage = useMemo(() => {
     if (error) {
       return 'No se pudo realizar la búsqueda en este momento.';
     }
@@ -192,7 +203,13 @@ export default function SearchScreen() {
       return 'Buscando usuarios...';
     }
     return 'No se encontraron usuarios con ese nombre.';
-  };
+  }, [error, isLoading, minimumChars, searchText]);
+
+  const separator = useCallback(() => <View style={styles.separator} />, []);
+  const listEmpty = useMemo(
+    () => <Text style={styles.emptyText}>{emptyMessage}</Text>,
+    [emptyMessage],
+  );
 
   return (
     <View style={styles.mainContainer}>
@@ -218,13 +235,9 @@ export default function SearchScreen() {
         keyExtractor={item => item.id}
         renderItem={renderItem}
         style={styles.listContainer}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>{emptyMessage()}</Text>
-        }
-        contentContainerStyle={
-          filteredResults.length === 0 ? styles.emptyContainer : undefined
-        }
+        ItemSeparatorComponent={separator}
+        ListEmptyComponent={listEmpty}
+        contentContainerStyle={emptyContentStyle}
         keyboardShouldPersistTaps="handled"
       />
     </View>

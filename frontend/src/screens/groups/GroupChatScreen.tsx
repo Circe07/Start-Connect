@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,13 +16,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useMutation } from '@tanstack/react-query';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 
-import useGroupMessages from '@/hooks/useGroupMessages';
+import useGroupMessages, {
+  UseGroupMessagesResult,
+} from '@/hooks/useGroupMessages';
 import useCurrentUserProfile from '@/hooks/useCurrentUserProfile';
 import { sendGroupMessage } from '@/services/groups/authGroup';
 
 const BRAND_ORANGE = '#FF7F3F';
+const EMPTY_GROUP_MESSAGES: UseGroupMessagesResult['messages'] = [];
 
 export default function GroupChatScreen() {
   const route = useRoute<any>();
@@ -34,18 +37,28 @@ export default function GroupChatScreen() {
   const { groupId, groupName } = route?.params || {};
   const { data: currentUser } = useCurrentUserProfile();
   const currentUserId = currentUser?.uid || currentUser?.id;
+  const isFocused = useIsFocused();
 
-  const { data, isLoading, isFetching, refetch } = useGroupMessages(groupId);
-
-  const messages = data?.messages || [];
+  const { data, isLoading, isFetching, refetch } = useGroupMessages(groupId, {
+    enabledPolling: isFocused,
+  });
+  const messages = data?.messages ?? EMPTY_GROUP_MESSAGES;
+  const sortedMessages = useMemo(
+    () =>
+      [...messages].sort(
+        (a, b) =>
+          (a.createdAtDate?.getTime?.() ?? 0) - (b.createdAtDate?.getTime?.() ?? 0),
+      ),
+    [messages],
+  );
 
   useEffect(() => {
-    if (!messages.length) return;
+    if (!sortedMessages.length) return;
     const timer = setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 150);
     return () => clearTimeout(timer);
-  }, [messages]);
+  }, [sortedMessages]);
 
   const sendMessageMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -71,7 +84,7 @@ export default function GroupChatScreen() {
     sendMessageMutation.mutate(trimmed);
   };
 
-  const renderMessage = ({ item }: any) => {
+  const renderMessage = useCallback(({ item }: any) => {
     const isMine = item.userId === currentUserId;
     const authorName =
       item.authorProfile?.name || item.authorProfile?.username || 'Miembro';
@@ -109,27 +122,44 @@ export default function GroupChatScreen() {
         </View>
       </View>
     );
-  };
+  }, [currentUserId]);
 
-  const showLoader = isLoading && messages.length === 0;
+  const showLoader = isLoading && sortedMessages.length === 0;
+
+  const themedStyles = useMemo(
+    () => ({
+      screenBg: { backgroundColor: isDarkMode ? '#000' : '#fff' },
+      header: {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+        borderBottomColor: isDarkMode ? '#333' : '#e0e0e0',
+      },
+      iconText: { color: isDarkMode ? '#f2f2f2' : '#333' },
+      spacer: { width: 24 },
+      inputContainer: {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+        borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
+      },
+      textInput: {
+        color: isDarkMode ? '#f2f2f2' : '#333',
+        backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
+      },
+      placeholder: isDarkMode ? '#666' : '#999',
+      sendOpacity: {
+        opacity:
+          messageText.trim().length === 0 || sendMessageMutation.isPending
+            ? 0.5
+            : 1,
+      },
+    }),
+    [isDarkMode, messageText, sendMessageMutation.isPending],
+  );
 
   return (
     <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: isDarkMode ? '#000' : '#fff' },
-      ]}
+      style={[styles.container, themedStyles.screenBg]}
       edges={['top']}
     >
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
-            borderBottomColor: isDarkMode ? '#333' : '#e0e0e0',
-          },
-        ]}
-      >
+      <View style={[styles.header, themedStyles.header]}>
         <Pressable
           onPress={() => navigation.goBack()}
           hitSlop={10}
@@ -138,18 +168,15 @@ export default function GroupChatScreen() {
           <Icon
             name="arrow-back"
             size={24}
-            color={isDarkMode ? '#f2f2f2' : '#333'}
+            color={themedStyles.iconText.color}
           />
         </Pressable>
         <Text
-          style={[
-            styles.headerTitle,
-            { color: isDarkMode ? '#f2f2f2' : '#333' },
-          ]}
+          style={[styles.headerTitle, themedStyles.iconText]}
         >
           {groupName || 'Chat del grupo'}
         </Text>
-        <View style={{ width: 24 }} />
+        <View style={themedStyles.spacer} />
       </View>
 
       <KeyboardAvoidingView
@@ -159,7 +186,7 @@ export default function GroupChatScreen() {
       >
         <FlatList
           ref={flatListRef}
-          data={messages}
+          data={sortedMessages}
           keyExtractor={item => item.id}
           renderItem={renderMessage}
           showsVerticalScrollIndicator={false}
@@ -184,41 +211,18 @@ export default function GroupChatScreen() {
           }
         />
 
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
-              borderTopColor: isDarkMode ? '#333' : '#e0e0e0',
-            },
-          ]}
-        >
+        <View style={[styles.inputContainer, themedStyles.inputContainer]}>
           <TextInput
-            style={[
-              styles.textInput,
-              {
-                color: isDarkMode ? '#f2f2f2' : '#333',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
-              },
-            ]}
+            style={[styles.textInput, themedStyles.textInput]}
             placeholder="Escribe un mensaje..."
-            placeholderTextColor={isDarkMode ? '#666' : '#999'}
+            placeholderTextColor={themedStyles.placeholder}
             value={messageText}
             onChangeText={setMessageText}
             multiline
             editable={!sendMessageMutation.isPending}
           />
           <Pressable
-            style={[
-              styles.sendButton,
-              {
-                opacity:
-                  messageText.trim().length === 0 ||
-                  sendMessageMutation.isPending
-                    ? 0.5
-                    : 1,
-              },
-            ]}
+            style={[styles.sendButton, themedStyles.sendOpacity]}
             disabled={
               messageText.trim().length === 0 || sendMessageMutation.isPending
             }

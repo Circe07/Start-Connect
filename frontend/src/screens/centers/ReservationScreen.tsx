@@ -29,8 +29,8 @@ export default function ReservationScreen({
   const [needsLights, setNeedsLights] = useState(false);
   const [durationTime, setDurationTime] = useState(60);
 
-  const setTime = (durationTime: number) => {
-    setDurationTime(durationTime);
+  const setTime = (nextDurationTime: number) => {
+    setDurationTime(nextDurationTime);
   };
 
   const handleContinuePayment = () => {
