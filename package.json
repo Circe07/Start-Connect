@@ -43,9 +43,9 @@
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "lint-staged": "^15.5.2",
-    "nodemon": "^3.1.10",
-    "prettier": "^3.6.2",
     "newman": "^6.2.1",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.8.1",
     "supertest": "^7.1.4"
   },
   "lint-staged": {
