@@ -21,6 +21,7 @@ const BRAND_GRAY = '#9E9E9E';
 // Placeholder screens for each tab
 import TiendaScreen from './TiendaScreen';
 import SearchUser from './SearchUser';
+import SwipeScreen from './discover/SwipeScreen';
 
 const HobbieScreen = () => <HobbiesScreen />;
 
@@ -100,6 +101,8 @@ export default function HomeScreen({ navigation }: any) {
         return <HobbiesScreen query={searchQuery} />;
       case 'chat':
         return <ChatScreen />;
+      case 'swipe':
+        return <SwipeScreen />;
       case 'perfil':
         return <PerfilScreen navigation={navigation} />;
       default:
