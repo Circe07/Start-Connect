@@ -11,6 +11,10 @@ const app = express();
 const errorHandler = require('./middleware/errorHandler');
 const { requestContext } = require('./middleware/requestContext');
 const { notFoundHandler } = require('./middleware/notFoundHandler');
+const { apiVersionV1 } = require('./middleware/apiVersionV1');
+const { validateEnv } = require('./config/validateEnv');
+const { readRateLimit, writeRateLimit } = require('./middleware/rateLimit');
+const { observabilityLogger } = require('./middleware/observability');
 
 // Required behind Firebase/Google proxy for correct client IP detection
 // (e.g. express-rate-limit + X-Forwarded-For).
@@ -59,6 +63,8 @@ const {
   createFirestoreDiscoverRepository,
 } = require('./data/discover/firestoreDiscoverRepository');
 
+validateEnv();
+
 /**
  * Global middleware here
  */
@@ -83,12 +89,14 @@ app.use(
   })
 );
 app.use(requestContext);
+app.use(observabilityLogger);
 app.use(
   helmet({
     contentSecurityPolicy: false,
   })
 );
 app.use(express.json());
+app.use('/api/v1', apiVersionV1);
 
 /**
  * Public routes
@@ -141,6 +149,7 @@ app.use('/api/v1/contacts', contactsRoutes);
 app.use('/groups', groupsRoutes);
 app.use(
   '/api/v1/groups',
+  writeRateLimit,
   createGroupsV1Router({
     getPublicGroups: createGetPublicGroupsUseCase({
       groupRepository: createFirestoreGroupRepository(),
@@ -172,6 +181,7 @@ app.use('/matches', matchesRoutes);
 app.use('/api/v1/matches', matchesRoutes);
 app.use(
   '/api/v1/discover',
+  readRateLimit,
   createDiscoverV1Router({
     listActivities: createListActivitiesUseCase({
       discoverRepository: createFirestoreDiscoverRepository(),

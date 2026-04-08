@@ -1,0 +1,29 @@
+name: Backend Release Gates
+
+on:
+  pull_request:
+    branches: [backend, main, master]
+  workflow_dispatch:
+
+jobs:
+  backend-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install functions dependencies
+        run: npm --prefix functions ci
+
+      - name: Validate release gate docs
+        run: npm run test:release-gate
+
+      - name: Run backend quality gates
+        run: npm run test:all-backend

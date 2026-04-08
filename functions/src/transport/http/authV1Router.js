@@ -1,5 +1,5 @@
 const express = require('express');
-const { AppError } = require('../../shared/AppError');
+const { ok, fail } = require('./responseContract');
 
 function createAuthV1Router({ refreshSession, loginSession, getMe, logoutSession }) {
   const router = express.Router();
@@ -15,26 +15,19 @@ function createAuthV1Router({ refreshSession, loginSession, getMe, logoutSession
         password: req.body?.password,
       });
 
-      return res.status(200).json({
-        success: true,
-        token: result.token,
-        refreshToken: result.refreshToken,
-        uid: result.uid,
-      });
+      return ok(
+        res,
+        {
+          success: true,
+          token: result.token,
+          refreshToken: result.refreshToken,
+          uid: result.uid,
+        },
+        200,
+        req.requestId
+      );
     } catch (error) {
-      if (error instanceof AppError) {
-        return res.status(error.status).json({
-          success: false,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        });
-      }
-      return res.status(500).json({
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'Error interno.',
-      });
+      return fail(res, error, req.requestId);
     }
   });
 
@@ -44,27 +37,19 @@ function createAuthV1Router({ refreshSession, loginSession, getMe, logoutSession
         refreshToken: req.body?.refreshToken,
       });
 
-      return res.status(200).json({
-        success: true,
-        token: result.token,
-        refreshToken: result.refreshToken,
-        uid: result.uid,
-      });
+      return ok(
+        res,
+        {
+          success: true,
+          token: result.token,
+          refreshToken: result.refreshToken,
+          uid: result.uid,
+        },
+        200,
+        req.requestId
+      );
     } catch (error) {
-      if (error instanceof AppError) {
-        return res.status(error.status).json({
-          success: false,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'Error interno.',
-      });
+      return fail(res, error, req.requestId);
     }
   });
 
@@ -74,21 +59,9 @@ function createAuthV1Router({ refreshSession, loginSession, getMe, logoutSession
         uid: getUidFromRequest(req),
       });
 
-      return res.status(200).json(result);
+      return ok(res, result, 200, req.requestId);
     } catch (error) {
-      if (error instanceof AppError) {
-        return res.status(error.status).json({
-          success: false,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        });
-      }
-      return res.status(500).json({
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'Error interno.',
-      });
+      return fail(res, error, req.requestId);
     }
   });
 
@@ -98,24 +71,17 @@ function createAuthV1Router({ refreshSession, loginSession, getMe, logoutSession
         uid: getUidFromRequest(req),
       });
 
-      return res.status(200).json({
-        success: true,
-        message: result.message,
-      });
+      return ok(
+        res,
+        {
+          success: true,
+          message: result.message,
+        },
+        200,
+        req.requestId
+      );
     } catch (error) {
-      if (error instanceof AppError) {
-        return res.status(error.status).json({
-          success: false,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        });
-      }
-      return res.status(500).json({
-        success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'Error interno.',
-      });
+      return fail(res, error, req.requestId);
     }
   });
 

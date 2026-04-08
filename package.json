@@ -12,6 +12,7 @@
     "postman:smoke": "newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=http://127.0.0.1:5001/startandconnect-c44b2/europe-west1/api",
     "test:smoke-env": "node testing/scripts/smoke-env.mjs",
     "test:smoke-api": "node testing/scripts/smoke-api.mjs",
+    "test:load-smoke": "node testing/scripts/load-smoke.mjs",
     "test:phase1": "npm run test:smoke-env && npm run test:smoke-api && npm test",
     "test:run-all:ps": "powershell -ExecutionPolicy Bypass -File ./testing/scripts/run-all-tests.ps1",
     "test:contract": "jest functions/test/contract.openapi.test.js",
@@ -19,7 +20,9 @@
     "test:security": "jest functions/test/security.middleware.test.js",
     "test:perf-smoke": "jest functions/test/perf.smoke.test.js",
     "test:all-backend": "npm run test:contract && npm run test:e2e && npm run test:security && npm run test:perf-smoke && npm test",
+    "test:all-backend:with-load": "npm run test:all-backend && npm run test:load-smoke",
     "test:release-gate": "node testing/scripts/release-gate.mjs",
+    "test:release-readiness": "npm run test:release-gate && npm run test:all-backend",
     "start": "node functions/index.js",
     "dev": "nodemon src/index.js"
   },
