@@ -6,8 +6,11 @@
 const express = require('express');
 const cors = require('cors');
 const logger = require('firebase-functions/logger');
+const helmet = require('helmet');
 const app = express();
 const errorHandler = require('./middleware/errorHandler');
+const { requestContext } = require('./middleware/requestContext');
+const { notFoundHandler } = require('./middleware/notFoundHandler');
 
 // Required behind Firebase/Google proxy for correct client IP detection
 // (e.g. express-rate-limit + X-Forwarded-For).
@@ -77,6 +80,12 @@ app.use(
       if (corsOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('CORS: origin not allowed'));
     },
+  })
+);
+app.use(requestContext);
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
   })
 );
 app.use(express.json());
@@ -195,6 +204,8 @@ app.get('/health', (_, res) => {
     status: 'ok',
   });
 });
+
+app.use(notFoundHandler);
 
 // Error handler (must be last)
 app.use(errorHandler);
