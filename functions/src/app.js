@@ -104,6 +104,7 @@ app.use(
   })
 );
 app.use('/admin', adminRoutes);
+app.use('/api/v1/admin', adminRoutes);
 app.use('/users', usersRoutes);
 app.use(
   '/api/v1/users',
@@ -125,7 +126,9 @@ app.use(
  * This routes need authentication
  */
 app.use('/hobbies', hobbiesRoutes);
+app.use('/api/v1/hobbies', hobbiesRoutes);
 app.use('/contacts', contactsRoutes);
+app.use('/api/v1/contacts', contactsRoutes);
 app.use('/groups', groupsRoutes);
 app.use(
   '/api/v1/groups',
@@ -145,12 +148,19 @@ app.use(
   })
 );
 app.use('/groupsRequests', groupsRequestsRoutes);
+app.use('/api/v1/groupsRequests', groupsRequestsRoutes);
 app.use('/maps', mapsRoutes);
+app.use('/api/v1/maps', mapsRoutes);
 app.use('/centers', centersRoutes);
+app.use('/api/v1/centers', centersRoutes);
 app.use('/bookings', bookingsRoutes);
+app.use('/api/v1/bookings', bookingsRoutes);
 app.use('/activities', activitiesRoutes);
+app.use('/api/v1/activities', activitiesRoutes);
 app.use('/swipes', swipesRoutes);
+app.use('/api/v1/swipes', swipesRoutes);
 app.use('/matches', matchesRoutes);
+app.use('/api/v1/matches', matchesRoutes);
 app.use(
   '/api/v1/discover',
   createDiscoverV1Router({
