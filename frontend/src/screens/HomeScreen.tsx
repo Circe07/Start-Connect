@@ -14,6 +14,7 @@ import ChatListScreen from './chat/ChatListScreen';
 import GroupsScreen from './groups/GroupsScreen';
 import CentersScreen from './centers/CentersScreen';
 import MyReservationsScreen from './centers/MyReservationsScreen';
+import SwipeScreen from './discover/SwipeScreen';
 
 export default function HomeScreen({ navigation }: any) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -83,6 +84,8 @@ export default function HomeScreen({ navigation }: any) {
         return <CentersScreen navigation={navigation} />;
       case 'reservations':
         return <MyReservationsScreen />;
+      case 'swipe':
+        return <SwipeScreen />;
       case 'perfil':
         return <ProfileScreen navigation={navigation} />;
       default:

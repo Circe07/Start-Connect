@@ -19,6 +19,7 @@ interface ExpandableMenuProps {
 const BRAND_ORANGE = '#FF7F3F';
 
 const MENU_OPTIONS = [
+  { id: 'swipe', label: 'Swipe', icon: 'swap-horiz' },
   { id: 'centers', label: 'Centros', icon: 'location-city' },
   { id: 'reservations', label: 'Mis Reservas', icon: 'event' },
   { id: 'tienda', label: 'Tienda', icon: 'shopping-cart' },
