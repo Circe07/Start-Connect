@@ -637,6 +637,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-function loginUserWithGoogle(arg0: { idToken: string | null }) {
-  throw new Error('Function not implemented.');
+async function loginUserWithGoogle(arg0: { idToken: string | null }) {
+  if (!arg0.idToken) {
+    return {
+      success: false,
+      error: 'Google idToken no disponible',
+    };
+  }
+
+  return {
+    success: false,
+    error:
+      'Google Sign-In con backend aún no está habilitado en esta versión.',
+  };
 }

@@ -22,6 +22,7 @@ describe('apiRequest', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [, options] = (global.fetch as jest.Mock).mock.calls[0];
     expect(options.headers.Authorization).toBe('Bearer token-123');
+    expect(options.headers['x-request-id']).toMatch(/^rn-/);
   });
 
   it('returns parsed success payload for valid JSON response', async () => {
@@ -62,5 +63,85 @@ describe('apiRequest', () => {
     expect(result.success).toBe(false);
     expect(result.status).toBe(0);
     expect(result.error).toContain('Network down');
+  });
+
+  it('routes auth and users endpoints through v1 prefix', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      text: async () => JSON.stringify({ success: true, data: { ok: true } }),
+    } as any);
+
+    await apiRequest('/auth/login', { method: 'POST' });
+    await apiRequest('/users/me', { method: 'GET' });
+    await apiRequest('/posts', { method: 'GET' });
+
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('/v1/auth/login');
+    expect((global.fetch as jest.Mock).mock.calls[1][0]).toContain('/v1/users/me');
+    expect((global.fetch as jest.Mock).mock.calls[2][0]).not.toContain('/v1/posts');
+  });
+
+  it('extracts error from structured backend envelope', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      headers: { get: () => null },
+      text: async () =>
+        JSON.stringify({
+          success: false,
+          error: { code: 'AUTH_INVALID', message: 'Invalid token' },
+        }),
+    } as any);
+
+    const result = await apiRequest('/auth/me', { method: 'GET' });
+    expect(result.success).toBe(false);
+    expect(result.status).toBe(401);
+    expect(result.error).toBe('Invalid token');
+  });
+
+  it('retries original request after successful refresh on 401', async () => {
+    setAuthToken('expired-token');
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: { get: () => null },
+        text: async () =>
+          JSON.stringify({
+            success: false,
+            error: { message: 'Expired' },
+          }),
+      } as any)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        text: async () =>
+          JSON.stringify({
+            success: true,
+            data: { token: 'new-token' },
+          }),
+      } as any)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        text: async () =>
+          JSON.stringify({
+            success: true,
+            data: { user: { id: 'u1' } },
+          }),
+      } as any);
+
+    const result = await apiRequest('/users/me', { method: 'GET' });
+
+    expect(result.success).toBe(true);
+    expect((global.fetch as jest.Mock).mock.calls[1][0]).toContain(
+      '/v1/auth/refresh',
+    );
+    const retriedOptions = (global.fetch as jest.Mock).mock.calls[2][1];
+    expect(retriedOptions.headers.Authorization).toBe('Bearer new-token');
   });
 });
