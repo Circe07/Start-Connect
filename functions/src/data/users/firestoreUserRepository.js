@@ -7,6 +7,9 @@ function createFirestoreUserRepository() {
       if (!snap.exists) return null;
       return snap.data();
     },
+    async updateById(uid, data) {
+      await db.collection('users').doc(uid).update(data);
+    },
   };
 }
 

@@ -39,7 +39,22 @@ const { createFirebaseTokenGateway } = require('./data/auth/firebaseTokenGateway
 const { createFirebaseAuthGateway } = require('./data/auth/firebaseAuthGateway');
 const { createUsersV1Router } = require('./transport/http/usersV1Router');
 const { createGetMyProfileUseCase } = require('./domain/users/getMyProfileUseCase');
+const { createUpdateMyProfileUseCase } = require('./domain/users/updateMyProfileUseCase');
+const { createGetUserProfileUseCase } = require('./domain/users/getUserProfileUseCase');
 const { createFirestoreUserRepository } = require('./data/users/firestoreUserRepository');
+const { createGroupsV1Router } = require('./transport/http/groupsV1Router');
+const { createGetPublicGroupsUseCase } = require('./domain/groups/getPublicGroupsUseCase');
+const { createJoinGroupUseCase } = require('./domain/groups/joinGroupUseCase');
+const { createSendGroupMessageUseCase } = require('./domain/groups/sendGroupMessageUseCase');
+const { createGetGroupMessagesUseCase } = require('./domain/groups/getGroupMessagesUseCase');
+const { createFirestoreGroupRepository } = require('./data/groups/firestoreGroupRepository');
+const { createDiscoverV1Router } = require('./transport/http/discoverV1Router');
+const { createListActivitiesUseCase } = require('./domain/discover/listActivitiesUseCase');
+const { createRecordSwipeUseCase } = require('./domain/discover/recordSwipeUseCase');
+const { createListMatchesUseCase } = require('./domain/discover/listMatchesUseCase');
+const {
+  createFirestoreDiscoverRepository,
+} = require('./data/discover/firestoreDiscoverRepository');
 
 /**
  * Global middleware here
@@ -96,6 +111,12 @@ app.use(
     getMyProfile: createGetMyProfileUseCase({
       userRepository: createFirestoreUserRepository(),
     }),
+    updateMyProfile: createUpdateMyProfileUseCase({
+      userRepository: createFirestoreUserRepository(),
+    }),
+    getUserProfile: createGetUserProfileUseCase({
+      userRepository: createFirestoreUserRepository(),
+    }),
   })
 );
 
@@ -106,6 +127,23 @@ app.use(
 app.use('/hobbies', hobbiesRoutes);
 app.use('/contacts', contactsRoutes);
 app.use('/groups', groupsRoutes);
+app.use(
+  '/api/v1/groups',
+  createGroupsV1Router({
+    getPublicGroups: createGetPublicGroupsUseCase({
+      groupRepository: createFirestoreGroupRepository(),
+    }),
+    joinGroup: createJoinGroupUseCase({
+      groupRepository: createFirestoreGroupRepository(),
+    }),
+    sendGroupMessage: createSendGroupMessageUseCase({
+      groupRepository: createFirestoreGroupRepository(),
+    }),
+    getGroupMessages: createGetGroupMessagesUseCase({
+      groupRepository: createFirestoreGroupRepository(),
+    }),
+  })
+);
 app.use('/groupsRequests', groupsRequestsRoutes);
 app.use('/maps', mapsRoutes);
 app.use('/centers', centersRoutes);
@@ -113,6 +151,20 @@ app.use('/bookings', bookingsRoutes);
 app.use('/activities', activitiesRoutes);
 app.use('/swipes', swipesRoutes);
 app.use('/matches', matchesRoutes);
+app.use(
+  '/api/v1/discover',
+  createDiscoverV1Router({
+    listActivities: createListActivitiesUseCase({
+      discoverRepository: createFirestoreDiscoverRepository(),
+    }),
+    recordSwipe: createRecordSwipeUseCase({
+      discoverRepository: createFirestoreDiscoverRepository(),
+    }),
+    listMatches: createListMatchesUseCase({
+      discoverRepository: createFirestoreDiscoverRepository(),
+    }),
+  })
+);
 
 /**
  * Default route to check if API is working
