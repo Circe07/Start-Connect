@@ -36,6 +36,9 @@ firebase-adminsdk.json
 .env.local
 .env.*.local
 .env.*
+.env.smoke
+frontend/.env.smoke
+!frontend/.env.smoke.example
 
 # Apikeys o configuraciones sensibles
 apikey.js
