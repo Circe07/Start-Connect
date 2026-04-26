@@ -6,7 +6,6 @@ import {
   Modal,
   Pressable,
   useColorScheme,
-  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

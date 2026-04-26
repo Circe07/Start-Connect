@@ -17,8 +17,6 @@ import {
   submitSwipe,
   SwipeCandidate,
 } from '@/services/discover/discoverService';
-import { addFriend } from '@/services/friends/friendsService';
-import { joinGroup, sendGroupRequest } from '@/services/groups/authGroup';
 
 const BRAND_ORANGE = '#FF7F3F';
 const SWIPE_THRESHOLD = 110;
@@ -64,49 +62,6 @@ export default function SwipeScreen() {
         toValue: { x: 0, y: 0 },
         useNativeDriver: false,
       }).start();
-    },
-  });
-
-  const quickActionMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentCard) return { success: false, error: 'No card available' };
-
-      if (currentCard.type === 'person') {
-        const personId = currentCard.raw?.id || currentCard.raw?.uid;
-        if (!personId) return { success: false, error: 'Persona inválida' };
-        return addFriend(personId);
-      }
-
-      if (currentCard.type === 'group') {
-        const groupId = currentCard.raw?.id;
-        if (!groupId) return { success: false, error: 'Grupo inválido' };
-        if (currentCard.raw?.isPublic) {
-          return joinGroup(groupId);
-        }
-        return sendGroupRequest(groupId);
-      }
-
-      return { success: true };
-    },
-    onSuccess: response => {
-      if (!response?.success) {
-        Alert.alert('No se pudo completar', response?.error || 'Intenta nuevamente.');
-        return;
-      }
-
-      if (!currentCard) return;
-      if (currentCard.type === 'person') {
-        Alert.alert('Listo', 'Usuario agregado a amigos.');
-        return;
-      }
-      if (currentCard.type === 'group') {
-        Alert.alert('Listo', 'Acción de grupo completada.');
-        return;
-      }
-      Alert.alert('Actividad', currentCard.description || currentCard.title);
-    },
-    onError: (error: any) => {
-      Alert.alert('No se pudo completar', error?.message || 'Intenta nuevamente.');
     },
   });
 
@@ -266,14 +221,17 @@ export default function SwipeScreen() {
       </View>
       <Pressable
         style={styles.secondaryButton}
-        disabled={quickActionMutation.isPending}
         onPress={() => {
           if (!currentCard) return;
+          if (currentCard.type === 'person') {
+            navigation.navigate('SearchUser');
+            return;
+          }
           if (currentCard.type === 'group' && currentCard.raw?.id) {
             navigation.navigate('GroupDetail', { groupId: currentCard.raw.id });
             return;
           }
-          quickActionMutation.mutate();
+          Alert.alert('Actividad', currentCard.description || currentCard.title);
         }}
       >
         <Text style={styles.secondaryButtonText}>
@@ -281,7 +239,7 @@ export default function SwipeScreen() {
             ? 'Agregar amigo'
             : currentCard.type === 'group'
             ? 'Ver grupo'
-            : 'Ver actividad'}
+            : 'Info actividad'}
         </Text>
       </Pressable>
     </View>

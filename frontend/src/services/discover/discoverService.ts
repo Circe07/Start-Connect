@@ -1,4 +1,4 @@
-import API_CONFIG from '@/api/api-config';
+import API_CONFIG from '@/config/api';
 import { getAuthToken } from '../storage/authStorage';
 
 export type SwipeEntityType = 'person' | 'group' | 'activity';
@@ -16,6 +16,7 @@ interface DiscoverResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
+  warnings?: string[];
 }
 
 const createRequestId = () =>
@@ -81,44 +82,82 @@ const discoverRequestWithFallback = async (
   };
 };
 
-const normalizeCandidates = (payload: any): SwipeCandidate[] => {
-  const activities = Array.isArray(payload?.activities) ? payload.activities : [];
-  const groups = Array.isArray(payload?.groups) ? payload.groups : [];
-  const users = Array.isArray(payload?.users) ? payload.users : [];
+const normalizeUsers = (users: any[]): SwipeCandidate[] =>
+  users
+    .filter(item => item?.id || item?.uid)
+    .map((item: any) => ({
+      id: `person:${item.id || item.uid}`,
+      type: 'person' as const,
+      title: item.name || item.username || item.email || 'Persona',
+      subtitle: item.username ? `@${item.username}` : undefined,
+      description: item.bio || '',
+      raw: item,
+    }));
 
-  const userCards: SwipeCandidate[] = users.map((item: any) => ({
-    id: `person:${item.id || item.uid}`,
-    type: 'person',
-    title: item.name || item.username || item.email || 'Persona',
-    subtitle: item.username ? `@${item.username}` : undefined,
-    description: item.bio || '',
-    raw: item,
-  }));
+const normalizeGroups = (groups: any[]): SwipeCandidate[] =>
+  groups
+    .filter(item => item?.id)
+    .map((item: any) => ({
+      id: `group:${item.id}`,
+      type: 'group' as const,
+      title: item.name || 'Grupo',
+      subtitle: item.sport || 'Grupo',
+      description: item.description || '',
+      raw: item,
+    }));
 
-  const groupCards: SwipeCandidate[] = groups.map((item: any) => ({
-    id: `group:${item.id}`,
-    type: 'group',
-    title: item.name || 'Grupo',
-    subtitle: item.sport || 'Grupo',
-    description: item.description || '',
-    raw: item,
-  }));
+const normalizeActivities = (activities: any[]): SwipeCandidate[] =>
+  activities
+    .filter(item => item?.id)
+    .map((item: any) => ({
+      id: `activity:${item.id}`,
+      type: 'activity' as const,
+      title: item.title || item.name || 'Actividad',
+      subtitle: item.sport || item.category || 'Actividad',
+      description: item.description || '',
+      raw: item,
+    }));
 
-  const activityCards: SwipeCandidate[] = activities.map((item: any) => ({
-    id: `activity:${item.id}`,
-    type: 'activity',
-    title: item.title || item.name || 'Actividad',
-    subtitle: item.sport || item.category || 'Actividad',
-    description: item.description || '',
-    raw: item,
-  }));
-
-  return [...userCards, ...groupCards, ...activityCards];
+const dedupeCandidates = (items: SwipeCandidate[]): SwipeCandidate[] => {
+  const seen = new Set<string>();
+  return items.filter(item => {
+    if (seen.has(item.id)) {
+      return false;
+    }
+    seen.add(item.id);
+    return true;
+  });
 };
 
-export const getSwipeCandidates = async (): Promise<
-  DiscoverResponse<{ items: SwipeCandidate[] }>
-> => {
+const getUsersSource = async (): Promise<DiscoverResponse<SwipeCandidate[]>> => {
+  const response = await discoverRequestWithFallback(
+    ['/v1/users?limit=20', '/users?limit=20'],
+    { method: 'GET' },
+  );
+
+  if (!response.success) {
+    return { success: false, error: response.error };
+  }
+
+  const users = Array.isArray(response.data?.users) ? response.data.users : [];
+  return { success: true, data: normalizeUsers(users) };
+};
+
+const getGroupsSource = async (): Promise<DiscoverResponse<SwipeCandidate[]>> => {
+  const response = await discoverRequestWithFallback(
+    ['/v1/groups/public', '/groups/public'],
+    { method: 'GET' },
+  );
+
+  if (!response.success) {
+    return { success: false, error: response.error };
+  }
+
+  const groups = Array.isArray(response.data?.groups) ? response.data.groups : [];
+  return { success: true, data: normalizeGroups(groups) };
+};
+
+const getActivitiesSource = async (): Promise<DiscoverResponse<SwipeCandidate[]>> => {
   const response = await discoverRequestWithFallback(
     ['/v1/discover/activities', '/discover/activities'],
     { method: 'GET' },
@@ -128,9 +167,46 @@ export const getSwipeCandidates = async (): Promise<
     return { success: false, error: response.error };
   }
 
+  const activities = Array.isArray(response.data?.activities)
+    ? response.data.activities
+    : [];
+  return { success: true, data: normalizeActivities(activities) };
+};
+
+export const getSwipeCandidates = async (): Promise<
+  DiscoverResponse<{ items: SwipeCandidate[] }>
+> => {
+  const [usersResult, groupsResult, activitiesResult] = await Promise.all([
+    getUsersSource(),
+    getGroupsSource(),
+    getActivitiesSource(),
+  ]);
+
+  const warnings: string[] = [];
+  if (!usersResult.success) warnings.push(`users: ${usersResult.error}`);
+  if (!groupsResult.success) warnings.push(`groups: ${groupsResult.error}`);
+  if (!activitiesResult.success) warnings.push(`activities: ${activitiesResult.error}`);
+
+  const merged = dedupeCandidates([
+    ...(usersResult.data || []),
+    ...(groupsResult.data || []),
+    ...(activitiesResult.data || []),
+  ]);
+
+  if (merged.length === 0) {
+    return {
+      success: false,
+      error:
+        warnings[0] ||
+        'No se encontraron datos de personas, grupos ni actividades.',
+      warnings,
+    };
+  }
+
   return {
     success: true,
-    data: { items: normalizeCandidates(response.data || {}) },
+    data: { items: merged },
+    warnings,
   };
 };
 
