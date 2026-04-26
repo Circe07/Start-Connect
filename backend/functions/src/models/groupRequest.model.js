@@ -2,22 +2,19 @@
 
 class GroupRequest {
   constructor(id, data = {}) {
-    if (typeof data !== "object" || data === null) data = {};
+    if (typeof data !== 'object' || data === null) data = {};
 
     // Identificadores
     this.id = id || null;
 
     // Validación fuerte (evita errores de Firestore)
-    this.groupId = typeof data.groupId === "string" && data.groupId.trim() !== ""
-      ? data.groupId
-      : null;
+    this.groupId =
+      typeof data.groupId === 'string' && data.groupId.trim() !== '' ? data.groupId : null;
 
-    this.userId = typeof data.userId === "string" && data.userId.trim() !== ""
-      ? data.userId
-      : null;
+    this.userId = typeof data.userId === 'string' && data.userId.trim() !== '' ? data.userId : null;
 
     // Información básica
-    this.status = data.status || "pending"; // pending | accepted | rejected
+    this.status = data.status || 'pending'; // pending | accepted | rejected
 
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || null;

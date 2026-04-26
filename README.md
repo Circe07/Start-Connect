@@ -4,6 +4,81 @@
 
 **StartAndConnect** is a RESTful API for managing users, community groups, and posts. Built with Node.js, Express, Firebase Cloud Functions, and Cloud Firestore.
 
+## Getting started (local)
+
+### Prerequisites
+
+- Node.js 20 (see `functions/package.json` engines)
+- Firebase CLI (`npm i -g firebase-tools`)
+
+### Environment variables
+
+- Copy `.env.example` to `.env` and fill required values (no secrets are committed).
+- Required for auth:
+  - `AUTH_API_KEY` (Firebase web API key)
+- Optional (Firestore DB selection):
+  - `FIREBASE_PROJECT_ID`
+  - `FIREBASE_DATABASE_ID`
+- Recommended:
+  - `CORS_ORIGINS` (comma separated allowlist for prod)
+  - `AUTH_RATE_LIMIT_WINDOW_MS`, `AUTH_RATE_LIMIT_MAX`
+
+### Install
+
+```bash
+cd functions
+npm install
+```
+
+### Run (emulators)
+
+```bash
+cd functions
+npm run serve
+```
+
+### Deploy (functions only)
+
+```bash
+cd functions
+npm run deploy
+```
+
+### Tests
+
+```bash
+npm test
+```
+
+### Production readiness testing
+
+```bash
+npm run test:phase1
+npm run test:contract
+npm run test:e2e
+npm run test:security
+npm run test:perf-smoke
+npm run test:all-backend
+```
+
+### Automation tooling
+
+- Pre-commit hook (Husky + lint-staged): formats staged files with Prettier.
+- Dependabot config: `.github/dependabot.yml` (npm + GitHub Actions updates).
+- Security scanning: `.github/workflows/codeql.yml`.
+- API availability smoke in CI: `.github/workflows/newman-smoke.yml`.
+
+Testing artifacts:
+
+- `testing/README.md`
+- `testing/frontend/api-integration-matrix.md`
+- `testing/frontend/StartAndConnect.postman_collection.json`
+- `testing/release/release-gates.md`
+
+### API docs
+
+- OpenAPI spec: `functions/docs/openapi.yaml`
+
 ### 🔸 API Endpoint Summary
 
 #### 🔸 Auth Module

@@ -1,0 +1,22 @@
+name: Newman Smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run health smoke collection
+        run: npx newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=https://europe-west1-startandconnect-c44b2.cloudfunctions.net/api

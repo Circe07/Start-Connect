@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "StartAndConnect Backend QA",
+    "_postman_id": "d6f4d721-8b36-4de2-bd2c-5f3ad2ea9f2f",
+    "description": "Smoke + MVP flow collection for frontend/backend integration QA.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:5001/startandconnect-c44b2/europe-west1/api" },
+    { "key": "token", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "groupId", "value": "" },
+    { "key": "activityId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"user@example.com\",\"password\":\"StrongPassword123!\"}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "Refresh",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"refreshToken\":\"{{refreshToken}}\"}" },
+        "url": "{{baseUrl}}/auth/refresh"
+      }
+    },
+    {
+      "name": "Activities",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/activities?city=Barcelona&limit=10"
+      }
+    },
+    {
+      "name": "Swipe Like",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"activityId\":\"{{activityId}}\",\"direction\":\"like\"}" },
+        "url": "{{baseUrl}}/swipes"
+      }
+    },
+    {
+      "name": "Matches",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/matches?limit=10"
+      }
+    },
+    {
+      "name": "Groups Public",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/groups/public?limit=10"
+      }
+    },
+    {
+      "name": "Join Group",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/groups/{{groupId}}/join"
+      }
+    },
+    {
+      "name": "Send Group Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"content\":\"hola desde postman\"}" },
+        "url": "{{baseUrl}}/groups/{{groupId}}/messages"
+      }
+    }
+  ]
+}
+

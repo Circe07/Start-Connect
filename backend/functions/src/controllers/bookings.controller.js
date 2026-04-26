@@ -4,14 +4,14 @@
  * Author: Unai Villar
  */
 
-const { db, admin, FieldValue } = require("../config/firebase");
-const Booking = require("../models/booking.model");
+const { db, admin, FieldValue } = require('../config/firebase');
+const Booking = require('../models/booking.model');
 
 /**
  * POST --> CREATE BOOKING
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * @param {*} req
+ * @param {*} res
+ * @returns
  */
 exports.createBooking = async (req, res) => {
   try {
@@ -24,7 +24,7 @@ exports.createBooking = async (req, res) => {
       facilityId: req.body.facilityId,
       date: req.body.date,
       startTime: req.body.startTime,
-      endTime: req.body.endTime
+      endTime: req.body.endTime,
     };
 
     /**
@@ -41,16 +41,16 @@ exports.createBooking = async (req, res) => {
      * If there is an overlap, return error
      */
     const overlap = await db
-      .collection("bookings")
-      .where("venueId", "==", data.venueId)
-      .where("facilityId", "==", data.facilityId)
-      .where("date", "==", data.date)
-      .where("startTime", "<", data.endTime)
-      .where("endTime", ">", data.startTime)
+      .collection('bookings')
+      .where('venueId', '==', data.venueId)
+      .where('facilityId', '==', data.facilityId)
+      .where('date', '==', data.date)
+      .where('startTime', '<', data.endTime)
+      .where('endTime', '>', data.startTime)
       .get();
 
     if (!overlap.empty) {
-      return res.status(400).json({ message: "Horario no disponible" });
+      return res.status(400).json({ message: 'Horario no disponible' });
     }
 
     /**
@@ -58,7 +58,7 @@ exports.createBooking = async (req, res) => {
      * Collection "bookings"
      */
     const booking = new Booking(data);
-    const ref = db.collection("bookings").doc();
+    const ref = db.collection('bookings').doc();
 
     // Set id
     booking.id = ref.id;
@@ -67,64 +67,62 @@ exports.createBooking = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Reserva creada correctamente",
-      booking
+      message: 'Reserva creada correctamente',
+      booking,
     });
-
   } catch (err) {
-    console.error("Error creating booking:", err);
+    console.error('Error creating booking:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
 /**
  * GET --> GET MY BOOKINGS
- * @param {*} req 
- * @param {*} res 
- * @returns 
+ * @param {*} req
+ * @param {*} res
+ * @returns
  */
 exports.getMyBookings = async (req, res) => {
   try {
     const userId = req.user.uid;
 
     const snapshot = await db
-      .collection("bookings")
-      .where("userId", "==", userId)
-      .orderBy("date", "desc")
+      .collection('bookings')
+      .where('userId', '==', userId)
+      .orderBy('date', 'desc')
       .get();
 
-    const bookings = snapshot.docs.map(doc => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
     return res.json({ success: true, bookings });
-
   } catch (err) {
-    console.error("Error fetching bookings:", err);
+    console.error('Error fetching bookings:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
 /**
  * GET --> GET AVAILABILITY
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  */
 exports.getAvailability = async (req, res) => {
   try {
     const { venueId, facilityId, date } = req.params;
 
     const snapshot = await db
-      .collection("bookings")
-      .where("venueId", "==", venueId)
-      .where("facilityId", "==", facilityId)
-      .where("date", "==", date)
+      .collection('bookings')
+      .where('venueId', '==', venueId)
+      .where('facilityId', '==', facilityId)
+      .where('date', '==', date)
       .get();
 
     const taken = snapshot.docs.map((d) => ({
       start: d.data().startTime,
-      end: d.data().endTime
+      end: d.data().endTime,
     }));
 
     res.json({ success: true, taken });
