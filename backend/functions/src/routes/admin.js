@@ -1,0 +1,105 @@
+// ! NO EJECTUAR A MENOS QUE SE AGREGEN MAS HOBBIES
+
+const router = require('express').Router();
+const adminMiddleware = require('../middleware/admin');
+const hobbiesSeed = require('../../scripts/hobbiesSeed');
+const venuesSeed = require('../../scripts/venuesSeed');
+const activitiesSeed = require('../../scripts/activitiesSeed');
+const groupsSeed = require('../../scripts/groupsSeed');
+const { db } = require('../config/firebase');
+
+router.get('/check', (req, res) => {
+  res.status(200).json({ message: 'Rutas de admin funcionando correctamente' });
+});
+
+// Everything below requires admin
+router.use(adminMiddleware);
+
+router.post('/seed-hobbies', async (req, res) => {
+  try {
+    const batch = db.batch();
+
+    hobbiesSeed.forEach((hobby) => {
+      const ref = db.collection('globalHobbies').doc(hobby.id);
+      batch.set(ref, hobby);
+    });
+
+    await batch.commit();
+
+    res.json({ success: true, message: 'Hobbies cargados' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error interno.' });
+  }
+});
+
+router.post('/seed-venues', async (req, res) => {
+  try {
+    for (const venue of venuesSeed) {
+      const venueRef = db.collection('globalVenues').doc(venue.id);
+
+      const venueData = { ...venue };
+      delete venueData.facilities;
+      await venueRef.set(venueData);
+
+      for (const facility of venue.facilities) {
+        const facilityRef = venueRef.collection('facilities').doc(facility.id);
+        await facilityRef.set(facility);
+      }
+    }
+
+    res.json({ success: true, message: 'Venues y facilities cargados' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error interno.' });
+  }
+});
+
+router.post('/seed-activities', async (req, res) => {
+  try {
+    const batch = db.batch();
+    activitiesSeed.forEach((activity) => {
+      const ref = db.collection('activities').doc(activity.id);
+      batch.set(
+        ref,
+        {
+          ...activity.data,
+          createdAt: new Date(),
+        },
+        { merge: true }
+      );
+    });
+    await batch.commit();
+    res.json({ success: true, message: 'Activities cargadas' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error interno.' });
+  }
+});
+
+router.post('/seed-groups', async (req, res) => {
+  try {
+    const batch = db.batch();
+    groupsSeed.forEach((group) => {
+      const ref = db.collection('groups').doc(group.id);
+      batch.set(ref, group.data, { merge: true });
+    });
+    await batch.commit();
+    res.json({ success: true, message: 'Groups cargados' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error interno.' });
+  }
+});
+const { admin } = require('../config/firebase');
+
+router.post('/make-admin', async (req, res) => {
+  try {
+    const { uid } = req.body;
+    if (!uid) return res.status(400).json({ message: 'UID es requerido' });
+
+    await admin.auth().setCustomUserClaims(uid, { role: 'admin' });
+
+    res.json({ success: true, message: `Usuario ${uid} es ahora Administrador.` });
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno.' });
+  }
+});
+
+module.exports = router;

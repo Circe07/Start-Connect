@@ -36,6 +36,9 @@ firebase-adminsdk.json
 .env.local
 .env.*.local
 .env.*
+.env.smoke
+frontend/.env.smoke
+!frontend/.env.smoke.example
 
 # Apikeys o configuraciones sensibles
 apikey.js
@@ -81,3 +84,7 @@ flutter_export_environment.sh
 
 # Scripts de utilidad
 .getToken.js
+
+
+# Scripts unicos e individuales
+.local.properties
