@@ -8,7 +8,12 @@ module.exports = {
   },
   root: true,
   extends: '@react-native',
-  rules: {
-    '@typescript-eslint/no-unused-vars': 'off',
-  },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
+      },
+    },
+  ],
 };
