@@ -7,6 +7,12 @@ const venuesSeed = require("../../scripts/venuesSeed");
 const activitiesSeed = require("../../scripts/activitiesSeed");
 const groupsSeed = require("../../scripts/groupsSeed");
 const { db } = require("../config/firebase");
+const rateLimit = require("express-rate-limit");
+
+const adminRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 admin requests per windowMs
+});
 
 router.get('/check', (req, res) => {
     res.status(200).json({ message: 'Rutas de admin funcionando correctamente' })
@@ -14,6 +20,7 @@ router.get('/check', (req, res) => {
 
 // Everything below requires admin
 router.use(adminMiddleware);
+router.use(adminRateLimiter);
 
 router.post("/seed-hobbies", async (req, res) => {
     try {
