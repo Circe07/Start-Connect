@@ -3,9 +3,10 @@
  * This component represents the bottom navigation bar of the app.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Pressable, useColorScheme, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ExpandableMenu from '@/components/navigation/ExpandableMenu';
 
 const BRAND_ORANGE = '#ff5703ff';
 const BRAND_GRAY = '#9E9E9E';
@@ -22,6 +23,7 @@ export default function BottomNavigation({
   navigation,
 }: BottomNavigationProps) {
   const isDarkMode = useColorScheme() === 'dark';
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const handleTabPress = (tab: string) => {
     if (tab === 'perfil' && navigation) {
@@ -32,73 +34,92 @@ export default function BottomNavigation({
     }
   };
 
+  const handleMenuOptionSelect = (option: string) => {
+    onTabChange(option);
+  };
+
   return (
-    <View
-      style={[
-        styles.bottomNav,
-        { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
-      ]}
-    >
-      <Pressable style={styles.navItem} onPress={() => handleTabPress('home')}>
-        <Icon
-          name="home"
-          size={26}
-          color={activeTab === 'home' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
+    <>
+      <View
+        style={[
+          styles.bottomNav,
+          { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' },
+        ]}
+      >
+        <Pressable style={styles.navItem} onPress={() => handleTabPress('home')}>
+          <Icon
+            name="home"
+            size={26}
+            color={activeTab === 'home' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('search')}
+        >
+          <Icon
+            name="search"
+            size={26}
+            color={activeTab === 'search' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('tienda')}
+        >
+          <Icon
+            name="shopping-cart"
+            size={26}
+            color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('hobbie')}
+        >
+          <Icon
+            name="fitness-center"
+            size={26}
+            color={activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+
+        <Pressable style={styles.navItem} onPress={() => handleTabPress('chat')}>
+          <Icon
+            name="wechat"
+            size={26}
+            color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+
+        <Pressable
+          style={styles.navItem}
+          onPress={() => handleTabPress('perfil')}
+        >
+          <Icon
+            name="person"
+            size={26}
+            color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
+          />
+        </Pressable>
+      </View>
 
       <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('search')}
+        style={styles.centerMenuButton}
+        onPress={() => setMenuVisible(true)}
       >
-        <Icon
-          name="search"
-          size={26}
-          color={activeTab === 'search' ? BRAND_ORANGE : BRAND_GRAY}
-        />
+        <Icon name="swap-horiz" size={24} color="#fff" />
       </Pressable>
 
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('tienda')}
-      >
-        <Icon
-          name="shopping-cart"
-          size={26}
-          color={activeTab === 'tienda' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
-
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('hobbie')}
-      >
-        <Icon
-          name="fitness-center"
-          size={26}
-          color={activeTab === 'hobbie' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
-
-      <Pressable style={styles.navItem} onPress={() => handleTabPress('chat')}>
-        <Icon
-          name="wechat"
-          size={26}
-          color={activeTab === 'chat' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
-
-      <Pressable
-        style={styles.navItem}
-        onPress={() => handleTabPress('perfil')}
-      >
-        <Icon
-          name="person"
-          size={26}
-          color={activeTab === 'perfil' ? BRAND_ORANGE : BRAND_GRAY}
-        />
-      </Pressable>
-    </View>
+      <ExpandableMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        onOptionSelect={handleMenuOptionSelect}
+      />
+    </>
   );
 }
 
@@ -118,6 +139,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center' as const,
     gap: 4,
+  },
+  centerMenuButton: {
+    position: 'absolute',
+    bottom: 58,
+    alignSelf: 'center',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: BRAND_ORANGE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 8,
   },
   navIcon: {
     width: 24,

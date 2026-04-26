@@ -3,9 +3,17 @@ module.exports = {
   parserOptions: {
     requireConfigFile: true,
     babelOptions: {
-      configFile: './frontend/babel.config.js',
+      configFile: './babel.config.js',
     },
   },
   root: true,
   extends: '@react-native',
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
+      },
+    },
+  ],
 };

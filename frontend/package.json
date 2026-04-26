@@ -8,6 +8,9 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "test:smoke": "jest __tests__/services/apiClient.test.ts __tests__/services/authService.test.ts __tests__/App.test.tsx",
+    "test:smoke:prod": "node scripts/smoke-prod.mjs",
+    "test:full": "npm run lint && npm test",
     "splash": "npx --yes \"@bam.tech/react-native-make\" set-splash --path ./src/assets/images/splash.png --platform android,ios"
   },
   "dependencies": {
