@@ -19,8 +19,8 @@ router.get('/check', (req, res) => {
 })
 
 // Everything below requires admin
-router.use(adminMiddleware);
 router.use(adminRateLimiter);
+router.use(adminMiddleware);
 
 router.post("/seed-hobbies", async (req, res) => {
     try {
