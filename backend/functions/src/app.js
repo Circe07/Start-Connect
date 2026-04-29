@@ -34,34 +34,14 @@ const usersRoutes = require('./routes/users');
 const mapsRoutes = require('./routes/maps');
 const centersRoutes = require('./routes/centers');
 const bookingsRoutes = require('./routes/bookings');
+const experienceBookingsRoutes = require('./routes/experienceBookings');
+const experiencesRoutes = require('./routes/experiences');
+const feedbackRoutes = require('./routes/feedback');
+const hostsRoutes = require('./routes/hosts');
+const referralsRoutes = require('./routes/referrals');
 const activitiesRoutes = require('./routes/activities');
 const swipesRoutes = require('./routes/swipes');
 const matchesRoutes = require('./routes/matches');
-const { createAuthV1Router } = require('./transport/http/authV1Router');
-const { createRefreshSessionUseCase } = require('./domain/auth/refreshSessionUseCase');
-const { createLoginSessionUseCase } = require('./domain/auth/loginSessionUseCase');
-const { createGetMeUseCase } = require('./domain/auth/getMeUseCase');
-const { createLogoutUseCase } = require('./domain/auth/logoutUseCase');
-const { createFirebaseTokenGateway } = require('./data/auth/firebaseTokenGateway');
-const { createFirebaseAuthGateway } = require('./data/auth/firebaseAuthGateway');
-const { createUsersV1Router } = require('./transport/http/usersV1Router');
-const { createGetMyProfileUseCase } = require('./domain/users/getMyProfileUseCase');
-const { createUpdateMyProfileUseCase } = require('./domain/users/updateMyProfileUseCase');
-const { createGetUserProfileUseCase } = require('./domain/users/getUserProfileUseCase');
-const { createFirestoreUserRepository } = require('./data/users/firestoreUserRepository');
-const { createGroupsV1Router } = require('./transport/http/groupsV1Router');
-const { createGetPublicGroupsUseCase } = require('./domain/groups/getPublicGroupsUseCase');
-const { createJoinGroupUseCase } = require('./domain/groups/joinGroupUseCase');
-const { createSendGroupMessageUseCase } = require('./domain/groups/sendGroupMessageUseCase');
-const { createGetGroupMessagesUseCase } = require('./domain/groups/getGroupMessagesUseCase');
-const { createFirestoreGroupRepository } = require('./data/groups/firestoreGroupRepository');
-const { createDiscoverV1Router } = require('./transport/http/discoverV1Router');
-const { createListActivitiesUseCase } = require('./domain/discover/listActivitiesUseCase');
-const { createRecordSwipeUseCase } = require('./domain/discover/recordSwipeUseCase');
-const { createListMatchesUseCase } = require('./domain/discover/listMatchesUseCase');
-const {
-  createFirestoreDiscoverRepository,
-} = require('./data/discover/firestoreDiscoverRepository');
 
 validateEnv();
 
@@ -103,40 +83,11 @@ app.use('/api/v1', apiVersionV1);
  * This routes don't need authentication
  */
 app.use('/auth', authRoutes);
-app.use(
-  '/api/v1/auth',
-  createAuthV1Router({
-    loginSession: createLoginSessionUseCase({
-      tokenGateway: createFirebaseTokenGateway(),
-    }),
-    refreshSession: createRefreshSessionUseCase({
-      tokenGateway: createFirebaseTokenGateway(),
-    }),
-    getMe: createGetMeUseCase({
-      authGateway: createFirebaseAuthGateway(),
-    }),
-    logoutSession: createLogoutUseCase({
-      authGateway: createFirebaseAuthGateway(),
-    }),
-  })
-);
+app.use('/api/v1/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/users', usersRoutes);
-app.use(
-  '/api/v1/users',
-  createUsersV1Router({
-    getMyProfile: createGetMyProfileUseCase({
-      userRepository: createFirestoreUserRepository(),
-    }),
-    updateMyProfile: createUpdateMyProfileUseCase({
-      userRepository: createFirestoreUserRepository(),
-    }),
-    getUserProfile: createGetUserProfileUseCase({
-      userRepository: createFirestoreUserRepository(),
-    }),
-  })
-);
+app.use('/api/v1/users', usersRoutes);
 
 /**
  * Private routes
@@ -147,24 +98,7 @@ app.use('/api/v1/hobbies', hobbiesRoutes);
 app.use('/contacts', contactsRoutes);
 app.use('/api/v1/contacts', contactsRoutes);
 app.use('/groups', groupsRoutes);
-app.use(
-  '/api/v1/groups',
-  writeRateLimit,
-  createGroupsV1Router({
-    getPublicGroups: createGetPublicGroupsUseCase({
-      groupRepository: createFirestoreGroupRepository(),
-    }),
-    joinGroup: createJoinGroupUseCase({
-      groupRepository: createFirestoreGroupRepository(),
-    }),
-    sendGroupMessage: createSendGroupMessageUseCase({
-      groupRepository: createFirestoreGroupRepository(),
-    }),
-    getGroupMessages: createGetGroupMessagesUseCase({
-      groupRepository: createFirestoreGroupRepository(),
-    }),
-  })
-);
+app.use('/api/v1/groups', writeRateLimit, groupsRoutes);
 app.use('/groupsRequests', groupsRequestsRoutes);
 app.use('/api/v1/groupsRequests', groupsRequestsRoutes);
 app.use('/maps', mapsRoutes);
@@ -173,27 +107,22 @@ app.use('/centers', centersRoutes);
 app.use('/api/v1/centers', centersRoutes);
 app.use('/bookings', bookingsRoutes);
 app.use('/api/v1/bookings', bookingsRoutes);
+app.use('/experience-bookings', experienceBookingsRoutes);
+app.use('/api/v1/experience-bookings', experienceBookingsRoutes);
+app.use('/experiences', experiencesRoutes);
+app.use('/api/v1/experiences', experiencesRoutes);
+app.use('/feedback', feedbackRoutes);
+app.use('/api/v1/feedback', feedbackRoutes);
+app.use('/hosts', hostsRoutes);
+app.use('/api/v1/hosts', hostsRoutes);
+app.use('/referrals', referralsRoutes);
+app.use('/api/v1/referrals', referralsRoutes);
 app.use('/activities', activitiesRoutes);
 app.use('/api/v1/activities', activitiesRoutes);
 app.use('/swipes', swipesRoutes);
 app.use('/api/v1/swipes', swipesRoutes);
 app.use('/matches', matchesRoutes);
 app.use('/api/v1/matches', matchesRoutes);
-app.use(
-  '/api/v1/discover',
-  readRateLimit,
-  createDiscoverV1Router({
-    listActivities: createListActivitiesUseCase({
-      discoverRepository: createFirestoreDiscoverRepository(),
-    }),
-    recordSwipe: createRecordSwipeUseCase({
-      discoverRepository: createFirestoreDiscoverRepository(),
-    }),
-    listMatches: createListMatchesUseCase({
-      discoverRepository: createFirestoreDiscoverRepository(),
-    }),
-  })
-);
 
 /**
  * Default route to check if API is working

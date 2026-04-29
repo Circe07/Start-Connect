@@ -22,8 +22,14 @@ jobs:
       - name: Install functions dependencies
         run: npm --prefix functions ci
 
+      - name: Lint/format gate
+        run: npm run format:check:hardening
+
       - name: Validate release gate docs
         run: npm run test:release-gate
 
       - name: Run backend quality gates
         run: npm run test:all-backend
+
+      - name: Run smoke Newman gate
+        run: npx newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=https://api-ma5t57vzsq-ew.a.run.app

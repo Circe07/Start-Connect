@@ -10,9 +10,11 @@ function observabilityLogger(req, res, next) {
       requestId: req.requestId,
       method: req.method,
       path: req.originalUrl,
+      routePath: req.route?.path || null,
       statusCode: res.statusCode,
       durationMs,
       userAgent: req.headers['user-agent'],
+      actor: req.user?.uid || null,
     });
   });
 

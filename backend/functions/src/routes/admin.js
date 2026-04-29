@@ -7,9 +7,10 @@ const venuesSeed = require('../../scripts/venuesSeed');
 const activitiesSeed = require('../../scripts/activitiesSeed');
 const groupsSeed = require('../../scripts/groupsSeed');
 const { db } = require('../config/firebase');
+const { ok, fail } = require('../shared/httpResponse');
 
 router.get('/check', (req, res) => {
-  res.status(200).json({ message: 'Rutas de admin funcionando correctamente' });
+  return ok(res, { message: 'Rutas de admin funcionando correctamente' }, 200, req.requestId);
 });
 
 // Everything below requires admin
@@ -99,6 +100,88 @@ router.post('/make-admin', async (req, res) => {
     res.json({ success: true, message: `Usuario ${uid} es ahora Administrador.` });
   } catch (error) {
     res.status(500).json({ message: 'Error interno.' });
+  }
+});
+
+router.get('/experiences/export', async (req, res) => {
+  try {
+    const { estado, ciudad, fecha } = req.query;
+    const limit = Math.min(Number(req.query.limit) || 200, 1000);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    let query = db.collection('experiences');
+    if (estado) query = query.where('estado', '==', estado);
+    if (ciudad) query = query.where('ciudad', '==', ciudad);
+    if (fecha) query = query.where('fecha', '==', fecha);
+    const snapshot = await query.limit(offset + limit).get();
+    const allData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const data = allData.slice(offset, offset + limit);
+    return ok(
+      res,
+      { total: allData.length, count: data.length, offset, limit, items: data },
+      200,
+      req.requestId
+    );
+  } catch (error) {
+    console.error('Error admin export experiences:', error);
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
+  }
+});
+
+router.get('/experience-bookings/export', async (req, res) => {
+  try {
+    const { estado, experience_id } = req.query;
+    const limit = Math.min(Number(req.query.limit) || 200, 1000);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    let query = db.collection('experience_bookings');
+    if (estado) query = query.where('estado', '==', estado);
+    if (experience_id) query = query.where('experience_id', '==', experience_id);
+    const snapshot = await query.limit(offset + limit).get();
+    const allData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const data = allData.slice(offset, offset + limit);
+    return ok(
+      res,
+      { total: allData.length, count: data.length, offset, limit, items: data },
+      200,
+      req.requestId
+    );
+  } catch (error) {
+    console.error('Error admin export bookings:', error);
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
+  }
+});
+
+router.get('/users/export', async (req, res) => {
+  try {
+    const { fuente_adquisicion, canal_adquisicion } = req.query;
+    const limit = Math.min(Number(req.query.limit) || 200, 1000);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    let query = db.collection('users');
+    if (fuente_adquisicion) query = query.where('fuente_adquisicion', '==', fuente_adquisicion);
+    if (canal_adquisicion) query = query.where('canal_adquisicion', '==', canal_adquisicion);
+    const snapshot = await query.limit(offset + limit).get();
+    const allData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const data = allData.slice(offset, offset + limit);
+    return ok(
+      res,
+      { total: allData.length, count: data.length, offset, limit, items: data },
+      200,
+      req.requestId
+    );
+  } catch (error) {
+    console.error('Error admin export users:', error);
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
   }
 });
 

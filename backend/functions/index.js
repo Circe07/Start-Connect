@@ -6,7 +6,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 
 setGlobalOptions({
   region: 'europe-west1',
-  maxInstances: 10,
+  maxInstances: 11,
 });
 
 const app = require('./src/app');

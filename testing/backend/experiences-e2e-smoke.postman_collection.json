@@ -1,0 +1,390 @@
+{
+  "info": {
+    "name": "StartAndConnect Experiences E2E Smoke",
+    "_postman_id": "b03ad3c9-a37a-4af5-96f4-eaf4ff32c61d",
+    "description": "Minimal end-to-end smoke for experiences, bookings, feedback, referrals, hosts and admin exports.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('health is ok', function () {",
+              "  pm.expect(body.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "01 - Create Host (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('hostId', body.host.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Host QA\",\n  \"telefono\": \"+34600111222\",\n  \"nivel_aproximado\": \"medio\",\n  \"disponibilidad\": \"fines de semana\",\n  \"estado\": \"junior\",\n  \"partidas_realizadas\": 12,\n  \"nps_medio\": 8.4,\n  \"observaciones\": \"Creado desde smoke\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/hosts"
+      }
+    },
+    {
+      "name": "02 - Create Experience (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('experienceId', body.experience.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Partido Test QA\",\n  \"descripcion\": \"Partido para validar flujo e2e\",\n  \"deporte_vertical\": \"padel\",\n  \"ciudad\": \"Madrid\",\n  \"club\": \"Club QA\",\n  \"direccion\": \"Calle Test 123\",\n  \"fecha\": \"{{experienceDate}}\",\n  \"hora_inicio\": \"10:00\",\n  \"hora_fin\": \"11:30\",\n  \"nivel_permitido\": \"medio\",\n  \"plazas_totales\": 2,\n  \"precio\": 14.5,\n  \"host_asignado\": \"{{hostId}}\",\n  \"politica_cancelacion\": \"Cancelacion hasta 24h antes\",\n  \"instrucciones\": \"Traer pala y agua\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/experiences"
+      }
+    },
+    {
+      "name": "03 - Publish Experience (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/experiences/{{experienceId}}/publish"
+      }
+    },
+    {
+      "name": "04 - Create Booking (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('bookingId', body.booking.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"experience_id\": \"{{experienceId}}\",\n  \"metodo_pago\": \"efectivo\",\n  \"importe\": 14.5,\n  \"codigo_referido\": \"INVITE-QA\",\n  \"viene_con_amigo\": false\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/experience-bookings"
+      }
+    },
+    {
+      "name": "05 - Check Experience After Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('available seats decremented', function () {",
+              "  pm.expect(body.experience.plazas_disponibles).to.eql(1);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/experiences/{{experienceId}}"
+      }
+    },
+    {
+      "name": "06 - Cancel Booking (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/experience-bookings/{{bookingId}}/cancel"
+      }
+    },
+    {
+      "name": "07 - Check Experience After Cancel",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('available seats restored', function () {",
+              "  pm.expect(body.experience.plazas_disponibles).to.eql(2);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/experiences/{{experienceId}}"
+      }
+    },
+    {
+      "name": "08 - Create Feedback (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('feedbackId', body.feedback.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"experience_id\": \"{{experienceId}}\",\n  \"nota_1_10\": 9,\n  \"repetiria\": true,\n  \"traeria_amigo\": true,\n  \"comentario\": \"Muy buena experiencia\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/feedback"
+      }
+    },
+    {
+      "name": "09 - Create Referral (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"INVITE-QA\",\n  \"referido_id\": \"friend-user-id\",\n  \"estado\": \"pendiente\",\n  \"descuento_aplicado\": false\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/referrals"
+      }
+    },
+    {
+      "name": "10 - Admin Export Experiences",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('export payload has data list', function () {",
+              "  pm.expect(body).to.have.property('data');",
+              "  pm.expect(body.data).to.have.property('items');",
+              "  pm.expect(Array.isArray(body.data.items)).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/admin/experiences/export?estado=publicada"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-ma5t57vzsq-ew.a.run.app"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "experienceDate",
+      "value": "2026-12-15"
+    },
+    {
+      "key": "hostId",
+      "value": ""
+    },
+    {
+      "key": "experienceId",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "feedbackId",
+      "value": ""
+    }
+  ]
+}

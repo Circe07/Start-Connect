@@ -9,6 +9,25 @@ const { admin, db } = require('../config/firebase');
 const functions = require('firebase-functions');
 const fetch = require('node-fetch');
 
+function getAuthApiKey() {
+  if (process.env.AUTH_API_KEY) return process.env.AUTH_API_KEY;
+  if (process.env.FIREBASE_API_KEY) return process.env.FIREBASE_API_KEY;
+
+  try {
+    const runtimeConfigRaw = process.env.CLOUD_RUNTIME_CONFIG;
+    if (runtimeConfigRaw) {
+      const runtimeConfig = JSON.parse(runtimeConfigRaw);
+      if (runtimeConfig?.env?.firebase_api_key) {
+        return runtimeConfig.env.firebase_api_key;
+      }
+    }
+  } catch (error) {
+    console.warn('No se pudo leer CLOUD_RUNTIME_CONFIG para AUTH API key');
+  }
+
+  return null;
+}
+
 /**
  * POST --> REGISTER USER
  * @param {*} req
@@ -17,7 +36,23 @@ const fetch = require('node-fetch');
  */
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, username, bio, photo, sports, phoneNumber, location } = req.body;
+    const {
+      email,
+      password,
+      name,
+      username,
+      bio,
+      photo,
+      sports,
+      phoneNumber,
+      location,
+      edad,
+      zona,
+      veces_jugadas,
+      idioma,
+      fuente_adquisicion,
+      canal_adquisicion,
+    } = req.body;
 
     /**
      * Email, password, name and usermame are required
@@ -71,6 +106,13 @@ exports.register = async (req, res) => {
         sports: sports || [],
         phoneNumber: phoneNumber || '',
         location: location || '',
+        edad: edad || null,
+        zona: zona || '',
+        veces_jugadas: Number(veces_jugadas || 0),
+        idioma: idioma || '',
+        fuente_adquisicion: fuente_adquisicion || '',
+        canal_adquisicion: canal_adquisicion || '',
+        fecha_registro: admin.firestore.FieldValue.serverTimestamp(),
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -108,7 +150,10 @@ exports.login = async (req, res) => {
      * API key is used to authenticate requests
      * API key is generated in Firebase Console > Authentication > API keys
      */
-    const apiKey = process.env.AUTH_API_KEY;
+    const apiKey = getAuthApiKey();
+    if (!apiKey) {
+      return res.status(500).json({ message: 'Configuración incompleta del servidor.' });
+    }
 
     /**
      * Call Firebase Authentication API to login user
@@ -159,7 +204,7 @@ exports.refresh = async (req, res) => {
       return res.status(400).json({ message: 'refreshToken es requerido' });
     }
 
-    const apiKey = process.env.AUTH_API_KEY;
+    const apiKey = getAuthApiKey();
     if (!apiKey) {
       return res.status(500).json({ message: 'Configuración incompleta del servidor.' });
     }

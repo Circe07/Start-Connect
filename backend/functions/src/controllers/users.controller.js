@@ -52,7 +52,25 @@ exports.updateMyProfile = async (req, res) => {
      * location -> string
      * TODO: Recommend to add more fields and validate data type with ../model
      */
-    const allowedFields = ['name', 'username', 'bio', 'photo', 'sports', 'phoneNumber', 'location'];
+    const allowedFields = [
+      'name',
+      'username',
+      'bio',
+      'photo',
+      'sports',
+      'phoneNumber',
+      'location',
+      'nombre',
+      'edad',
+      'telefono_whatsapp',
+      'email',
+      'zona',
+      'veces_jugadas',
+      'idioma',
+      'fecha_registro',
+      'fuente_adquisicion',
+      'canal_adquisicion',
+    ];
 
     const data = {};
     allowedFields.forEach((field) => {
