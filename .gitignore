@@ -57,6 +57,9 @@ tmp/
 logs/
 
 
+# ---- Cursor / local tooling ----
+.cursor/
+
 # ---- IDEs / Editores ----
 # Configuración de VSCode, IntelliJ, WebStorm, etc.
 .vscode/

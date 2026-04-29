@@ -6,26 +6,21 @@
  */
 
 const { admin, db } = require('../config/firebase');
-const functions = require('firebase-functions');
 const fetch = require('node-fetch');
 
-function getAuthApiKey() {
-  if (process.env.AUTH_API_KEY) return process.env.AUTH_API_KEY;
-  if (process.env.FIREBASE_API_KEY) return process.env.FIREBASE_API_KEY;
+function getAuthApiKeys() {
+  const keys = [];
+  const envAuth = process.env.AUTH_API_KEY;
+  const envFirebase = process.env.FIREBASE_API_KEY;
 
-  try {
-    const runtimeConfigRaw = process.env.CLOUD_RUNTIME_CONFIG;
-    if (runtimeConfigRaw) {
-      const runtimeConfig = JSON.parse(runtimeConfigRaw);
-      if (runtimeConfig?.env?.firebase_api_key) {
-        return runtimeConfig.env.firebase_api_key;
-      }
-    }
-  } catch (error) {
-    console.warn('No se pudo leer CLOUD_RUNTIME_CONFIG para AUTH API key');
-  }
+  const isLikelyPlaceholder = (value) =>
+    typeof value === 'string' && value.toLowerCase().includes('your_firebase_web_api_key');
 
-  return null;
+  if (envAuth && !isLikelyPlaceholder(envAuth)) keys.push(envAuth);
+  if (envFirebase && !isLikelyPlaceholder(envFirebase) && envFirebase !== envAuth)
+    keys.push(envFirebase);
+
+  return keys;
 }
 
 /**
@@ -150,8 +145,8 @@ exports.login = async (req, res) => {
      * API key is used to authenticate requests
      * API key is generated in Firebase Console > Authentication > API keys
      */
-    const apiKey = getAuthApiKey();
-    if (!apiKey) {
+    const apiKeys = getAuthApiKeys();
+    if (!apiKeys.length) {
       return res.status(500).json({ message: 'Configuración incompleta del servidor.' });
     }
 
@@ -160,23 +155,32 @@ exports.login = async (req, res) => {
      * API key is used to authenticate requests
      * This is used for authentication and authorization
      */
-    const response = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          returnSecureToken: true,
-        }),
-      }
-    );
+    let data = null;
+    let lastError = null;
+    for (const apiKey of apiKeys) {
+      const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
+      );
 
-    const data = await response.json();
+      data = await response.json();
+      if (!data.error) break;
+      lastError = data.error.message;
+      if (data.error.message !== 'API key not valid. Please pass a valid API key.') break;
+    }
 
-    if (data.error) {
-      return res.status(401).json({ message: data.error.message });
+    if (!data || data.error) {
+      return res
+        .status(401)
+        .json({ message: lastError || data?.error?.message || 'Credenciales inválidas' });
     }
 
     return res.json({
@@ -204,23 +208,31 @@ exports.refresh = async (req, res) => {
       return res.status(400).json({ message: 'refreshToken es requerido' });
     }
 
-    const apiKey = getAuthApiKey();
-    if (!apiKey) {
+    const apiKeys = getAuthApiKeys();
+    if (!apiKeys.length) {
       return res.status(500).json({ message: 'Configuración incompleta del servidor.' });
     }
 
-    const response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }).toString(),
-    });
+    let data = null;
+    let responseOk = false;
+    for (const apiKey of apiKeys) {
+      const response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+        }).toString(),
+      });
+      data = await response.json();
+      if (response.ok) {
+        responseOk = true;
+        break;
+      }
+      if (data?.error?.message !== 'API key not valid. Please pass a valid API key.') break;
+    }
 
-    const data = await response.json();
-
-    if (!response.ok) {
+    if (!responseOk) {
       return res.status(401).json({ message: 'Refresh token inválido o expirado.' });
     }
 

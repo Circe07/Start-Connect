@@ -1,0 +1,9 @@
+{
+	"devDependencies": {
+		"@google-cloud/gcloud-mcp": "^0.5.3",
+		"@google-cloud/observability-mcp": "^0.2.3"
+	},
+	"dependencies": {
+		"gcloud": "^0.37.2"
+	}
+}

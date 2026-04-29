@@ -1,0 +1,20 @@
+{
+  "displayName": "API booking conflict detected",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "Booking conflict in logs",
+      "conditionMatchedLog": {
+        "filter": "resource.type=\"cloud_run_revision\" resource.labels.service_name=\"api\" (textPayload:\"No hay plazas disponibles\" OR textPayload:\"booking conflict\" OR textPayload:\"ya tiene una reserva activa\")"
+      }
+    }
+  ],
+  "alertStrategy": {
+    "notificationRateLimit": {
+      "period": "300s"
+    },
+    "autoClose": "1800s"
+  },
+  "enabled": true,
+  "severity": "WARNING"
+}

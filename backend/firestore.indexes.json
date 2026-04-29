@@ -23,6 +23,48 @@
         { "fieldPath": "city", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "experiences",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "ciudad", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "experience_bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "experience_id", "order": "ASCENDING" },
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "experience_bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "experience_id", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fuente_adquisicion", "order": "ASCENDING" },
+        { "fieldPath": "canal_adquisicion", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "feedback",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "experience_id", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

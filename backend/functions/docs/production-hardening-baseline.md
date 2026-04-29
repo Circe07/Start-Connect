@@ -1,5 +1,9 @@
 # Production Hardening Baseline
 
+## Operations documentation
+
+For deployment, secrets, monitoring, Firestore indexes, tests, and rollback procedures see **`operations-and-production.md`** in this folder.
+
 ## Scope
 
 Current baseline for v1 endpoints related to experiences:
@@ -31,7 +35,13 @@ Current baseline for v1 endpoints related to experiences:
 
 - Admin middleware protects creation/update routes for experiences/hosts/admin exports.
 - User auth protects booking/feedback/referral creation.
-- Ownership checks are not uniformly applied to all user-mutating operations.
+- Domain rules for bookings (transitions, cancel ownership) live in `src/domain/bookingRules.js` and are covered by tests.
+- Fine-grained ownership applies where implemented (e.g. cancel booking); extend consistently for new mutating routes.
+
+### Runtime / secrets (current)
+
+- **Node 22**, `firebase-functions` v7.x.
+- **`AUTH_API_KEY`** is provided via **Secret Manager** and `defineSecret('AUTH_API_KEY')` in `index.js` (not legacy `functions.config()`).
 
 ## Smoke Baseline
 
@@ -53,7 +63,11 @@ Expected green path:
 ## Definition of Done per endpoint (hardening target)
 
 - Validates request payload/params/query with explicit schema.
-- Returns consistent success/error envelope.
+- Returns consistent success/error envelope (`ok` / `fail` helpers where adopted).
 - Enforces role and ownership constraints.
-- Emits structured request logs with `requestId`.
+- Emits structured request logs with `requestId` (and observability fields where enabled).
 - Covered by at least one RED->GREEN test and included in smoke/CI gate.
+
+## Stripe (pending)
+
+When payment features are enabled: store `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in Secret Manager, wire the function the same way as `AUTH_API_KEY`, and add webhook/smoke coverage.

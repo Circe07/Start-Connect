@@ -2,57 +2,84 @@
 
 ## 🔸 Overview
 
-**StartAndConnect** is a RESTful API for managing users, community groups, and posts. Built with Node.js, Express, Firebase Cloud Functions, and Cloud Firestore.
+**StartAndConnect** is a REST API built with Node.js, Express, Firebase Cloud Functions (Gen2 → Cloud Run), and Firestore. It powers community features (groups, contacts, centers, maps), authentication, and the **experiences** domain (experiences, experience bookings, hosts, feedback, referrals, admin exports).
+
+The **canonical backend** used for production deploy is **`backend/functions`** (see `backend/firebase.json`). An older root-level `functions/` tree was **moved to [`archive/legacy-root-functions-layered`](archive/legacy-root-functions-layered)** for reference only—do not deploy or install from there.
+
+### Documentation (operations & production)
+
+| Topic | Location |
+|-------|-----------|
+| **Operations, secrets, monitoring, rollback, checklist** | [`backend/functions/docs/operations-and-production.md`](backend/functions/docs/operations-and-production.md) |
+| **Index of `docs/` folder** | [`backend/functions/docs/README.md`](backend/functions/docs/README.md) |
+| **Incident runbook (includes Cloud Run rollback commands)** | [`backend/functions/docs/incident-runbook.md`](backend/functions/docs/incident-runbook.md) |
+| **Hardening baseline & smoke references** | [`backend/functions/docs/production-hardening-baseline.md`](backend/functions/docs/production-hardening-baseline.md) |
+
+Production highlights (details in the docs above):
+
+- **Node.js 22**, **`firebase-functions` v7**, auth API key via **`defineSecret('AUTH_API_KEY')`** + Secret Manager (no legacy `functions.config()`).
+- **Firestore** composite indexes: `backend/firestore.indexes.json` (use `gcloud` if CLI index deploy fails).
+- **Cloud Monitoring**: dashboard + alert policy JSON under `backend/functions/docs/`; notification channels configured in GCP.
+- **Rollback**: route Cloud Run traffic for service `api` in `europe-west1` (see runbook).
+
+---
 
 ## Getting started (local)
 
 ### Prerequisites
 
-- Node.js 20 (see `functions/package.json` engines)
+- **Node.js 22** for Cloud Functions (`backend/functions/package.json` → `engines.node`). Use the same or compatible for local runs.
 - Firebase CLI (`npm i -g firebase-tools`)
 
 ### Environment variables
 
-- Copy `.env.example` to `.env` and fill required values (no secrets are committed).
-- Required for auth:
-  - `AUTH_API_KEY` (Firebase web API key)
+- Copy **`backend/functions/.env.example`** to **`backend/functions/.env`** and fill values (never commit real secrets).
+- Required for auth (login / refresh against Firebase Identity Toolkit):
+  - `AUTH_API_KEY` (Firebase Web API key)
 - Optional (Firestore DB selection):
   - `FIREBASE_PROJECT_ID`
   - `FIREBASE_DATABASE_ID`
 - Recommended:
-  - `CORS_ORIGINS` (comma separated allowlist for prod)
+  - `CORS_ORIGINS` (comma-separated allowlist for prod)
   - `AUTH_RATE_LIMIT_WINDOW_MS`, `AUTH_RATE_LIMIT_MAX`
+- Payments (when integrated): `STRIPE_*` — use Secret Manager in production, not committed `.env`.
 
 ### Install
 
 ```bash
-cd functions
+cd backend/functions
 npm install
 ```
 
 ### Run (emulators)
 
+From `backend/functions`:
+
 ```bash
-cd functions
 npm run serve
 ```
 
-### Deploy (functions only)
+### Deploy (API function)
+
+From the **`backend`** directory (where `firebase.json` lives):
 
 ```bash
-cd functions
-npm run deploy
+firebase deploy --only functions:api
 ```
 
-### Tests
+### Tests (functions package)
 
 ```bash
+cd backend/functions
 npm test
 ```
 
 ### Production readiness testing
 
+Run from the **`backend`** directory (see `backend/package.json`):
+
 ```bash
+cd backend
 npm run test:phase1
 npm run test:contract
 npm run test:e2e
@@ -61,23 +88,52 @@ npm run test:perf-smoke
 npm run test:all-backend
 ```
 
+### End-to-end smoke (experiences)
+
+Postman collection and environment (refresh JWTs before running):
+
+- `testing/backend/experiences-e2e-smoke.postman_collection.json`
+- `testing/backend/experiences-e2e-smoke.postman_environment.json`
+
+```bash
+cd <repo-root>
+npx newman run testing/backend/experiences-e2e-smoke.postman_collection.json -e testing/backend/experiences-e2e-smoke.postman_environment.json
+```
+
 ### Automation tooling
 
-- Pre-commit hook (Husky + lint-staged): formats staged files with Prettier.
-- Dependabot config: `.github/dependabot.yml` (npm + GitHub Actions updates).
-- Security scanning: `.github/workflows/codeql.yml`.
-- API availability smoke in CI: `.github/workflows/newman-smoke.yml`.
+- Pre-commit hook (Husky + lint-staged): configured under **`backend/`**; formats staged files with Prettier.
+- Dependabot: `backend/.github/dependabot.yml`
+- Security scanning: `backend/.github/workflows/codeql.yml`
+- Backend release gates (lint/format/smoke): `backend/.github/workflows/backend-release-gates.yml`
+- Newman smoke workflow: `backend/.github/workflows/newman-smoke.yml`
 
 Testing artifacts:
 
 - `testing/README.md`
+- `testing/backend/` — experiences E2E smoke (above)
 - `testing/frontend/api-integration-matrix.md`
 - `testing/frontend/StartAndConnect.postman_collection.json`
 - `testing/release/release-gates.md`
 
 ### API docs
 
-- OpenAPI spec: `functions/docs/openapi.yaml`
+- OpenAPI spec (maintained copy): [`backend/functions/docs/openapi.yaml`](backend/functions/docs/openapi.yaml) — may lag behind all `/api/v1` routes; prefer [`operations-and-production.md`](backend/functions/docs/operations-and-production.md) for production behavior.
+
+### Experiences domain (`/api/v1`)
+
+Routes are also registered without the `api/v1` prefix for backward compatibility; **prefer `/api/v1/...`** for new clients.
+
+| Area | Endpoints (summary) |
+|------|---------------------|
+| Hosts | `POST/PATCH/GET /api/v1/hosts`, `GET /api/v1/hosts/:id` |
+| Experiences | `POST/GET/PATCH /api/v1/experiences`, `PATCH .../publish`, `GET .../:id` |
+| Experience bookings | `POST /api/v1/experience-bookings`, `GET /me`, `GET /experience/:id`, `PATCH .../:id/status`, `PATCH .../:id/cancel` |
+| Feedback | `POST /api/v1/feedback`, `GET /experience/:experienceId` |
+| Referrals | `POST /api/v1/referrals`, `GET /me` |
+| Admin exports | `GET /api/v1/admin/experiences/export`, `.../experience-bookings/export`, `.../users/export` (query filters + pagination) |
+
+See **`backend/functions/docs/production-hardening-baseline.md`** and **`operations-and-production.md`** for smoke expectations and operational checklist.
 
 ### 🔸 API Endpoint Summary
 
@@ -398,7 +454,7 @@ If you have this -> java.lang.String cannot be cast to java.lang.Boolean
 
 ### 1. Check your JDK version -> >= 21
 
-### 2. Check your NodeJS version -> v.20
+### 2. Check your NodeJS version -> LTS (e.g. 20 or 22 per tooling requirements)
 
 If you have this -> white screen
 
