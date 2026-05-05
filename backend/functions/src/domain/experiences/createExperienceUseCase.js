@@ -26,6 +26,7 @@ function createCreateExperienceUseCase({ experienceRepository }) {
         plazas_disponibles: normalized.plazas_disponibles,
         precio: normalized.precio,
         host_asignado: normalized.host_asignado,
+        center_id: normalized.center_id,
         estado: normalized.estado,
         politica_cancelacion: normalized.politica_cancelacion,
         instrucciones: normalized.instrucciones,

@@ -1,54 +1,49 @@
 /**
- * Script para obtener un ID Token válido de Firebase Auth (para pruebas en Postman).
- * Ejecutar con: node getToken.js
+ * Imprime idTokens en consola vía POST /auth/login (no usa Firebase Web API key).
+ *
+ * Credenciales: backend/functions/.env
+ *   POSTMAN_ADMIN_EMAIL, POSTMAN_ADMIN_PASSWORD (y opcionalmente POSTMAN_USER_*)
+ *
+ * Uso: node getToken.js
  */
 
-const { initializeApp } = require('firebase/app');
-const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, 'functions/.env') });
 
-// --- CONFIGURACIÓN DE TU PROYECTO FIREBASE ---
-const firebaseConfig = {
-  apiKey: 'AIzaSyASqdBdLa1OIRZaj9F3xgSuAgjf6qrfVb8',
-  authDomain: 'startandconnect-c44b2.firebaseapp.com',
-  projectId: 'startandconnect-c44b2',
-};
+const baseUrl = (process.env.POSTMAN_BASE_URL || 'https://api-ma5t57vzsq-ew.a.run.app').replace(
+  /\/$/,
+  ''
+);
 
-// --- CREDENCIALES DE USUARIO DE PRUEBA ---
-const USERS = [
-  { email: 'startandconnect@gmail.com', password: 'A53838081a*' },
-  { email: 'unaidevcoding@gmail.com', password: '993000' },
-  { email: 'admin@gmail.com', password: '123455' },
-  { email: 'test@gmail.com', password: 'A53838081a*' },
-  { email: 'test2@gmail.com', password: '123456' },
+const pairs = [
+  ['POSTMAN_ADMIN_EMAIL', 'POSTMAN_ADMIN_PASSWORD', 'admin'],
+  ['POSTMAN_USER_EMAIL', 'POSTMAN_USER_PASSWORD', 'usuario'],
 ];
 
-// --- FUNCIÓN PRINCIPAL ---
 (async () => {
-  const { getIdToken } = await import('firebase/auth');
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  for (const user of USERS) {
+  for (const [emailKey, passKey, label] of pairs) {
+    const email = process.env[emailKey];
+    const password = process.env[passKey];
+    if (!email || !password) {
+      console.warn(`Omitido (${label}): define ${emailKey} y ${passKey} en functions/.env`);
+      continue;
+    }
     try {
-      console.log(`\n🔐 Iniciando sesión como ${user.email}...`);
-
-      const userCredential = await signInWithEmailAndPassword(auth, user.email, user.password);
-
-      const idToken = await userCredential.user.getIdToken(true);
-
+      console.log(`\n🔐 Login ${label} (${email})…`);
+      const res = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.message || String(res.status));
       console.log('-----------------------------------------');
-      console.log(`✅ TOKEN OBTENIDO PARA: ${user.email}`);
-      console.log(`UID: ${userCredential.user.uid}`);
-      console.log('\nCopia este token en Postman:');
-      console.log(idToken);
-      console.log('-----------------------------------------\n');
-    } catch (error) {
-      console.error(`❌ Error con ${user.email}:`, error.message);
-      if (error.code === 'auth/invalid-login-credentials') {
-        console.error('⚠️ Verifica email y contraseña en Firebase Authentication.');
-      }
+      console.log(`✅ Token (${label})`);
+      console.log(body.token);
+      console.log('-----------------------------------------');
+    } catch (e) {
+      console.error(`❌ ${label}:`, e.message);
     }
   }
-
   process.exit(0);
 })();

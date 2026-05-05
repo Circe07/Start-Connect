@@ -29,9 +29,10 @@ function createFirestoreExperienceRepository() {
       return { id, ...patch };
     },
 
-    async list({ estado, limit = 30 }) {
+    async list({ estado, center_id, limit = 30 }) {
       let query = db.collection('experiences').orderBy('createdAt', 'desc');
       if (estado) query = query.where('estado', '==', estado);
+      if (center_id) query = query.where('center_id', '==', center_id);
       const snap = await query.limit(Math.min(Number(limit) || 30, 100)).get();
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     },

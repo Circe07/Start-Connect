@@ -1,6 +1,7 @@
 // functions/src/routes/users.js
 const { db, admin } = require('../config/firebase');
 const Contact = require('../models/contact.model');
+const { fail } = require('../shared/httpResponse');
 
 // Referencia a la subcolección de contactos de un usuario
 const getContactsCollectionRef = (userId) =>
@@ -25,9 +26,11 @@ exports.getAllContacts = async (req, res) => {
     });
   } catch (error) {
     console.error('Error al obtener contactos:', error);
-    res
-      .status(500)
-      .json({ success: false, message: 'Error al obtener contactos', error: error.message });
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
   }
 };
 
@@ -58,9 +61,11 @@ exports.createContact = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creando contacto:', error);
-    res
-      .status(500)
-      .json({ success: false, message: 'Error creando contacto', error: error.message });
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
   }
 };
 
@@ -96,11 +101,11 @@ exports.updateContact = async (req, res) => {
     });
   } catch (error) {
     console.error('Error al actualizar contacto:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error interno al actualizar el contacto',
-      error: error.message,
-    });
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
   }
 };
 
@@ -125,10 +130,10 @@ exports.deleteContact = async (req, res) => {
     return res.status(200).json({ success: true, message: 'Contacto eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar contacto:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error interno al eliminar el contacto',
-      error: error.message,
-    });
+    return fail(
+      res,
+      { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+      req.requestId
+    );
   }
 };

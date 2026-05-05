@@ -9,6 +9,17 @@ const groupsSeed = require('../../scripts/groupsSeed');
 const { db } = require('../config/firebase');
 const { ok, fail } = require('../shared/httpResponse');
 
+function forbidProductionSeeds(req, res, next) {
+  if (process.env.NODE_ENV === 'production') {
+    return fail(
+      res,
+      { status: 404, code: 'NOT_FOUND', message: 'Ruta no encontrada' },
+      req.requestId
+    );
+  }
+  next();
+}
+
 router.get('/check', (req, res) => {
   return ok(res, { message: 'Rutas de admin funcionando correctamente' }, 200, req.requestId);
 });
@@ -16,7 +27,7 @@ router.get('/check', (req, res) => {
 // Everything below requires admin
 router.use(adminMiddleware);
 
-router.post('/seed-hobbies', async (req, res) => {
+router.post('/seed-hobbies', forbidProductionSeeds, async (req, res) => {
   try {
     const batch = db.batch();
 
@@ -33,7 +44,7 @@ router.post('/seed-hobbies', async (req, res) => {
   }
 });
 
-router.post('/seed-venues', async (req, res) => {
+router.post('/seed-venues', forbidProductionSeeds, async (req, res) => {
   try {
     for (const venue of venuesSeed) {
       const venueRef = db.collection('globalVenues').doc(venue.id);
@@ -54,7 +65,7 @@ router.post('/seed-venues', async (req, res) => {
   }
 });
 
-router.post('/seed-activities', async (req, res) => {
+router.post('/seed-activities', forbidProductionSeeds, async (req, res) => {
   try {
     const batch = db.batch();
     activitiesSeed.forEach((activity) => {
@@ -75,7 +86,7 @@ router.post('/seed-activities', async (req, res) => {
   }
 });
 
-router.post('/seed-groups', async (req, res) => {
+router.post('/seed-groups', forbidProductionSeeds, async (req, res) => {
   try {
     const batch = db.batch();
     groupsSeed.forEach((group) => {

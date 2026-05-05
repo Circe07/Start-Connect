@@ -67,6 +67,42 @@
       }
     },
     {
+      "name": "01b - Create Center (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('validCenterId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Club QA Center\",\n  \"description\": \"Centro para smoke center_id\",\n  \"address\": \"Calle Centro 99\",\n  \"location\": { \"lat\": 40.4168, \"lng\": -3.7038 },\n  \"services\": [\"padel\"],\n  \"prices\": { \"primer_set\": 20 }\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/centers"
+      }
+    },
+    {
       "name": "02 - Create Experience (admin)",
       "event": [
         {
@@ -126,6 +162,117 @@
           }
         ],
         "url": "{{baseUrl}}/api/v1/experiences/{{experienceId}}/publish"
+      }
+    },
+    {
+      "name": "03b - Create Experience with center_id (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.environment.set('experienceIdWithCenter', body.experience.id);",
+              "pm.environment.set('experienceIdV2', body.experience.id);",
+              "pm.test('response carries center_id', function () {",
+              "  pm.expect(body.experience.center_id).to.eql(pm.environment.get('validCenterId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Partido Test QA Center\",\n  \"descripcion\": \"Partido para validar center_id\",\n  \"deporte_vertical\": \"padel\",\n  \"ciudad\": \"Madrid\",\n  \"club\": \"Club QA Center\",\n  \"direccion\": \"Calle Centro 99\",\n  \"fecha\": \"{{experienceDate}}\",\n  \"hora_inicio\": \"12:00\",\n  \"hora_fin\": \"13:30\",\n  \"nivel_permitido\": \"medio\",\n  \"plazas_totales\": 2,\n  \"precio\": 20,\n  \"host_asignado\": \"{{hostId}}\",\n  \"center_id\": \"{{validCenterId}}\",\n  \"politica_cancelacion\": \"Cancelacion hasta 24h antes\",\n  \"instrucciones\": \"Traer pala y agua\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/experiences"
+      }
+    },
+    {
+      "name": "03c - Create Experience with invalid center_id (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('validation mentions center_id', function () {",
+              "  pm.expect(JSON.stringify(body)).to.include('center_id');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Partido Test QA Invalid Center\",\n  \"descripcion\": \"Partido para validar center_id invalido\",\n  \"deporte_vertical\": \"padel\",\n  \"ciudad\": \"Madrid\",\n  \"club\": \"Club QA\",\n  \"direccion\": \"Calle Test 124\",\n  \"fecha\": \"{{experienceDate}}\",\n  \"hora_inicio\": \"14:00\",\n  \"hora_fin\": \"15:00\",\n  \"nivel_permitido\": \"medio\",\n  \"plazas_totales\": 2,\n  \"precio\": 18,\n  \"host_asignado\": \"{{hostId}}\",\n  \"center_id\": \"{{invalidCenterId}}\",\n  \"politica_cancelacion\": \"Cancelacion hasta 24h antes\",\n  \"instrucciones\": \"Traer pala y agua\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/experiences"
+      }
+    },
+    {
+      "name": "03d - List Experiences by center_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('all returned experiences match center_id filter', function () {",
+              "  pm.expect(Array.isArray(body.experiences)).to.eql(true);",
+              "  body.experiences.forEach(function (e) {",
+              "    pm.expect(e.center_id).to.eql(pm.environment.get('validCenterId'));",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/experiences?center_id={{validCenterId}}&limit=20"
       }
     },
     {
@@ -282,6 +429,82 @@
         "body": {
           "mode": "raw",
           "raw": "{\n  \"experience_id\": \"{{experienceId}}\",\n  \"nota_1_10\": 9,\n  \"repetiria\": true,\n  \"traeria_amigo\": true,\n  \"comentario\": \"Muy buena experiencia\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/feedback"
+      }
+    },
+    {
+      "name": "08b - Create Feedback V2 (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('feedback version is v2', function () {",
+              "  pm.expect(body.feedback.feedback_version).to.eql('v2');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"experience_id\": \"{{experienceIdV2}}\",\n  \"nota_app\": 8,\n  \"nota_club\": 9,\n  \"nota_host\": 10,\n  \"nota_companeros\": 8,\n  \"repetiria\": true,\n  \"traeria_amigo\": true,\n  \"comentario\": \"Feedback v2 granular\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/feedback"
+      }
+    },
+    {
+      "name": "08c - Create Feedback V2 incomplete (user)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('validation mentions nota_companeros', function () {",
+              "  pm.expect(JSON.stringify(body)).to.include('nota_companeros');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"experience_id\": \"{{experienceIdV2}}\",\n  \"nota_app\": 8,\n  \"nota_club\": 9,\n  \"nota_host\": 10,\n  \"repetiria\": true,\n  \"traeria_amigo\": true,\n  \"comentario\": \"Feedback v2 incompleto\"\n}"
         },
         "url": "{{baseUrl}}/api/v1/feedback"
       }

@@ -1,6 +1,8 @@
 # Documentación backend — Functions
 
-Desde la raíz del repositorio también hay un resumen enlazado aquí en el [**README principal**](../../../README.md) (sección _Documentation (operations & production)_).
+La guía funcional completa de la API (sin enlaces externos a otros archivos del repo) está en el README del paquete: **backend/functions/README.md** (un nivel por encima de esta carpeta `docs/`).
+
+Desde la raíz del repositorio existe además un README principal del proyecto con el resto de capas (frontend, etc.).
 
 | Documento                                                                  | Contenido                                                                                                                      |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |

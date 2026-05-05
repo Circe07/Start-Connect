@@ -11,6 +11,8 @@
     "format:check": "prettier --check .",
     "format:check:hardening": "prettier --check functions/src/**/*.js functions/test/**/*.js functions/docs/**/*.md .github/workflows/backend-release-gates.yml ../testing/backend/*.json",
     "postman:smoke": "newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=http://127.0.0.1:5001/startandconnect-c44b2/europe-west1/api",
+    "postman:update-tokens": "node scripts/update-postman-tokens.cjs",
+    "postman:experiences-smoke": "newman run ../testing/backend/experiences-e2e-smoke.postman_collection.json -e ../testing/backend/experiences-e2e-smoke.postman_environment.json",
     "test:smoke-env": "node testing/scripts/smoke-env.mjs",
     "test:smoke-api": "node testing/scripts/smoke-api.mjs",
     "test:load-smoke": "node testing/scripts/load-smoke.mjs",

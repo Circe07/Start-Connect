@@ -26,6 +26,55 @@ components:
         nextStartAfterId:
           type: string
           nullable: true
+    ExperienceCreateRequest:
+      type: object
+      required: [titulo, deporte_vertical, ciudad, fecha, hora_inicio, hora_fin]
+      properties:
+        titulo: { type: string }
+        descripcion: { type: string }
+        deporte_vertical: { type: string }
+        ciudad: { type: string }
+        club: { type: string }
+        direccion: { type: string }
+        fecha: { type: string }
+        hora_inicio: { type: string }
+        hora_fin: { type: string }
+        nivel_permitido: { type: string }
+        plazas_totales: { type: integer, minimum: 1 }
+        precio: { type: number }
+        host_asignado: { type: string, nullable: true }
+        center_id:
+          type: string
+          description: Centro/club registrado (opcional, pero si se envía debe existir en /centers)
+    FeedbackCreateRequest:
+      type: object
+      required: [experience_id]
+      properties:
+        experience_id: { type: string }
+        nota_1_10:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Campo legacy (compatibilidad hacia atrás).
+        nota_app:
+          type: integer
+          minimum: 1
+          maximum: 10
+        nota_club:
+          type: integer
+          minimum: 1
+          maximum: 10
+        nota_host:
+          type: integer
+          minimum: 1
+          maximum: 10
+        nota_companeros:
+          type: integer
+          minimum: 1
+          maximum: 10
+        repetiria: { type: boolean }
+        traeria_amigo: { type: boolean }
+        comentario: { type: string }
 paths:
   /health:
     get:
@@ -233,3 +282,46 @@ paths:
         '201': { description: Created }
         '401': { description: Unauthorized }
         '403': { description: Forbidden (not a member) }
+  /experiences:
+    get:
+      summary: List experiences
+      parameters:
+        - in: query
+          name: estado
+          schema: { type: string }
+        - in: query
+          name: center_id
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200': { description: OK }
+        '401': { description: Unauthorized }
+    post:
+      summary: Create experience (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceCreateRequest'
+      responses:
+        '201': { description: Created }
+        '400': { description: Validation error or center_id does not exist }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+  /feedback:
+    post:
+      summary: Create feedback (legacy or v2 granular)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackCreateRequest'
+      responses:
+        '201': { description: Created }
+        '400': { description: Validation error }
+        '401': { description: Unauthorized }
+        '409': { description: Duplicate feedback for same user + experience }

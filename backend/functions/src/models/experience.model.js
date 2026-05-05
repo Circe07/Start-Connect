@@ -17,6 +17,7 @@ class Experience {
     this.plazas_disponibles = Number(payload.plazas_disponibles ?? payload.plazas_totales ?? 0);
     this.precio = Number(payload.precio || 0);
     this.host_asignado = payload.host_asignado || null;
+    this.center_id = payload.center_id || null;
     this.estado = payload.estado || 'borrador';
     this.politica_cancelacion = payload.politica_cancelacion || '';
     this.instrucciones = payload.instrucciones || '';
@@ -82,6 +83,13 @@ class Experience {
       return `Estado inválido. Permitidos: ${EXPERIENCE_STATUSES.join(', ')}`;
     }
 
+    // Firestore puede devolver null si la experiencia no tiene centro asociado
+    if (data.center_id !== undefined && data.center_id !== null && data.center_id !== '') {
+      if (typeof data.center_id !== 'string' || data.center_id.trim().length === 0) {
+        return 'center_id debe ser un string no vacío';
+      }
+    }
+
     return null;
   }
 
@@ -101,6 +109,7 @@ class Experience {
       plazas_disponibles: this.plazas_disponibles,
       precio: this.precio,
       host_asignado: this.host_asignado,
+      center_id: this.center_id,
       estado: this.estado,
       politica_cancelacion: this.politica_cancelacion,
       instrucciones: this.instrucciones,

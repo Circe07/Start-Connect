@@ -26,8 +26,13 @@ This folder contains the automation-first testing implementation for backend pro
 ## Experiences E2E smoke (deployed API)
 
 - Collection: `testing/backend/experiences-e2e-smoke.postman_collection.json`
-- Environment: `testing/backend/experiences-e2e-smoke.postman_environment.json`  
-  Set `baseUrl` to your Cloud Run URL and refresh `adminToken` / `userToken` before running.
+- Environment local (no versionado, contiene JWT): copia la plantilla y rellena tokens.
+
+```bash
+cp testing/backend/experiences-e2e-smoke.postman_environment.example.json testing/backend/experiences-e2e-smoke.postman_environment.json
+```
+
+En `backend/`: `npm run postman:update-tokens` (requiere `POSTMAN_*` en `backend/functions/.env` o variables de entorno). Luego `npm run postman:experiences-smoke`.
 
 From repo root:
 

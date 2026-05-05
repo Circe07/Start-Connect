@@ -27,4 +27,23 @@ describe('createExperienceUseCase', () => {
     expect(result.id).toBe('exp-1');
     expect(repo.create).toHaveBeenCalledWith(expect.objectContaining({ estado: 'borrador' }));
   });
+
+  test('keeps optional center_id in payload', async () => {
+    const repo = {
+      create: jest.fn(async (p) => ({ id: 'exp-2', ...p })),
+    };
+    const useCase = createCreateExperienceUseCase({ experienceRepository: repo });
+    const result = await useCase.execute({
+      titulo: 'Partido con centro',
+      deporte_vertical: 'padel',
+      ciudad: 'Madrid',
+      fecha: '2026-05-01',
+      hora_inicio: '10:00',
+      hora_fin: '11:00',
+      plazas_totales: 8,
+      center_id: 'center-1',
+    });
+    expect(result.id).toBe('exp-2');
+    expect(repo.create).toHaveBeenCalledWith(expect.objectContaining({ center_id: 'center-1' }));
+  });
 });

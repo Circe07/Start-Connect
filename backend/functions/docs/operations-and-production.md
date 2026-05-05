@@ -39,6 +39,29 @@ La URL pública la muestra el CLI tras cada deploy (`Function URL`). El hosting 
 - Plantilla: `backend/functions/.env.example`
 - `dotenv` carga `backend/functions/.env` (no commitear valores reales).
 
+### Producción (`NODE_ENV=production`)
+
+- Además de **`AUTH_API_KEY`** (o `FIREBASE_API_KEY`), **`validateEnv()` exige `CORS_ORIGINS`** con al menos un origen (lista separada por comas). Configurarlo en variables de entorno de Cloud Run (servicio de la función Gen2 `api`) antes del deploy. No tiene por qué ser secreto; suele definirse como variable normal, no como Secret Manager.
+
+**Ejemplo para este repo (solo Firebase Hosting del proyecto `startandconnect-c44b2`):**
+
+```text
+CORS_ORIGINS=https://startandconnect-c44b2.web.app,https://startandconnect-c44b2.firebaseapp.com
+```
+
+- Añade más entradas separadas por coma si usas dominio custom en Hosting, preview channels (`https://startandconnect-c44b2--<channel>-<hash>.web.app`), o otro front desplegado (cada URL debe coincidir **exactamente** con el header `Origin` del navegador: esquema + host, sin barra final).
+- En la consola: Firebase → Build → Functions → `api` → Variables de entorno, o Google Cloud Console → Cloud Run → servicio asociado → Variables y secretos.
+
+### Seguridad API (referencia)
+
+- Perfil **`GET /users/:uid`**: el propietario ve el documento completo; otros usuarios solo campos públicos definidos en `src/domain/users/publicProfile.js`.
+- **Admin seed** (`/admin/seed-*`): deshabilitados en producción (404).
+- **Idempotencia** (`Idempotency-Key`): en producción la respuesta se guarda en Firestore, colección **`api_idempotency`**, con clave hash por usuario + ruta + cabecera (TTL por campo `expiresAt`, ventana por defecto 5 min). En **tests Jest** y con **`IDEMPOTENCY_STORE=memory`** se usa el almacén en memoria (una sola instancia).
+
+### Dependencias
+
+- Revisar vulnerabilidades con `npm audit` en `backend/functions`. Tras `npm audit fix`, pueden quedar avisos **low** en dependencias transitivas de `firebase-admin` / `@google-cloud/firestore`; no usar `npm audit fix --force` sin validar (puede bajar `firebase-admin` de forma incompatible). El workflow de release gates puede ejecutar auditoría en CI (ver `.github/workflows/backend-release-gates.yml`).
+
 ---
 
 ## 3. Deuda técnica resuelta (referencia)
@@ -70,13 +93,24 @@ La URL pública la muestra el CLI tras cada deploy (`Function URL`). El hosting 
 
 Tras importar o crear políticas, asociar **canales de notificación** (email u otros). Conviene un segundo canal (Slack/PagerDuty) además del correo.
 
+- Crear primero al menos un canal en **Monitoring → Alerting → Edit notification channels** (p. ej. email). Las políticas JSON del repo no incluyen el ID del canal; hay que adjuntarlo al **importar** en la consola o crear la política manualmente con el mismo filtro de métricas que figura en `alert-policy-*.json`.
+- Si `gcloud alpha monitoring` no está instalado o el CLI pide modo interactivo en Windows, usar solo la consola web para crear políticas equivalentes.
+
 ---
 
 ## 5. Firestore — índices
 
-- Definición en repo: `backend/firestore.indexes.json`
-- Índices compuestos relevantes para exports y dominio experiencias/reservas/feedback/usuarios (multiples igualdades en misma query).
-- Si `firebase deploy --only firestore:indexes` falla por el CLI, los índices se pueden crear con `gcloud firestore indexes composite create` (comprobar estado hasta `READY`).
+- Definición en repo: `backend/firestore.indexes.json` (también referenciada para la base nombrada `startandconnect-eur3` en `firebase.json`).
+- Incluye consultas de listado de experiencias por **`estado` + `createdAt`** y por **`center_id` + `estado` + `createdAt`** (además de los índices previos de grupo/actividades/reservas).
+- Si `firebase deploy --only firestore:indexes` falla con error genérico del CLI, crear los índices en la base **`startandconnect-eur3`** con `gcloud firestore indexes composite create` (en PowerShell, cada `--field-config=...` entre comillas). Ejemplo de dos campos:
+
+  `gcloud firestore indexes composite create --project=startandconnect-c44b2 --database=startandconnect-eur3 --collection-group=experiences "--field-config=field-path=estado,order=ascending" "--field-config=field-path=createdAt,order=descending"`
+
+  Tres campos (`center_id` + `estado` + `createdAt`):
+
+  `gcloud firestore indexes composite create --project=startandconnect-c44b2 --database=startandconnect-eur3 --collection-group=experiences "--field-config=field-path=center_id,order=ascending" "--field-config=field-path=estado,order=ascending" "--field-config=field-path=createdAt,order=descending"`
+
+- Comprobar en consola Firebase o con `gcloud firestore indexes composite list` hasta estado **READY** antes de depender de esas queries en producción.
 
 ---
 

@@ -8,28 +8,39 @@ on:
 jobs:
   backend-gates:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install root dependencies
+      - name: Install backend dependencies
         run: npm ci
 
       - name: Install functions dependencies
         run: npm --prefix functions ci
 
+      - name: npm audit (functions)
+        working-directory: backend/functions
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Lint/format gate
         run: npm run format:check:hardening
 
       - name: Validate release gate docs
-        run: npm run test:release-gate
+        working-directory: .
+        run: node testing/scripts/release-gate.mjs
 
       - name: Run backend quality gates
         run: npm run test:all-backend
 
       - name: Run smoke Newman gate
-        run: npx newman run testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=https://api-ma5t57vzsq-ew.a.run.app
+        run: npx newman run ../testing/frontend/health-smoke.postman_collection.json --env-var baseUrl=https://api-ma5t57vzsq-ew.a.run.app

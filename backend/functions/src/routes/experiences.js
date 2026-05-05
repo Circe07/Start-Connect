@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const authMiddleware = require('../middleware/auth');
 const adminMiddleware = require('../middleware/admin');
+const { readRateLimit } = require('../middleware/rateLimit');
 const {
   createExperience,
   publishExperience,
@@ -16,8 +17,8 @@ router.get('/check', (_, res) => {
   });
 });
 
-router.get('/', authMiddleware, listExperiences);
-router.get('/:id', authMiddleware, getExperienceById);
+router.get('/', readRateLimit, authMiddleware, listExperiences);
+router.get('/:id', readRateLimit, authMiddleware, getExperienceById);
 router.post('/', adminMiddleware, createExperience);
 router.patch('/:id', adminMiddleware, updateExperience);
 router.patch('/:id/publish', adminMiddleware, publishExperience);

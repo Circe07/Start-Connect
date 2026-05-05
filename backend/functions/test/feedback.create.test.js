@@ -45,4 +45,35 @@ describe('feedback create', () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
   });
+
+  it('creates feedback with granular v2 ratings', async () => {
+    const req = {
+      user: { uid: 'u-1' },
+      body: {
+        experience_id: 'exp-1',
+        nota_app: 9,
+        nota_club: 8,
+        nota_host: 10,
+        nota_companeros: 7,
+        repetiria: true,
+        traeria_amigo: true,
+      },
+    };
+    const res = mockRes();
+    await createFeedback(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        feedback: expect.objectContaining({
+          feedback_version: 'v2',
+          nota_app: 9,
+          nota_club: 8,
+          nota_host: 10,
+          nota_companeros: 7,
+        }),
+      })
+    );
+  });
 });

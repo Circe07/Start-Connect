@@ -1,5 +1,6 @@
 // src/index.js
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+// Load the same .env file the Firebase CLI uses for Gen2 (`backend/functions/.env`).
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const { defineSecret } = require('firebase-functions/params');
 const { setGlobalOptions } = require('firebase-functions/v2/options');

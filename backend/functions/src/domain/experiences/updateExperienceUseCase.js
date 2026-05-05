@@ -16,6 +16,7 @@ function createUpdateExperienceUseCase({ experienceRepository }) {
     'plazas_disponibles',
     'precio',
     'host_asignado',
+    'center_id',
     'estado',
     'politica_cancelacion',
     'instrucciones',

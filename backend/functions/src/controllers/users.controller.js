@@ -1,16 +1,24 @@
 /**
  * Controller Users
- * This controller is responsible for creating and managing users and their profiles.
+ * This file is responsible for creating and managing users and their profiles.
  * Author: Unai Villar
  */
 
 const { db } = require('../config/firebase');
+const { fail } = require('../shared/httpResponse');
+const { pickPublicUserFields } = require('../domain/users/publicProfile');
+
+function internalError(res, req, logError) {
+  if (logError) console.error(logError);
+  return fail(
+    res,
+    { status: 500, code: 'INTERNAL_ERROR', message: 'Error interno.' },
+    req.requestId
+  );
+}
 
 /**
  * GET -> Get my profile
- * @param {*} req
- * @param {*} res
- * @returns
  */
 exports.getMyProfile = async (req, res) => {
   try {
@@ -24,34 +32,18 @@ exports.getMyProfile = async (req, res) => {
 
     res.json(snap.data());
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    return internalError(res, req, error);
   }
 };
 
 /**
- *  PATCH -> Update my profile
- * @param {*} req
- * @param {*} res
- * @returns
+ * PATCH -> Update my profile (allowlist; email / fecha_registro only via server flows)
  */
 exports.updateMyProfile = async (req, res) => {
   try {
     const uid = req.user.uid;
     const body = req.body;
 
-    /**
-     * Allowed fields to update
-     * This fields will be updated
-     * name -> string
-     * username -> string
-     * bio -> string
-     * photo -> string
-     * sports -> array
-     * phoneNumber -> string
-     * location -> string
-     * TODO: Recommend to add more fields and validate data type with ../model
-     */
     const allowedFields = [
       'name',
       'username',
@@ -63,11 +55,9 @@ exports.updateMyProfile = async (req, res) => {
       'nombre',
       'edad',
       'telefono_whatsapp',
-      'email',
       'zona',
       'veces_jugadas',
       'idioma',
-      'fecha_registro',
       'fuente_adquisicion',
       'canal_adquisicion',
     ];
@@ -77,30 +67,36 @@ exports.updateMyProfile = async (req, res) => {
       if (body[field] !== undefined) data[field] = body[field];
     });
 
+    if (Object.prototype.hasOwnProperty.call(data, 'edad')) {
+      const n = Number(data.edad);
+      data.edad = Number.isFinite(n) ? Math.max(0, Math.min(120, Math.round(n))) : null;
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'veces_jugadas')) {
+      const n = Number(data.veces_jugadas);
+      data.veces_jugadas = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
+    }
+
     if (Object.keys(data).length === 0) {
       return res
         .status(400)
-        .json({ message: 'No se proporcionaron campos válidos para actualizar' });
+        .json({ message: 'No se proporcionaron campos válidos para actualizar' });
     }
 
     await db.collection('users').doc(uid).update(data);
 
     res.json({ message: 'Perfil actualizado correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    return internalError(res, req, error);
   }
 };
 
 /**
- * GET -> Get user profile with uid(id)
- * @param {*} req
- * @param {*} res
- * @returns
+ * GET -> Get user profile by uid (full doc for self; public subset for others)
  */
 exports.getUserProfile = async (req, res) => {
   try {
     const { uid } = req.params;
+    const requesterUid = req.user.uid;
 
     const snap = await db.collection('users').doc(uid).get();
 
@@ -108,9 +104,13 @@ exports.getUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'El usuario no existe' });
     }
 
-    res.json(snap.data());
+    const data = snap.data();
+    if (requesterUid === uid) {
+      return res.json(data);
+    }
+
+    return res.json(pickPublicUserFields(data));
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    return internalError(res, req, error);
   }
 };

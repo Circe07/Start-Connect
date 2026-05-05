@@ -1,11 +1,21 @@
 const { db, FieldValue } = require('../config/firebase');
 const Experience = require('../models/experience.model');
 
+async function ensureCenterExists(centerId) {
+  if (centerId === undefined) return true;
+  const centerRef = db.collection('centers').doc(centerId);
+  const centerSnap = await centerRef.get();
+  return centerSnap.exists;
+}
+
 exports.createExperience = async (req, res) => {
   try {
     const payload = { ...req.body, estado: 'borrador' };
     const validationError = Experience.validate(payload);
     if (validationError) return res.status(400).json({ message: validationError });
+    if (!(await ensureCenterExists(payload.center_id))) {
+      return res.status(400).json({ message: 'center_id no existe' });
+    }
 
     const experience = new Experience(payload);
     const ref = db.collection('experiences').doc();
@@ -61,6 +71,7 @@ exports.updateExperience = async (req, res) => {
       'plazas_disponibles',
       'precio',
       'host_asignado',
+      'center_id',
       'estado',
       'politica_cancelacion',
       'instrucciones',
@@ -79,6 +90,9 @@ exports.updateExperience = async (req, res) => {
 
     const validationError = Experience.validate(patch);
     if (validationError) return res.status(400).json({ message: validationError });
+    if (!(await ensureCenterExists(patch.center_id))) {
+      return res.status(400).json({ message: 'center_id no existe' });
+    }
 
     patch.updatedAt = FieldValue.serverTimestamp();
     await db.collection('experiences').doc(id).update(patch);
@@ -94,8 +108,35 @@ exports.listExperiences = async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit, 10) || 30, 100);
     const status = req.query.estado;
-    let query = db.collection('experiences').orderBy('createdAt', 'desc').limit(limit);
+    const centerId = req.query.center_id;
+
+    // No mezclar orderBy('createdAt') con where('center_id') sin índice compuesto.
+    // Filtrar solo por center_id: igualdad + límite (orden arbitrario; suficiente para filtros).
+    if (centerId && !status) {
+      const snapshot = await db
+        .collection('experiences')
+        .where('center_id', '==', centerId)
+        .limit(limit)
+        .get();
+      const experiences = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return res.status(200).json({ success: true, experiences });
+    }
+
+    if (centerId && status) {
+      const snapshot = await db
+        .collection('experiences')
+        .where('center_id', '==', centerId)
+        .where('estado', '==', status)
+        .orderBy('createdAt', 'desc')
+        .limit(limit)
+        .get();
+      const experiences = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return res.status(200).json({ success: true, experiences });
+    }
+
+    let query = db.collection('experiences');
     if (status) query = query.where('estado', '==', status);
+    query = query.orderBy('createdAt', 'desc').limit(limit);
 
     const snapshot = await query.get();
     const experiences = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));

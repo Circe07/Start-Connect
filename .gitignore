@@ -39,6 +39,13 @@ firebase-adminsdk.json
 frontend/.env.smoke
 !frontend/.env.smoke.example
 
+# Plantillas de ejemplo (sí versionar); la regla .env.* las ocultaba antes
+!.env.example
+!**/.env.example
+
+# Postman / Newman: entorno local con idTokens (regenerar con postman:update-tokens)
+testing/backend/experiences-e2e-smoke.postman_environment.json
+
 # Apikeys o configuraciones sensibles
 apikey.js
 .apikey.js
