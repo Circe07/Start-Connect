@@ -90,14 +90,13 @@ npm run test:all-backend
 
 ### End-to-end smoke (experiences)
 
-Postman collection and environment (refresh JWTs before running):
-
-- `testing/backend/experiences-e2e-smoke.postman_collection.json`
-- `testing/backend/experiences-e2e-smoke.postman_environment.json`
+- Collection: `testing/backend/experiences-e2e-smoke.postman_collection.json`
+- Environment: copy `testing/backend/experiences-e2e-smoke.postman_environment.example.json` to `experiences-e2e-smoke.postman_environment.json` (that file is gitignored because it holds JWTs). From **`backend/`**, run `npm run postman:update-tokens` after setting `POSTMAN_*` in `backend/functions/.env` (see `backend/functions/.env.example`), then `npm run postman:experiences-smoke`.
 
 ```bash
 cd <repo-root>
-npx newman run testing/backend/experiences-e2e-smoke.postman_collection.json -e testing/backend/experiences-e2e-smoke.postman_environment.json
+cp testing/backend/experiences-e2e-smoke.postman_environment.example.json testing/backend/experiences-e2e-smoke.postman_environment.json
+cd backend && npm run postman:update-tokens && npm run postman:experiences-smoke
 ```
 
 ### Automation tooling
