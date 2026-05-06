@@ -544,6 +544,46 @@
       }
     },
     {
+      "name": "09b - Payments Checkout (booking)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('checkout payload has mode and url', function () {",
+              "  pm.expect(body).to.have.property('mode');",
+              "  pm.expect(body).to.have.property('checkout_url');",
+              "});",
+              "if (body.payment_attempt_id) pm.environment.set('paymentAttemptId', body.payment_attempt_id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"booking_id\": \"{{bookingId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/payments/checkout"
+      }
+    },
+    {
       "name": "10 - Admin Export Experiences",
       "event": [
         {

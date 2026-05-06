@@ -42,6 +42,7 @@ const referralsRoutes = require('./routes/referrals');
 const activitiesRoutes = require('./routes/activities');
 const swipesRoutes = require('./routes/swipes');
 const matchesRoutes = require('./routes/matches');
+const paymentsRoutes = require('./routes/payments');
 
 validateEnv();
 
@@ -123,6 +124,8 @@ app.use('/swipes', swipesRoutes);
 app.use('/api/v1/swipes', swipesRoutes);
 app.use('/matches', matchesRoutes);
 app.use('/api/v1/matches', matchesRoutes);
+app.use('/payments', paymentsRoutes);
+app.use('/api/v1/payments', paymentsRoutes);
 
 /**
  * Default route to check if API is working

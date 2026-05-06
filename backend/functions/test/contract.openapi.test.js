@@ -25,7 +25,13 @@ describe('OpenAPI contract coverage (critical paths)', () => {
     ].forEach((p) => expect(openapi).toContain(p));
   });
 
-  test('app mounts auth, v1, groups, activities, experiences, and experience-bookings', () => {
+  test('openapi includes payments paths', () => {
+    ['/payments/checkout', '/payments/webhook', '/payments/{bookingId}/status'].forEach((p) =>
+      expect(openapi).toContain(p)
+    );
+  });
+
+  test('app mounts auth, v1, groups, activities, experiences, experience-bookings and payments', () => {
     expect(app).toContain("app.use('/auth', authRoutes)");
     expect(app).toContain("app.use('/api/v1/auth', authRoutes)");
     expect(app).toContain("app.use('/api/v1', apiVersionV1)");
@@ -37,5 +43,7 @@ describe('OpenAPI contract coverage (critical paths)', () => {
     expect(app).toContain("app.use('/api/v1/experiences', experiencesRoutes)");
     expect(app).toContain("app.use('/experience-bookings', experienceBookingsRoutes)");
     expect(app).toContain("app.use('/api/v1/experience-bookings', experienceBookingsRoutes)");
+    expect(app).toContain("app.use('/payments', paymentsRoutes)");
+    expect(app).toContain("app.use('/api/v1/payments', paymentsRoutes)");
   });
 });

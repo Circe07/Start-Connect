@@ -26,9 +26,19 @@ La URL pública la muestra el CLI tras cada deploy (`Function URL`). El hosting 
 
 - **`AUTH_API_KEY`**: Firebase Web API key para Identity Toolkit / refresh token. En código se declara con **`defineSecret('AUTH_API_KEY')`** (`firebase-functions/params`) y se monta en Cloud Run como variable de entorno secreta. El valor vive en **Secret Manager**; rotación = nueva versión del secreto + redeploy de `functions:api` si hace falta recargar.
 
-### Pendiente cuando exista integración de pagos
+### Pagos Stripe (modo híbrido)
 
-- **`STRIPE_SECRET_KEY`**, **`STRIPE_WEBHOOK_SECRET`**: crear versiones en Secret Manager y enlazar la función igual que `AUTH_API_KEY` cuando el código los consuma solo desde secretos (no desde `.env` en prod).
+- Variables usadas por la API de pagos:
+  - **`STRIPE_MODE`**: `fixed` (por defecto) o `dynamic`.
+  - **`STRIPE_CHECKOUT_URL_FIXED`**: enlace Checkout fijo (obligatorio en `fixed`).
+  - **`STRIPE_SECRET_KEY`**: clave secreta (obligatoria en `dynamic` y para verificar webhooks).
+  - **`STRIPE_WEBHOOK_SECRET`**: firma del endpoint webhook (obligatoria siempre en prod).
+  - **`STRIPE_SUCCESS_URL`**, **`STRIPE_CANCEL_URL`**: callbacks para `dynamic`.
+- Endpoints expuestos:
+  - `POST /api/v1/payments/checkout`
+  - `POST /api/v1/payments/webhook`
+  - `GET /api/v1/payments/:bookingId/status`
+- Persistencia de trazabilidad: colección Firestore `payment_attempts` y deduplicación de webhooks en `stripe_webhook_events` por `event.id`.
 
 ### Legacy eliminado
 
@@ -41,7 +51,11 @@ La URL pública la muestra el CLI tras cada deploy (`Function URL`). El hosting 
 
 ### Producción (`NODE_ENV=production`)
 
-- Además de **`AUTH_API_KEY`** (o `FIREBASE_API_KEY`), **`validateEnv()` exige `CORS_ORIGINS`** con al menos un origen (lista separada por comas). Configurarlo en variables de entorno de Cloud Run (servicio de la función Gen2 `api`) antes del deploy. No tiene por qué ser secreto; suele definirse como variable normal, no como Secret Manager.
+- Además de **`AUTH_API_KEY`** (o `FIREBASE_API_KEY`), **`validateEnv()` exige `CORS_ORIGINS`** con al menos un origen (lista separada por comas). Configurarlo en variables de entorno de Cloud Run (servicio de la función Gen2 `api`) antes del deploy.
+- Para pagos en producción:
+  - `STRIPE_WEBHOOK_SECRET` obligatorio.
+  - `STRIPE_MODE=fixed` exige `STRIPE_CHECKOUT_URL_FIXED`.
+  - `STRIPE_MODE=dynamic` exige `STRIPE_SECRET_KEY`, `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL`.
 
 **Ejemplo para este repo (solo Firebase Hosting del proyecto `startandconnect-c44b2`):**
 
@@ -119,7 +133,7 @@ Tras importar o crear políticas, asociar **canales de notificación** (email u 
 | Tipo                   | Ubicación / comando                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unit / integration     | `backend/functions`: `npm test`                                                                                                                     |
-| Smoke E2E              | `testing/backend/experiences-e2e-smoke.postman_collection.json` + `experiences-e2e-smoke.postman_environment.json`                                  |
+| Smoke E2E              | `testing/backend/experiences-e2e-smoke.postman_collection.json` + `experiences-e2e-smoke.postman_environment.example.json`                          |
 | Newman                 | `npx newman run ...` (tokens en entorno deben estar vigentes)                                                                                       |
 | OpenAPI (contrato MVP) | `backend/functions/docs/openapi.yaml` — comprobado por `backend/functions/test/contract.openapi.test.js` (`npm run test:contract` desde `backend/`) |
 
@@ -149,13 +163,14 @@ Ver **`incident-runbook.md`**: severidades, primeros 10 minutos, rollback por re
 
 ---
 
-## 9. Checklist previo a go-live (sin Stripe)
+## 9. Checklist previo a go-live
 
 - [ ] Secretos de prod solo en Secret Manager / params; sin keys en repo.
 - [ ] Tokens Postman/regression: renovar si expiran; no subir entornos con JWT activos al remoto.
 - [ ] Alertas con al menos un canal operativo; ideal segundo canal.
 - [ ] Simulacro de rollback ejecutado al menos una vez (ver runbook).
-- [ ] Stripe: pendiente hasta tener claves y cableado igual que `AUTH_API_KEY`.
+- [ ] Stripe webhook activo y firmado (`STRIPE_WEBHOOK_SECRET` válido).
+- [ ] `STRIPE_MODE` definido según estrategia (`fixed` o `dynamic`) y variables requeridas configuradas.
 
 ---
 

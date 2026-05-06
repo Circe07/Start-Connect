@@ -32,7 +32,7 @@ This folder contains the automation-first testing implementation for backend pro
 cp testing/backend/experiences-e2e-smoke.postman_environment.example.json testing/backend/experiences-e2e-smoke.postman_environment.json
 ```
 
-En `backend/`: `npm run postman:update-tokens` (requiere `POSTMAN_*` en `backend/functions/.env` o variables de entorno). Luego `npm run postman:experiences-smoke`.
+En `backend/`: `npm run postman:update-tokens` (requiere `POSTMAN_*` en `backend/functions/.env` o variables de entorno). Luego `npm run postman:experiences-smoke`. La colección incluye también un smoke de `POST /api/v1/payments/checkout`.
 
 From repo root:
 
